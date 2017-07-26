@@ -9,13 +9,26 @@ This package enables simultaneous estimation of epidemiological parameters and p
 
 ## Distribution and Installation
 
-The package is not currently available from the Beast repository i.e. it can't be installed with Beauti's package manager. The package can be installed by hand or, alternatively, examples can be run using the package's standalone version.
+The package is not currently available from the Beast repository i.e. it can't be installed with Beauti's package manager. The package must be installed by hand or, alternatively, examples can be run using the PhyDyn's standalone version.
 
-The zipped distribution of the package can be found in `dist/` directory. The latest distribution is `dist/PhyDyn.v1.0.0.zip`.
-Instructions on how to install Beast packages by hand can be found ([here](https://www.beast2.org/managing-packages/)).
+### Installation by-hand
+The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.0.0.zip`.
+Instructions on how to install Beast packages by hand can be found [here](https://www.beast2.org/managing-packages/). The steps are:
+* Locate the directory where the current Beast version  keeps add-ons and packages. In Linux, it's usually `/users/<username>/.beast/2.4`. Move there, create a directory for PhyDyn, and then move inside the new directory:
+```
+> cd /users/<username>/.beast/2.4
+> mkdir phydyn
+> cd phydyn
+```
+* Copy the zipped distribution to the package's directory (current directory). Unzip the file.
+```
+> cp path-to-file/PhyDyn.v1.0.0.zip .
+> unzip PhyDyn.v1.0.0.zip
+```
 
+### Standalone
 
-The standalone version of the package, `jars/phydyn.jar`, can be executed by running  `java -jar` :
+In order to run an example with the package's stand-alone version, `jars/phydyn.jar`, type the following:
 ```
     java -jar examplefile.xml
 ```
