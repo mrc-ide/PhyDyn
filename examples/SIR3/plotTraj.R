@@ -1,18 +1,22 @@
+args <- commandArgs(trailingOnly=TRUE )
 
+csvFile <- args[1]
+pngFile <- paste(csvFile,".png",sep='')
 
-png("traj.png")
-
-traj <- read.csv('trajSIR3.csv')
+traj <- read.csv(csvFile)
 x <- traj[,1]
+
+png(pngFile)
+
 ymax <- max(traj[,2],traj[,3],traj[,4],traj[,5])
 plot(x,traj[,2], 'lh', ylim=c(0,ymax*1.20), col='blue', xlab='time',ylab='Population')
 lines(x,traj[,3],  col='red')
-lines(x,traj[,4], col='green')
-lines(x,traj[,5], col='cyan')  
+lines(x,traj[,4],  col='green')
+lines(x,traj[,5],  col='cyan')
 
-legend("topright",
+legend("topleft",
       inset=.05,
-      cex = 1,
+      cex = 0.8,
       title="Legend",
       c("I0","I1","I2","S"),
       horiz=TRUE,

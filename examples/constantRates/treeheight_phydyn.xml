@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' 
+beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+    <data id="sequences" name="alignment">
+		<sequence id="inv0_0" taxon="inv0_0" totalcount="4" value="??"/>
+		<sequence id="inv1_0" taxon="inv1_0" totalcount="4" value="??"/>
+		<sequence id="inv2_0" taxon="inv2_0" totalcount="4" value="??"/>
+		<sequence id="inv0_1" taxon="inv0_1" totalcount="4" value="??"/>
+		<sequence id="inv1_1" taxon="inv1_1" totalcount="4" value="??"/>
+		<sequence id="inv0_2" taxon="inv0_2" totalcount="4" value="??"/>
+    </data>
+    
+    <trait spec='beast.evolution.tree.TraitSet' id='timeTraitSet' traitname="date-backward"
+        value="inv0_0=0,inv1_0=10,inv2_0=5,inv0_1=1,inv1_1=4,inv0_2=8">
+        <taxa spec='TaxonSet' alignment='@sequences'/>
+    </trait>
+     
+	<model spec='PopModelODE' id='simplemodel' 
+	       popParams='@simpleparams' modelParams='@simplerates'
+	        evaluator="compiled">
+		<matrixeq spec='MatrixEquation' type="birth" origin="I0" destination="I0"> beta0*S*I0</matrixeq> 
+		<matrixeq spec='MatrixEquation' type="birth" origin="I1" destination="I1"> beta1*S*I1 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="birth" origin="I2" destination="I2"> beta2*S*I2 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="migration" origin="I0" destination="I1"> gamma01*I0 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="migration" origin="I0" destination="I2"> gamma02*I0 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="migration" origin="I1" destination="I0"> gamma10*I1 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="migration" origin="I1" destination="I2"> gamma12*I1 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="migration" origin="I2" destination="I0"> gamma20*I2 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="migration" origin="I2" destination="I1"> gamma21*I2 </matrixeq>
+		<matrixeq spec='MatrixEquation' type="death" origin="I0"> beta0*S*I0-(gamma01+gamma02)*I0+ gamma10*I1+gamma20*I2 </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="death" origin="I1"> beta1*S*I1-(gamma10+gamma12)*I1+ gamma01*I0+gamma21*I2  </matrixeq>
+		<matrixeq spec='MatrixEquation' type="death" origin="I2"> beta2*S*I2-(gamma20+gamma21)*I2+ gamma02*I0+gamma12*I1 </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="nondeme" origin="S"> 0 </matrixeq>
+	</model>
+	
+	<params spec="ModelParameters" id='simplerates'>
+		<param spec='ParamValue' names='beta0' values='0.25'></param>
+		<param spec='ParamValue' names='beta1' values='0.5'></param>
+		<param spec='ParamValue' names='beta2' values='1.0'></param>
+		<param spec='ParamValue' names='gamma01' values='0.001'></param>
+		<param spec='ParamValue' names='gamma02' values='0.01'></param>
+		<param spec='ParamValue' names='gamma10' values='0.01'></param>
+		<param spec='ParamValue' names='gamma12' values='0.01'></param>
+		<param spec='ParamValue' names='gamma20' values='0.02'></param>
+		<param spec='ParamValue' names='gamma21' values='0.003'></param>
+	</params>
+	
+	<params id="simpleparams" spec='TrajectoryParameters' method="classicrk" 
+		integrationSteps="1001" rTol="0.01" aTol="1.0e-4" order="3" t0="-0.1">
+			<initialValue spec="ParamValue" names='I0' values='100.0'  />
+			<initialValue spec="ParamValue" names='I1' values='100.0'  />
+			<initialValue spec="ParamValue" names='I2' values='100.0'  />
+			<initialValue spec="ParamValue" names='S'  values='200.0' />
+	</params>
+	  
+    <run id="mcmc" spec="MCMC" chainLength="300">
+        <state id="state" storeEvery="100">
+            <tree id="tree" name="stateNode">
+                <trait idref="timeTraitSet"/>
+                <taxonset spec="TaxonSet" alignment='@sequences'/>
+            </tree>
+
+        </state>
+
+
+        <init id="RandomTree.t:sequences" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@tree" taxa="@sequences">
+            <populationModel id="ConstantPopulation" spec="ConstantPopulation">
+                <parameter id="randomPopSize" name="popSize">100</parameter>
+            </populationModel>
+        </init>
+        
+            
+        <distribution id="posterior" spec="util.CompoundDistribution">
+            <distribution id="prior" spec="util.CompoundDistribution">
+                <!-- ARUDSIR Priors-->
+            </distribution>         
+            <distribution id="likelihood" spec="util.CompoundDistribution">
+             	<!--  distribution comes here -->
+             	 <distribution spec='STreeLikelihoodODE' id = 'stlikelihood' 
+             	 	 popmodel='@simplemodel'
+             	 	useStateName='false' approxLambda='true' finiteSizeCorrections='true' >
+             	 	<treeIntervals spec="STreeIntervals" tree='@tree'> </treeIntervals>
+    			</distribution>
+                
+            </distribution>
+        </distribution>
+        
+        <operator id="CoalescentConstantTreeScaler.t:sequences" spec="ScaleOperator" scaleFactor="0.8" tree="@tree" weight="3.0"/>
+        <operator id="CoalescentConstantTreeRootScaler.t:sequences" spec="ScaleOperator" scaleFactor="0.8" tree="@tree" weight="3.0" rootOnly="true"/>
+        <operator id="CoalescentConstantUniformOperator.t:sequences" spec="Uniform" tree="@tree" weight="3.0"/>
+        <operator id="CoalescentConstantSubtreeSlide.t:sequences" spec="SubtreeSlide" tree="@tree" optimise="true" weight="30.0"/>
+        <operator id="CoalescentConstantNarrow.t:sequences" spec="Exchange" tree="@tree" weight="15.0"/>
+        <operator id="CoalescentConstantWide.t:sequences" spec="Exchange" isNarrow="false" tree="@tree" weight="3.0"/>
+        <operator id="CoalescentConstantWilsonBalding.t:sequences" spec="WilsonBalding" tree="@tree" weight="3.0"/>
+        
+       
+        <logger id="tracelog" fileName="treeheight_phydyn.log" logEvery="10" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log id="tree_height" spec="beast.evolution.tree.TreeHeightLogger" tree="@tree"/>
+        </logger>
+       
+        
+        <logger id="screenlog" logEvery="10">
+            <log idref="posterior"/>
+        </logger>
+    </run>
+</beast>

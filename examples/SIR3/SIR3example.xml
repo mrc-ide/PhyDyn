@@ -14,12 +14,12 @@
 		<matrixeq spec='MatrixEquation' type="death" origin="I1"> mu*I1 </matrixeq> 
 		<matrixeq spec='MatrixEquation' type="death" origin="I2"> mu*I2+gamma2*I2 </matrixeq> 
 		<matrixeq spec='MatrixEquation' type="nondeme" origin="S"> 
-			(b-mu)*S - (beta0*I0+ beta1*I1 + beta2*I2)*S/N
+			mu*N - mu*S - (beta0*I0+ beta1*I1 + beta2*I2)*S/N
 		</matrixeq>
 	</model>
 	
 	<rates spec="ModelParameters" id='rates'>	
-		<param spec='ParamValue' names='b mu' values='0.042 0.0333'></param>
+		<param spec='ParamValue' names='b mu' values='0.036 0.0333'></param>
 		<param spec='ParamValue' names='beta0 beta1 beta2' values='1.2 0.03 0.09'></param>
 		<param spec='ParamValue' names='gamma0 gamma1 gamma2' values='1 0.1428 0.64'></param>
 	</rates>	
