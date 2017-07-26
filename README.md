@@ -4,13 +4,13 @@ Igor Siveroni and Erik Volz.
 Department of Infectious Disease Epidemiology, Imperial College London.
 
 ## Description
-[PhyDyn](https://github.com/igococha/PhyDyn/wiki) is a BEAST2 package for performing Bayesian phylogenetic inference under models that deal with structured populations with complex population dynamics.
+[PhyDyn](https://github.com/mrc-ide/PhyDyn/wiki) is a BEAST2 package for performing Bayesian phylogenetic inference under models that deal with structured populations with complex population dynamics.
 This package enables simultaneous estimation of epidemiological parameters and pathogen phylogenies. The package implements a coalescent model for a large class of epidemic processes specified by a deterministic nonlinear dynamical system. Genealogies are specified as timed phylogenetic trees in which lineages are associated with the distinct subpopulation in which they are sampled. Epidemic models are defined by a series of ordinary differential equations (ODEs) specifying the rates that new lineages introduced in the population (birth matrix) and the rates at which migrations, or transition between states occur (migration matrix). The ODE syntax allows the user to define and use complex mathematical expressions such as  polynomials and trigonometric functions. Currently, PhyDyn works with deterministic demographic models. Future versions may incorporate other population models, methods for simulating trees conditional on an epidemic process and include semiparametric epidemiological models.
 
 
 ## Documentation and Examples
 
-* Check the PhyDyn [wiki](https://github.com/igococha/PhyDyn/wiki) for detailed documentation.
+* Check the PhyDyn [wiki](https://github.com/mrc-ide/PhyDyn/wiki) for detailed documentation.
 * [SIR3](examples/SIR3) : An example of a 3-deme population model and the use of the TrajectoryOut class.
 * [Root States](examples/roosStates): A constant population model (constant rates) with tree sampling. Logging of root state probabilities.
 
