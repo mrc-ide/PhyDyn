@@ -1,0 +1,37 @@
+<!-- Basic XML input file -->
+
+<beast version='2.0' namespace='phydyn.model:beast.util:beast.evolution.alignment:beast.evolution.tree'>
+
+	<model spec='PopModelODE' id='themodel' evaluator="compiled"
+	     popParams='@initValues' modelParams='@rates'>
+		<definition spec='Definition'>N=I0+I1+I2+S</definition>
+		<matrixeq spec='MatrixEquation' type="birth" origin="I0" destination="I0"> (beta0*S*I0)/N  </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="birth" origin="I1" destination="I0"> (beta1*S*I1)/N </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="birth" origin="I2" destination="I0"> (beta2*S*I2)/N </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="migration" origin="I0" destination="I1"> gamma0*I0 </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="migration" origin="I1" destination="I2"> gamma1*I1 </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="death" origin="I0"> mu*I0 </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="death" origin="I1"> mu*I1 </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="death" origin="I2"> mu*I2+gamma2*I2 </matrixeq> 
+		<matrixeq spec='MatrixEquation' type="nondeme" origin="S"> 
+			(b-mu)*S - (beta0*I0+ beta1*I1 + beta2*I2)*S/N
+		</matrixeq>
+	</model>
+	
+	<rates spec="ModelParameters" id='rates'>	
+		<param spec='ParamValue' names='b mu' values='0.042 0.0333'></param>
+		<param spec='ParamValue' names='beta0 beta1 beta2' values='1.2 0.03 0.09'></param>
+		<param spec='ParamValue' names='gamma0 gamma1 gamma2' values='1 0.1428 0.64'></param>
+	</rates>	
+
+			
+	<trajparams id='initValues' spec='TrajectoryParameters' method="adams-bashforth" 
+	            integrationSteps="1001" rTol="0.01" aTol="1.0e-4" order="3" t0="0" t1="50">
+			<initialValue spec="ParamValue" names='I0 I1' values='1 0.01'  />
+			<initialValue spec="ParamValue" names='I2 S' values='0.01 3000.0' />
+	</trajparams>
+	
+	
+    <run spec='TrajectoryOut' model='@themodel' file="trajSIR3.csv">   </run>
+    
+</beast>
