@@ -7,6 +7,19 @@ Department of Infectious Disease Epidemiology, Imperial College London.
 [PhyDyn](https://github.com/mrc-ide/PhyDyn/wiki) is a BEAST2 package for performing Bayesian phylogenetic inference under models that deal with structured populations with complex population dynamics.
 This package enables simultaneous estimation of epidemiological parameters and pathogen phylogenies. The package implements a coalescent model for a large class of epidemic processes specified by a deterministic nonlinear dynamical system. Genealogies are specified as timed phylogenetic trees in which lineages are associated with the distinct subpopulation in which they are sampled. Epidemic models are defined by a series of ordinary differential equations (ODEs) specifying the rates that new lineages introduced in the population (birth matrix) and the rates at which migrations, or transition between states occur (migration matrix). The ODE syntax allows the user to define and use complex mathematical expressions such as  polynomials and trigonometric functions. Currently, PhyDyn works with deterministic demographic models. Future versions may incorporate other population models, methods for simulating trees conditional on an epidemic process and include semiparametric epidemiological models.
 
+## Distribution and Installation
+
+The package is not currently available from the Beast repository i.e. it can't be installed with Beauti's package manager. The package can be installed by hand or, alternatively, examples can be run using the package's standalone version.
+
+The zipped distribution of the package can be found in `dist/` directory. The latest distribution is `dist/PhyDyn.v1.0.0.zip`.
+Instructions on how to install Beast packages by hand can be found ([here](https://www.beast2.org/managing-packages/)).
+
+
+The standalone version of the package, `jars/phydyn.jar`, can be executed by running  `java -jar` :
+```
+    java -jar examplefile.xml
+```
+
 
 ## Documentation and Examples
 
