@@ -25,6 +25,8 @@ Instructions on how to install Beast packages by hand can be found [here](https:
 > cp path-to-file/PhyDyn.v1.0.0.zip .
 > unzip PhyDyn.v1.0.0.zip
 ```
+That's all. Beast should recognize the package next time it runs.
+
 
 ### Standalone
 
