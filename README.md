@@ -9,7 +9,7 @@ This package enables simultaneous estimation of epidemiological parameters and p
 
 ## Distribution and Installation
 
-The package is not currently available from the Beast repository i.e. it can't be installed with Beauti's package manager. The package must be installed by hand or, alternatively, examples can be run using the PhyDyn's standalone version.
+The package is not currently available from the Beast repository i.e. it can't be installed with Beauti's package manager. The package must be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
 
 ### Installation by-hand
 The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.0.0.zip`.
