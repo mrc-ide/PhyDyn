@@ -38,7 +38,7 @@ In order to run an example with the package's stand-alone version, `jars/phydyn.
 
 * Check the PhyDyn [wiki](https://github.com/mrc-ide/PhyDyn/wiki) for detailed documentation.
 * [SIR3](examples/SIR3) : An example of a 3-deme population model and the use of the TrajectoryOut class.
-* [Root States](examples/roosStates): A constant population model (constant rates) with tree sampling. Logging of root state probabilities.
+
 
 ## License
 
