@@ -32,7 +32,7 @@ That's all. Beast should recognize the package next time it runs.
 
 In order to run an example with the package's stand-alone version, `jars/phydyn.jar`, type the following:
 ```
-    java -jar examplefile.xml
+    java -jar phydyn.jar examplefile.xml
 ```
 
 
@@ -43,6 +43,10 @@ In order to run an example with the package's stand-alone version, `jars/phydyn.
 * [Ebola](examples/ebola): Ebola examples (SEIR and superspreader models) with fixed trees.
 * [Influenza](examples/influenza): Flu model with fixed trees and sequence data.
 
+
+## Contact
+
+Any questions, bug reports or suggestions please email to Igor Siveroni at i.siveroni@imperial.ac.uk.
 
 ## License
 
