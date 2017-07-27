@@ -1,0 +1,92 @@
+<beast beautitemplate='Standard' beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:phydyn.operators:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+
+
+<model spec='PopModelODE' id='flumodel' evaluator="compiled"
+	 popParams='@initValues' modelParams='@rates'>
+	
+	
+	<definition spec='Definition' >
+		foi = if (t > 2004.75) then R0*gamma*S/N
+		else gamma 
+	</definition>
+	
+	<definition spec="Definition">
+		N = S + I + R
+	</definition>
+	
+	<matrixeq spec='MatrixEquation' type="birth"  origin="I" destination="I"> 
+		foi * I
+	</matrixeq> 
+	
+	<matrixeq spec='MatrixEquation' type="death" origin="I">
+		gamma*I
+	</matrixeq> 
+	
+	<matrixeq spec='MatrixEquation' type="nondeme" origin="S">
+		if (t > 2004.75) then -foi*I
+		else 0.0 
+	</matrixeq>
+	
+	<matrixeq spec='MatrixEquation' type="nondeme" origin="R">
+		if (t > 2004.75) then gamma * I
+		else 0.0
+	</matrixeq>
+	
+<!--
+	source deme
+-->
+	
+	<matrixeq spec='MatrixEquation' type="birth"  origin="src" destination="src"> 
+		gamma * src
+	</matrixeq> 
+	
+	<matrixeq spec='MatrixEquation' type="death" origin="src">
+		gamma * src
+	</matrixeq> 
+	
+	<matrixeq spec='MatrixEquation' type="migration"  origin="src" destination="I"> 
+		mu * I
+	</matrixeq> 
+	
+	<matrixeq spec='MatrixEquation' type="migration"  origin="I" destination="src"> 
+		mu * I
+	</matrixeq> 
+
+</model>
+
+<rates spec="ModelParameters" id='rates'>	
+	<param spec='ParamValue' names='gamma' values='52.0'/>
+	<param spec='ParamValue' names='R0' values='2.0'/>
+	<param spec='ParamValue' names='mu' values='4.0'/>
+<!--
+	<param spec='ParamValue' names='R0' values='@R0'/>
+	<param spec='ParamValue' names='mu' values='@mu'/>
+-->
+</rates>
+
+<trajparams id='initValues' spec='TrajectoryParameters' method="classicrk" 
+			integrationSteps="500" rTol="0.01" aTol="1.0e-4" order="3" t0="2000.0" t1='2006.0' >
+		<initialValue spec="ParamValue" names='R' values='0.0'  />
+		<initialValue spec="ParamValue" names='I' values='1.0'  />
+		<initialValue spec="ParamValue" names='S' values='10000.0'  />
+		<initialValue spec="ParamValue" names='src' values='10000.0'  />
+<!--
+		<initialValue spec="ParamValue" names='I' values='@initI0'  />
+		<initialValue spec="ParamValue" names='S' values='@initS0'  />
+		<initialValue spec="ParamValue" names='src' values='@srcSize'  />
+-->
+</trajparams>
+
+
+<!--
+		<state id='state'>
+	        <parameter id="initI0" lower="0.0" upper="1000" name="stateNode">10.00</parameter>
+			<parameter id="initS0" lower="100.0" name="stateNode">2000.0</parameter>
+			<parameter id="R0" lower="0.0" upper="10" name="stateNode">2.0</parameter>
+			<parameter id="mu" lower="0.0" upper="10" name="stateNode">2.0</parameter>
+			<parameter id="srcSize" lower="1.0" upper="100000000.0" name="stateNode">10000.0</parameter>	
+		</state>
+-->
+	<run spec='TrajectoryOut' model='@flumodel' file="test0.csv">  
+	</run>	
+</beast>

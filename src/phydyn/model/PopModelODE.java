@@ -50,7 +50,7 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 			 "definition","List of definitions var = exp",new ArrayList<>());
 	 
 	 public Input<String> evaluatorTypeInput = new Input<>(
-			 "evaluator","Evaluator type: interpreter, compiled, optimised","interpreter");
+			 "evaluator","Evaluator type: interpreter, compiled, optimised","compiled");
 	 
 	 // Potential parameters
 	 public Input<TrajectoryParameters> popParametersInput = new Input<>(
