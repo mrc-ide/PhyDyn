@@ -52,7 +52,7 @@ Any questions, bug reports or suggestions please email to Igor Siveroni at i.siv
 
 This software is free (as in freedom). With the exception of the libraries on which it depends, it is made available under the terms of the GNU General Public Licence version 3, which is contained in the this directory in the file named COPYING.
 
-The following libraries are bundled with MultiTypeTree:
+The following libraries are bundled with PhyDyn:
 
 * [ANTLR](http://www.antlr.org/) : Another Toll for Language recorgnition
 * Apache Commons (http://commons.apache.org/)
