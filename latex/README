@@ -2,3 +2,4 @@ Using Imagemagick:
 
 convert -density 150 -scale 20% formulas.pdf  -quality 90 formulas.png 
 
+convert -density 150 -scale 90% formulas2.pdf  -quality 90 formulas2.png 
