@@ -1,3 +1,5 @@
+% convert -density 150 -scale 20% formulas.pdf  -quality 90 formulas.png 
+% convert -density 150  islandFormulas.pdf  -quality 90 islandFormulas.png 
 
 \documentclass{standalone}
 
@@ -6,7 +8,7 @@
 
 \begin{document}
 \begin{tikzpicture}
-\node[scale=1.40] {
+\node[scale=1.0] {
 $
 \begin{array}{l}
 l, k \in \{1,\ldots,m \}:  \\
@@ -18,14 +20,3 @@ $
 \end{tikzpicture}
 \end{document}
 
-
-%\begin{tikzpicture}
-%\node[scale=8.0] {
-%$\begin{aligned}
-%\frac{d}{dt}I_1 &=  \frac{S}{N} (\beta_1  I_1 + \beta_2  I_2) - \gamma_1 I_1  \\
-%\frac{d}{dt}I_2 &=  \gamma_1 I_1- \gamma_2 I_2   \\
-%%%\frac{\partial I_1}{\partial t} &=  \frac{S}{N} (\beta_11 I_1 + \beta_21 I_2) - \gamma_1 I_1  \\
-%%%\frac{\partial I_2}{\partial t} &=  \gamma_1 I_1- \gamma_2 I_2 
-%\end{aligned}$
-%};
-%\end{tikzpicture}
