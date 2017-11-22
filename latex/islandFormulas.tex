@@ -11,8 +11,17 @@
 \node[scale=1.0] {
 $
 \begin{array}{l}
-l, k \in \left[ 1,m \right]:  \\
-\;\; F_{kk} = \frac{Y_k^2}{2 N\!e_k } \quad G_{kl} = M_{lk} Y_l \quad
+\quad l, k \in \left[ 1,m \right]:  \\
+\quad \quad
+F_{lk} =  \left\{ \begin{array}{ll}
+    \frac{Y_k^2}{2 N\!e_k } & l = k \\
+    0 & l \neq k
+\end{array} \right.
+\quad G_{kl} = \left\{ \begin{array}{ll}
+0 & l=k \\
+M_{lk} Y_l & l \neq k
+\end{array} \right. 
+\quad
 Y_l = x_{\!F}  N\!e_l
 \end{array}
 $
