@@ -1,0 +1,9 @@
+.DS_Store
+.classpath
+.project
+/bin/
+/build/
+/build-lib/
+/build-beast/
+/build-test/
+
