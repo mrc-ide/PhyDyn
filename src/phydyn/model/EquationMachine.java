@@ -11,6 +11,7 @@ public class EquationMachine implements EquationEvaluatorAPI {
 	int tAddress;
 	int[] yAddresses;
 	int[] rateAddresses;
+	int[] rateVectorAddresses;
 	int[] defAddresses;
 	PMStackMachine machine;
 	 
@@ -31,7 +32,8 @@ public class EquationMachine implements EquationEvaluatorAPI {
 			t0t1Addresses = new int[2];			
 		}
 		yAddresses = new int[model.yNames.length];
-		rateAddresses = new int[model.modelParams.numParams];  // igor mod
+		rateAddresses = new int[model.modelParams.numParams];
+		rateVectorAddresses = new int[model.modelParams.numVectorParams];  // new - vectors
 		defAddresses = new int[model.defNames.size()];	
 		/* Assign addresses to variable names */
 		compiler.updateEnv(constantNames, constantAddresses);
@@ -42,7 +44,8 @@ public class EquationMachine implements EquationEvaluatorAPI {
 			tAddress = compiler.updateEnv(SemanticChecker.T);
 		}
 		compiler.updateEnv(model.yNames, yAddresses);
-		compiler.updateEnv(model.modelParams.paramNames, rateAddresses);  // igor mod
+		compiler.updateEnv(model.modelParams.paramNames, rateAddresses); 
+		compiler.updateEnv(model.modelParams.paramVectorNames,model.modelParams.paramVectorValues,rateVectorAddresses); // new - vectors
 		compiler.updateEnv(model.defNames, defAddresses);
 		/* now, compile */
 		int stackSize, maxStackSize=0;
@@ -74,6 +77,11 @@ public class EquationMachine implements EquationEvaluatorAPI {
 	
 	public void updateRates(double[] rateValues) {
 		machine.updateEnv(rateAddresses, rateValues);
+	}
+	
+	public void updateRateVectors(double[][] rateVectorValues) {
+		machine.updateEnv(rateVectorAddresses, rateVectorValues);
+		return;
 	}
 	
 	public void updateYs(double[] yValues) {

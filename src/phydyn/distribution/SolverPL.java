@@ -8,8 +8,10 @@ import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 import org.jblas.DoubleMatrix;
 
 import phydyn.model.TimeSeriesFGY;
+import phydyn.model.TimeSeriesFGY.FGY;
+import phydyn.model.TimeSeriesFGYStd;
 
-public class SolverPL extends SolverInterval implements FirstOrderDifferentialEquations {
+public class SolverPL extends SolverIntervalODE implements FirstOrderDifferentialEquations {
 	private double[] pl0, pl1;
 	
 	private double tsTimes0;
@@ -24,6 +26,7 @@ public class SolverPL extends SolverInterval implements FirstOrderDifferentialEq
 	public SolverPL(STreeLikelihoodODE stlh) {
 		super(stlh);
 		dimensionP = numStates; // temporary value		
+		// we could set tsTimes0 and setMinP HERE
 	}
 	
 	
@@ -57,12 +60,7 @@ public class SolverPL extends SolverInterval implements FirstOrderDifferentialEq
 		
 		//for(int i=0; i <= dimensionP; i++) System.out.print(pl0[i]+ " ");
 		//System.out.println("");
-		foi.integrate(this, h0, pl0, h1, pl1);
-		
-		//System.out.print("pl1=");
-		//for(int i=0; i <= dimensionP; i++) System.out.print(pl1[i]+ " ");
-		//System.out.println("");
-	
+		foi.integrate(this, h0, pl0, h1, pl1);		
 		
 		// copy new state probabilities
 		idx=0;
@@ -70,7 +68,8 @@ public class SolverPL extends SolverInterval implements FirstOrderDifferentialEq
 		
 		for(int i = 0; i < numExtant; i++) {
 			//probs = stlh.extantProbs[i];
-			probs = sp.getStateProbsFromIndex(i);
+			probs = sp.getExtantProbsFromIndex(i);
+			//System.out.println("probs: "+probs);
 			//A.addi(probs);
 			for(int j=0; j < numStates; j++) {
 				probs.put(j,pl1[idx]);
@@ -79,7 +78,7 @@ public class SolverPL extends SolverInterval implements FirstOrderDifferentialEq
 			probs.maxi(0.0);
 			probs.divi(probs.sum());
 			
-			//System.out.println("probs "+i+" "+ stlh.extantProbs[i]);
+			//System.out.println("probs "+i+" "+ sp.getStateProbsFromIndex(i));
 		}
 		if (stlh.setMinP) {
 			sp.setMinP(stlh.minP);
@@ -98,9 +97,10 @@ public class SolverPL extends SolverInterval implements FirstOrderDifferentialEq
 		
 		tsPointLast = tsPointCurrent;
 
-		DoubleMatrix Y = ts.getYs()[tsPointCurrent];
-		DoubleMatrix F = ts.getFs()[tsPointCurrent];
-		DoubleMatrix G = ts.getGs()[tsPointCurrent];
+		FGY fgy = ts.getFGY(tsPointCurrent);
+		DoubleMatrix Y = fgy.Y; 
+		DoubleMatrix F = fgy.F; 
+		DoubleMatrix G = fgy.G; 
 		
 		if (forgiveY) Y.maxi(1.0); else Y.maxi(MIN_Y);
 		
@@ -139,8 +139,7 @@ public class SolverPL extends SolverInterval implements FirstOrderDifferentialEq
 		DoubleMatrix a = A.div(Y); 
 		DoubleMatrix AmP, AmPnorm; // = DoubleMatrix.zeros(numStates, 1);
 		DoubleMatrix dP = R.mmul(P);
-		//if (h < 00.2) System.out.println("A="+A);
-		//if (h < 00.2) System.out.println("dP="+dP);
+		
 		// dL = -dP.sum();  -- this is zero
 		for (z = 0; z < numExtant; z++){
 			// dPik.col(z) = R * Pik.col(z) ; 
@@ -178,7 +177,6 @@ public class SolverPL extends SolverInterval implements FirstOrderDifferentialEq
 		//if (h < 00.2) System.out.println("DL="+dL);
 		// copy dP to array
 		
-		//System.out.println("dP="+dP);
 		
 		idx = 0;
 		double[] dPdata = dP.data;

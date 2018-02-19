@@ -17,6 +17,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import beast.core.Input;
 import beast.core.Runnable;
 import phydyn.distribution.STreeLikelihood;
+import phydyn.model.PopModel;
 import phydyn.model.PopModelODE;
 
 public class PopModelParameterEstimation extends Runnable implements MultivariateFunction {
@@ -25,7 +26,7 @@ public class PopModelParameterEstimation extends Runnable implements Multivariat
 			"density","Population Model");
 	
 	protected STreeLikelihood density;
-	protected PopModelODE model;
+	protected PopModel model;
 	
 	@Override
 	public void initAndValidate()  {

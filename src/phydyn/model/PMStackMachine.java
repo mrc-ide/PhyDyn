@@ -23,6 +23,7 @@ public class PMStackMachine {
 	public final static int ISPECIAL_CALL=-6, IUNARY_OP=-7, IJMP=-8, IJMP_IF_TRUE=-9, IJMP_IF_FALSE=-10;
 	public final static int ICMP_OP=-11, IBOOL_OP=-12;
 	public final static int BINARY_CALL=-13;
+	public final static int IPUSH_VAR_OFFSET=-14; 
 	
 	public PMStackMachine(int envSize, int stackSize) {
 		env = new double[envSize];
@@ -35,9 +36,22 @@ public class PMStackMachine {
 			env[addresses[i]] = values[i];
 	}
 	
+	// vectors
+	public void updateEnv(int[] addresses, double[][] values) {
+		int idx;
+		double[] vector;
+		for(int i=0; i<addresses.length; i++) {
+			idx = addresses[i];
+			vector = values[i];
+			for(int j=0; j < vector.length; j++) {
+				env[idx++] = vector[j];
+			}			
+		}
+	}
+	
 	public void updateEnv(int address, double value) {
 		env[address] = value;
-	}
+	}		
 	
 	
 	public double execute(PMMachineCode code) {
@@ -54,6 +68,10 @@ public class PMStackMachine {
 				break;
 			case IPUSH_VAR:
 				stack[++stack_index] = env[instructions[pc++]];
+				break;
+			case IPUSH_VAR_OFFSET:
+				v1 = stack[stack_index]; // apply floow here
+				stack[stack_index] = env[instructions[pc++] + (int)Math.floor(v1)];
 				break;
 			case IWRITE_VAR:
 				env[instructions[pc++]] = stack[stack_index--];

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Extracts the intervals from a beast.tree.
  * Extended original beast.evolution.tree.coalescent.TreeIntervals to work with structured coalescent models
- * Extensions taken from StructuredTreeIntervals from the structcoal package 
+ * Extensions taken from StructuredTreeIntervals, MAscot package
  * by David Rasmussen/Nicola Mueller.
  * We have used inheritance instead to avoid code duplication.
  * 
@@ -28,9 +28,7 @@ public class STreeIntervals extends TreeIntervals {
     protected List<Node>[] storedLineagesRemoved;
     
     public STreeIntervals() {    }
-    
- 
-    
+       
     @Override
     public void initAndValidate() {
         super.initAndValidate();
@@ -38,14 +36,15 @@ public class STreeIntervals extends TreeIntervals {
 
     @Override
     protected void restore() {
+    	
         // Added these last two for structured coalescent models
         List<Node>[] tmp4 = storedLineagesAdded;
         storedLineagesAdded = lineagesAdded;
-        lineagesAdded = tmp4;
+        lineagesAdded = deepCopyListArray( tmp4);
         
         List<Node>[] tmp5 = storedLineagesRemoved;
         storedLineagesRemoved = lineagesRemoved;
-        lineagesRemoved = tmp5;
+        lineagesRemoved = deepCopyListArray(tmp5);
         
         super.restore();
         
@@ -54,72 +53,41 @@ public class STreeIntervals extends TreeIntervals {
     
     @Override
     protected void store() {
-    	// stores the lineage Counts per intervall and the intervalls in the arrays stored...
-        //System.arraycopy(lineageCounts, 0, storedLineageCounts, 0, lineageCounts.length);
-        //System.arraycopy(intervals, 0, storedIntervals, 0, intervals.length);
-        //storedIntervalCount = intervalCount;
-        
-    	// Removed in extension as well - go back to see if a shallow copy is needed
-        // Create new deep copies for storedLineagsAdded/Removed
-        //storedLineagesAdded = deepCopyLineagesAdded();
-        //storedLineagesRemoved = deepCopyLineagesRemoved();
+       
+    	// Safe: make copies of lists in array
+        storedLineagesAdded = deepCopyListArray(lineagesAdded);
+        storedLineagesRemoved = deepCopyListArray(lineagesRemoved);
      
         super.store(); /* restores lineagesCounts and intervals */
     }
     
-    
-    /*
     @SuppressWarnings("unchecked")
-	public List<Node>[] deepCopyLineagesAdded() {
-    	
-    	int intervalCount = intervals.length;
-    	List<Node>[] newList = new List[intervalCount];
+	public List<Node>[] deepCopyListArray(List<Node>[] listArray) {
+    	// assertion intervals.length = listarray.length
+    	List<Node>[] newList = new List[listArray.length];
     	for (int i = 0; i < intervalCount; i++) {
-    		if (lineagesAdded[i] != null) {
-    			List<Node> nodeList = new ArrayList<Node>();
-    			int nodeCount = lineagesAdded[i].size();
-    			for (int n = 0; n < nodeCount; n++) {
-    				nodeList.add(lineagesAdded[i].get(n));
-    			}
-    			newList[i] = nodeList;
+    		List<Node> nodeList = null;
+    		if (listArray[i] != null) {
+    			nodeList = new ArrayList<Node>(listArray[i]);		
     		}
+    		newList[i] = nodeList;
     	}
     	return newList;   	
     }
-    */
     
-    /*
-    @SuppressWarnings("unchecked")
-	public List<Node>[] deepCopyLineagesRemoved() {    	
-    	int intervalCount = intervals.length;
-    	List<Node>[] newList = new List[intervalCount];
-    	for (int i = 0; i < intervalCount; i++) {
-    		if (lineagesRemoved[i] != null) {
-	    		List<Node> nodeList = new ArrayList<Node>();
-	    		int nodeCount = lineagesRemoved[i].size();
-	    		for (int n = 0; n < nodeCount; n++) {
-	    			nodeList.add(lineagesRemoved[i].get(n));
-	    		}
-	    		newList[i] = nodeList;
-	    		}
-    	}
-    	return newList;
-    }
-    */
     
     /**
      * Recalculates all the intervals for the given beast.tree.
      */
     @SuppressWarnings("unchecked")
     protected void calculateIntervals() {
+    	
         final int nodeCount = treeInput.get().getNodeCount();
-        if (intervals == null || intervals.length != nodeCount) {
-            
-        	// Initialize new Lists - the rest initialized by superclass
+        /* Not needed since we are doing a deep copy now
+        if (intervals == null || intervals.length != nodeCount) {          
             storedLineagesAdded = new List[nodeCount];
-            storedLineagesRemoved = new List[nodeCount];
-            
-        } else {
+            storedLineagesRemoved = new List[nodeCount];            
+        } else { 
             for (List<Node> l : storedLineagesAdded) {
             	if (l != null) l.clear();
             }
@@ -127,6 +95,7 @@ public class STreeIntervals extends TreeIntervals {
                 if (l != null) l.clear();
             }
         }
+        */
         super.calculateIntervals();
         // force correct order - alternatively, treeIntervals need to be modified
         swap();
@@ -134,14 +103,14 @@ public class STreeIntervals extends TreeIntervals {
     
     protected void addLineage(int interval, Node node) {
     	super.addLineage(interval, node);
-        if (storedLineagesAdded[interval] == null) storedLineagesAdded[interval] = new ArrayList<Node>();
-        storedLineagesAdded[interval].add(node);
+        //if (storedLineagesAdded[interval] == null) storedLineagesAdded[interval] = new ArrayList<Node>();
+        //storedLineagesAdded[interval].add(node);
     }
     
     protected void removeLineage(int interval, Node node) {
     	super.removeLineage(interval,  node);;
-        if (storedLineagesRemoved[interval] == null) storedLineagesRemoved[interval] = new ArrayList<Node>();
-        storedLineagesRemoved[interval].add(node);
+        //if (storedLineagesRemoved[interval] == null) storedLineagesRemoved[interval] = new ArrayList<Node>();
+        //storedLineagesRemoved[interval].add(node);
     }
     public List<Node> getLineagesAdded(int i) {
         if (!intervalsKnown) {
@@ -162,7 +131,7 @@ public class STreeIntervals extends TreeIntervals {
     /**
      * Added method
      */
-    protected void swap(){
+    protected void swap(){    	
     	ArrayList<Integer> activeLineages = new ArrayList<Integer>();
         
         for (int i = 0; i < intervalCount; i++){

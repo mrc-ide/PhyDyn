@@ -15,6 +15,8 @@ public interface EquationEvaluatorAPI {
 	public void updateRate(int rateIndex, double v);
 	
 	public void updateRates(double[] rateValues);
+	
+	public void updateRateVectors(double[][] rateVectorValues);
 		
 	public void updateYs(double[] yValues);
 	

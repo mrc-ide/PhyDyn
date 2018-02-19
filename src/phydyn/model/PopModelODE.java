@@ -40,7 +40,7 @@ enum IntegrationMethod { EULER, MIDPOINT, CLASSICRK, GILL
  */
 	
 	
-public class PopModelODE extends CalculationNode  implements FirstOrderDifferentialEquations, StepHandler {
+public class PopModelODE extends PopModel  implements FirstOrderDifferentialEquations, StepHandler {
 	 
 	 public Input<List<MatrixEquation>> matrixEquationsInput = new Input<>(
 	            "matrixeq",
@@ -63,13 +63,15 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 	protected ModelParameters modelParams;
 	 
 	 
-	 public int numDemes, numNonDemes, yLength; // m = numDemes
-	 public String[] demeNames, nonDemeNames,  yNames;
+
+	 
+	 public int yLength;
+	 public String[] yNames;
 	 protected List<String> defNames;
 	 List<Definition> definitions;
 	 // Could add some declarations
 	 protected List<MatrixEquation> equations;
-	 boolean diagF;
+	 
 	 
 	 // now part of modelParams
 	 //public String[] rateNames;
@@ -90,6 +92,8 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 	 EquationEvaluatorAPI eqEvaluator;
 	 String evaluatorType;
 	 private boolean useT, useT0T1;
+	 
+	
 	 
 	 
 	@Override
@@ -176,7 +180,8 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 		
 		
 		
-	}
+	}	
+	
 	
 	/* CalculationNode Interface */
 	@Override
@@ -204,6 +209,10 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 	/* End CalculationNode Interface */
 	public boolean hasEndTime() { return  trajParams.t1Input.get()!= null; }
 	public double getEndTime() { return trajParams.t1; }
+	public void setStartTime(double newT0) { 
+		// keep this for the time being
+		throw new IllegalArgumentException("Can't change t0 for non-constant populations");
+	}
 	public double getStartTime() { return trajParams.getStartTime(); }
 	public void setEndTime(double newt1) {
 		trajParams.t1 = newt1; 
@@ -220,18 +229,11 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 	public TimeSeriesFGY getTimeSeries() { return timeseries; }
 	
 	
-	// Replace this with call to hashmap
-	public int indexOf(String[] a, String s) {
-		for(int i=0; i < a.length; i++)
-			if (a[i].equals(s))
-				return i;
-		return -1;
-	}
-	
 	protected void init_population(TrajectoryParameters params) {
 		params.updateValues();
 		double[] initialValues = params.paramValues;
 		/* <deme,nondeme> order as entered in model	*/
+		
 		for(int i=0; i < initialValues.length; i++) {
 			y0[i] = initialValues[i];			
 		}
@@ -253,19 +255,11 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 	public boolean updateParam(String paramName, double paramValue) {
 		return trajParams.updateParam(paramName, paramValue);
 	}
-	
-	/* Legacy needed by Density class -  defaultt implementation */
-	public int getNumStates() { return numDemes; }
-	public void setDiagF(boolean b) { diagF = b; }
-	public boolean isDiagF() { return diagF; }
-	
+		
 	//public double getEndTime() { return t1; }
 	//public void setEndTime(double newt1) { t1 = newt1; } // integrate again
 	
-	/* Maps stateNames to stateNumbers 0,...,m-1 */
-	public int getStateFromName(String name) {
-		return this.indexOf(demeNames,name);
-	}
+
 
 	/*  Rates, etc  */
 	public int getParamIndex(String paramName) {
@@ -289,6 +283,8 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 		/* extract arguments */
 		t0t1[0] = getStartTime();
 		t0t1[1] = trajParams.t1;
+		// System.out.println("t0="+t0t1[0]+"  t1="+t0t1[1]);
+	
 		nsteps = trajParams.integrationSteps;
 		method = trajParams.method;
 		fixedStepSize = trajParams.fixedStepSize;
@@ -302,6 +298,8 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 		modelParams.updateValues();  // update paramValues array in case there was change in Parameters - overkill
 		//modelParams.print();
 		eqEvaluator.updateRates(modelParams.paramValues); // assuming RateParameters object agrees with model
+		eqEvaluator.updateRateVectors(modelParams.paramVectorValues); // testing vectors
+		
 		
 		if (useT0T1) {
 			eqEvaluator.updateT0T1(t0t1);
@@ -441,9 +439,9 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
         
         // System.out.println("--> Step handler: "+t);
         
-        timeseries.addY(t,y);
+        //timeseries.addY(t,y);
         this.updateMatrices(t, y);
-        timeseries.addFG(t, births, migrations);
+        timeseries.addFGY(t, births, migrations,y, deaths);
         
         /*  -- trying to optimise -too many special cases
         if (this.fixedStepSize) {
@@ -465,10 +463,10 @@ public class PopModelODE extends CalculationNode  implements FirstOrderDifferent
 	
 	@Override
 	public void init(double t0, double[] y0, double t) {
-		timeseries = new TimeSeriesFGY(this);
-    	timeseries.addY(t0,y0);
+		timeseries = new TimeSeriesFGYStd(this);
+    	//timeseries.addY(t0,y0);
     	this.updateMatrices(t0, y0);
-    	timeseries.addFG(t0,this.births,this.migrations);
+    	timeseries.addFGY(t0,this.births,this.migrations,y0,this.deaths);
     }
 	
 

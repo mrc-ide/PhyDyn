@@ -10,6 +10,8 @@ import beast.core.Input.Validate;
 import beast.core.Loggable;
 import phydyn.model.PopModelODE;
 import phydyn.model.TimeSeriesFGY;
+import phydyn.model.TimeSeriesFGY.FGY;
+import phydyn.model.TimeSeriesFGYStd;
 
 public class TrajectoryLogger extends CalculationNode implements Loggable {
 	
@@ -52,15 +54,16 @@ public class TrajectoryLogger extends CalculationNode implements Loggable {
 	@Override
 	public void log(int sample, PrintStream out) {
 		TimeSeriesFGY timeseries = popModel.getTimeSeries();
-		DoubleMatrix[] ySeries = timeseries.getAllYs();
-		double[] timePoints = timeseries.getTimePoints();
-		DoubleMatrix y = ySeries[0];
+		
+		FGY fgy; // = ts.getFGY(0);
+		DoubleMatrix y; // = ySeries[0];
 		int j;
-		int idx = timePoints.length - 1;	
+		int idx = timeseries.getNumTimePoints() - 1;
 		// The timeseries runs backwards in time
-		// first line -
-		y = ySeries[idx];
-		out.print(timePoints[idx]); // don't print sample number
+		// first - line
+		fgy = timeseries.getFGY(idx);
+		y = fgy.Yall;
+		out.print(timeseries.getTime(idx)); // don't print sample number
 		for(j = 0; j < popModel.yLength; j++) {
 			out.print("\t"+y.get(j));
 		}
@@ -69,16 +72,17 @@ public class TrajectoryLogger extends CalculationNode implements Loggable {
 		// other lines
 		idx -= frequency;
 		while (idx > 0) {
-			y = ySeries[idx];
-			out.print(sample+"\t"+timePoints[idx]);
+			fgy = timeseries.getFGY(idx);
+			y =  fgy.Yall;  //ySeries[idx];
+			out.print(sample+"\t"+timeseries.getTime(idx));
 			for(j = 0; j < popModel.yLength; j++) {
 				out.print("\t"+y.get(j));
 			}
 			out.println("");
 			idx -= frequency;
 		}
-		y = ySeries[0];
-		out.print(sample+"\t"+timePoints[0]);
+		y = timeseries.getFGY(0).Yall;
+		out.print(sample+"\t"+timeseries.getTime(0));
 		for(j = 0; j < popModel.yLength; j++) {
 			out.print("\t"+y.get(j));
 		}

@@ -16,11 +16,14 @@ public class ModelParameters extends CalculationNode {
             "Parameter values used by the model equations",
             new ArrayList<>());
 
-	public int numParams;
-	public String[] paramNames;
+	public int numParams, numVectorParams, numVectorValues;
+	public String[] paramNames, paramVectorNames;
 	Map<String, Integer> paramsMap;
 	
 	public double[] paramValues;
+	public double[][] paramVectorValues;
+	
+	// todo: store related
 	protected double[] storedParamValues;
 	protected boolean modifiedValues;
 	
@@ -29,23 +32,46 @@ public class ModelParameters extends CalculationNode {
 	public void initAndValidate()  {
 		// Calculate number of parameters
 		numParams = 0;
+		numVectorParams=0; numVectorValues=0;
+		paramValues= null;
+		paramVectorValues=null;
 		for (ParamValue param: paramsInput.get()) {
-			numParams += param.names.size();
+			if (param.isVector) {
+				numVectorParams +=1;
+				numVectorValues += param.values.getDimension();
+			} else {
+				numParams += param.names.size();
+			}
 		}
 		paramNames = new String[numParams];
 		paramValues = new double[numParams];
+		// vectors
+		paramVectorNames = new String[numVectorParams];
+		paramVectorValues = new double[numVectorParams][];
+		// todo: store related
 		storedParamValues = new double[numParams];
 		// Fill out arrays
-		int idx = 0,n;
+		int idx = 0, n, idxV=0;
 		paramsMap = new HashMap<>();
-		for (ParamValue p: paramsInput.get()) {
-			n = p.names.size();
-			for(int i=0; i<n;i++) {
-				paramValues[idx] = p.values.getValue(i);
-				paramNames[idx] = p.names.get(i);
-				paramsMap.put(p.names.get(i), idx); // stores idx used to access value array
-				idx++;
-			}			
+		for (ParamValue p: paramsInput.get()) {			
+			if (p.isVector) {
+				n = p.values.getDimension();
+				paramVectorValues[idxV] = new double[n];
+				paramVectorNames[idxV] = p.names.get(0);
+				for(int i=0; i<n;i++) {
+					paramVectorValues[idxV][i] = p.values.getValue(i);
+				}				
+				paramsMap.put(paramVectorNames[idxV], idxV);
+				idxV++;
+			} else {
+				n = p.names.size();
+				for(int i=0; i<n;i++) {
+					paramValues[idx] = p.values.getValue(i);
+					paramNames[idx] = p.names.get(i);
+					paramsMap.put(paramNames[idx], idx); // stores idx used to access value array
+					idx++;
+				}	
+			}
 		}
 		modifiedValues = true;
 		
@@ -54,13 +80,21 @@ public class ModelParameters extends CalculationNode {
 	// Calculate 
 	public void updateValues() {
 		if (!modifiedValues) return;
-		int idx = 0, n;
+		int idx = 0, n, idxV=0;
 		for (ParamValue p: paramsInput.get()) {
-			n = p.names.size();
-			for(int i=0; i<n;i++) {
-				paramValues[idx] = p.values.getValue(i);
-				idx++;
-			}			
+			if (p.isVector) {
+				n = p.values.getDimension();
+				for(int i=0; i<n;i++) {
+					paramVectorValues[idxV][i] = p.values.getValue(i);				
+				}
+				idxV++;
+			} else {
+				n = p.names.size();
+				for(int i=0; i<n;i++) {
+					paramValues[idx] = p.values.getValue(i);
+					idx++;
+				}	
+			}
 		}
 		
 	}

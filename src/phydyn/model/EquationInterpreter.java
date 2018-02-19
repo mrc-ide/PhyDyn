@@ -23,6 +23,10 @@ public class EquationInterpreter implements EquationEvaluatorAPI {
 		interpreter.updateEnv(model.modelParams.paramNames, paramValues);
 	}
 	
+	public void updateRateVectors(double[][] rateVectorValues) {
+		interpreter.updateEnv(model.modelParams.paramVectorNames, rateVectorValues);
+	}
+	
 	public void updateYs(double[] yValues) {
 		interpreter.updateEnv(model.yNames, yValues);
 	}

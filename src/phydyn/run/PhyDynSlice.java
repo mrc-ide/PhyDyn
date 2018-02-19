@@ -27,6 +27,7 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.tree.Tree;
 import phydyn.distribution.STreeLikelihood;
+import phydyn.model.PopModel;
 import phydyn.model.PopModelODE;
 
 
@@ -80,7 +81,7 @@ public class PhyDynSlice extends Runnable implements UnivariateFunction, Multiva
 	
 	protected boolean verbose;
 	
-	protected PopModelODE model=null;
+	protected PopModel model=null;
 	
 	// auxuliary variable - keeps track of value of IC that maximizes likelihhod
 	protected double[] optPoint;

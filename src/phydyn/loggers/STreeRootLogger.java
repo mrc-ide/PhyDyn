@@ -52,7 +52,7 @@ public class STreeRootLogger extends Tree implements Loggable {
     	Tree tree = (Tree)treeInput.get().getCurrent();
     	Node root = tree.getRoot();
     	StateProbabilities sp = densityInput.get().getStateProbabilities();
-    	DoubleMatrix probs = sp.getStateProbs(root.getNr());
+    	DoubleMatrix probs = sp.getRootProbs();
     	if (probs != null) {
     		for(int i=0; i < numStates; i++)
     			out.print(probs.get(i)+"\t");

@@ -25,6 +25,7 @@ expr:
   |  expr op=(AND|OR) expr		# boolExpr  
   |  op=(EXP|LOG|SQRT|SIN|COS|ABS|FLOOR|CEIL) '(' expr ')'     # callSpecialExpr
   |  op=(MAX|MIN|MOD) '(' expr ',' expr ')'  #callBinaryExpr
+  |  IDENT '[' expr ']'     # vectorExpr
   |  IDENT	       	   		# identExpr
   |  val=INT				# intExpr
   |  val=FLOAT				# floatExpr

@@ -24,6 +24,7 @@ import phydyn.model.parser.PopModelParser.PowerExprContext;
 import phydyn.model.parser.PopModelParser.ProdExprContext;
 import phydyn.model.parser.PopModelParser.StmContext;
 import phydyn.model.parser.PopModelParser.SumExprContext;
+import phydyn.model.parser.PopModelParser.VectorExprContext;
 
 /**
  * Evaluates expressions found in ODEs and variable definitions used by the model
@@ -37,10 +38,12 @@ import phydyn.model.parser.PopModelParser.SumExprContext;
 public class PopModelInterpreter extends PopModelBaseVisitor<Double> {
 
 	private final Map<String, Double> env;
+	private final Map<String, double[]> envVectors;
 	
 	public PopModelInterpreter(SemanticChecker checker) {
 		super();
 		env = new HashMap<>();
+		envVectors = new HashMap<>();
 		// Load initial environments with system constants
 		for (Map.Entry<String, Double> entry : checker.usedConstants.entrySet())
         {
@@ -69,6 +72,31 @@ public class PopModelInterpreter extends PopModelBaseVisitor<Double> {
 	public void updateEnv(String varName, double value) {
 		env.put(varName, value);	
 	}
+	
+	public void updateEnv(String[] varNames, double[][] vectorValues) {
+		int i=0;
+		double[] storedVector;
+		double[] newVector;
+		int l;
+		for(String name: varNames) {
+			storedVector = envVectors.get(name);
+			newVector = vectorValues[i];
+			l = newVector.length;
+			if (storedVector==null) {
+				storedVector = new double[l];	
+				envVectors.put(name, storedVector);
+			} else {
+				if (l != storedVector.length)
+					throw new IllegalArgumentException("Updating interpreter vector: wrong size "
+							+ "(programming error)");
+			}
+			for(int idx=0; idx < l; idx++) {
+				storedVector[idx] = newVector[idx];
+			}
+			i++;
+		}	
+	}
+	
 	public void printEnv() {
 		System.out.print("[");
 		for (Map.Entry<String, Double> entry : env.entrySet()) {
@@ -110,6 +138,25 @@ public class PopModelInterpreter extends PopModelBaseVisitor<Double> {
 	public Double visitNotExpr(NotExprContext ctx) {
 		double val = visit(ctx.expr());
 		return (val == 0.0) ? 1.0 : 0.0; 
+	}
+	
+	@Override
+	public Double visitVectorExpr(VectorExprContext ctx) {
+		String id = ctx.IDENT().getText();
+		int index = (int)Math.floor(visit(ctx.expr()));
+		//String s = index+id;
+		//System.out.print(s);
+		if (envVectors.containsKey(id)) {
+			double[] vector = envVectors.get(id);
+			//System.out.println(" = "+vector[index]);
+			if (index >= vector.length)
+				throw new IllegalArgumentException("Vector index out of bounds: "+id+"["+index+"]");
+			return vector[index];
+		} else {
+			throw new IllegalArgumentException("Vector name " + id
+					+ " unkown");
+		}
+		
 	}
 
 	@Override

@@ -7,19 +7,30 @@ import org.jblas.DoubleMatrix;
 
 import beast.evolution.tree.Node;
 
+/**
+ * @author Igor Siveroni
+ */
+
 public class StateProbabilitiesArray implements StateProbabilities {
 	
 	 /* Lineage and state probabilities management  */
 	 // Extant Lineages
-	int numNodes; // total number of Tree Nodes
+	protected int numNodes; // total number of Tree Nodes
 	protected int[] extantLineages, extantIndex;
-	protected DoubleMatrix[] extantProbs;
+	protected DoubleMatrix[] extantProbs;  // assuming row-vectors
 	protected int numExtant, numStates;
+	protected DoubleMatrix[] ancestralProbs;
 
 	public StateProbabilitiesArray() {
 		numNodes = 0;
 		numStates = 0;
 	}
+	
+	public StateProbabilities copy() {
+		return null;
+	}
+	
+
 
 	@Override
 	public void init(int numNodes, int numStates) {
@@ -29,12 +40,7 @@ public class StateProbabilitiesArray implements StateProbabilities {
 		extantLineages = new int[numNodes];
 		extantIndex = new int[numNodes];
 		extantProbs = new DoubleMatrix[numNodes];
-		//if (this.numNodes != numNodes) {
-		//	this.numNodes = numNodes;
-		//	extantLineages = new int[numNodes];
-		//	extantIndex = new int[numNodes];
-		//	extantProbs = new DoubleMatrix[numNodes];
-		//}
+		ancestralProbs=null;
         initExtantLineages();
 	}
 	
@@ -47,6 +53,15 @@ public class StateProbabilitiesArray implements StateProbabilities {
 
 	public int getNumExtant() {
 		return numExtant;
+	}
+	
+	public int[] getExtantLineages() { 
+		int[] result;
+		if (numExtant>0) result = new int[numExtant];
+		else result = null;
+		for(int i=0; i < numExtant; i++)
+			result[i] = extantLineages[i];
+		return result;
 	}
 	
 	public int getLineageIndex(int lineage) {
@@ -86,6 +101,7 @@ public class StateProbabilitiesArray implements StateProbabilities {
     	if (coalLines.size() > 2) {
 			throw new RuntimeException("Unsupported coalescent at non-binary node");
 		}
+    	//System.out.println("coalLines size="+coalLines.size());
 		int childIdx1 = extantIndex[coalLines.get(0).getNr()];
 		int childIdx2 = extantIndex[coalLines.get(1).getNr()];
 		
@@ -98,8 +114,8 @@ public class StateProbabilitiesArray implements StateProbabilities {
 		}
 		List<DoubleMatrix> result = new ArrayList<DoubleMatrix>();
 		DoubleMatrix pvec1, pvec2;		
-		pvec1 = this.getStateProbsFromIndex(childIdx1);
-		pvec2 = this.getStateProbsFromIndex(childIdx2);
+		pvec1 = this.getExtantProbsFromIndex(childIdx1);
+		pvec2 = this.getExtantProbsFromIndex(childIdx2);
 				
 		result.add(pvec1);  result.add(pvec2);
 		
@@ -118,38 +134,83 @@ public class StateProbabilitiesArray implements StateProbabilities {
 	}
 
 	@Override
-	public int removeLineageNr(int nodeNr) {
+	public DoubleMatrix removeLineageNr(int nodeNr) {
 		int nodeIdx = extantIndex[nodeNr];
-		if (nodeIdx == (numExtant-1)) {
+		if (nodeIdx==-1) {
+			throw new IllegalArgumentException("Error removing lineage: Lineage not extant");
+		}
+		DoubleMatrix result = extantProbs[nodeIdx];
+		
+		if (nodeIdx == (numExtant-1)) { // added last (no swap needed)
 			extantProbs[nodeIdx] = null;
 			extantIndex[nodeNr] = -1;
+			numExtant--;			
+		} else {  // swap positions and probs
+			int lastNr = extantLineages[numExtant-1];
+			extantLineages[nodeIdx] = lastNr;
+			extantProbs[nodeIdx] = extantProbs[numExtant-1];
+			extantIndex[nodeNr] = -1;
+			extantIndex[lastNr] = nodeIdx;
 			numExtant--;
-			return 0;
+			extantProbs[numExtant] = null;
 		}
-		int lastNr = extantLineages[numExtant-1];
-		extantLineages[nodeIdx] = lastNr;
-		extantProbs[nodeIdx] = extantProbs[numExtant-1];
-		extantIndex[nodeNr] = -1;
-		extantIndex[lastNr] = nodeIdx;
-		numExtant--;
-		extantProbs[numExtant] = null;
-		return 0;
+		return result;
+	}
+	
+	public DoubleMatrix getRootProbs() {
+		// rootNr = numNodes
+		if (this.ancestralProbs!=null) {
+			return ancestralProbs[numNodes-1];
+		}
+		if (numExtant>0) {
+			if (this.extantIndex[numNodes]!=-1)
+				return extantProbs[extantIndex[numNodes]];
+		}
+		return null;
 	}
 
 	@Override
-	public DoubleMatrix getStateProbs(int nodeNr) {
-		 int i;
-		 for(i=0; i < numExtant; i++)
-			 if (extantLineages[i]==nodeNr) 
-				 break;
-		 if (i>= numExtant)
-			 return null;
-		 else
-			 return extantProbs[i];	
+	public DoubleMatrix getExtantProbs(int nodeNr) {
+		if (extantIndex[nodeNr] == -1)
+			return null;
+		else 
+			return extantProbs[extantIndex[nodeNr]];
+	}
+	
+	public DoubleMatrix getAncestralProbs(int nodeNr) {
+		if (ancestralProbs == null)
+			return null;
+		return ancestralProbs[nodeNr];
+
+	}
+	
+	public void storeAncestralProbs(int nodeNr, DoubleMatrix p, boolean makeCopy) {
+		if (ancestralProbs == null)
+			ancestralProbs = new DoubleMatrix[numNodes];
+		if (makeCopy)
+			ancestralProbs[nodeNr] = p.add(0);
+		else
+			ancestralProbs[nodeNr] = p;
+	}
+	
+	public DoubleMatrix[] clearAncestralProbs() {
+		DoubleMatrix[] processed = ancestralProbs;
+		ancestralProbs = new DoubleMatrix[numNodes];
+		return processed;
+	}
+	
+	public void printAncestralProbabilities() {
+		if (this.ancestralProbs==null)
+			System.out.println("--NULL--");
+		else {
+			for(int i=0; i < numNodes; i++)
+				if (this.ancestralProbs[i]!=null)
+					System.out.println("node: "+i+" p="+ this.ancestralProbs[i]);
+		}
 	}
 	
 	@Override
-	public DoubleMatrix getStateProbsFromIndex(int idx) {
+	public DoubleMatrix getExtantProbsFromIndex(int idx) {
 		return extantProbs[idx];	
 	}
 	
@@ -192,7 +253,6 @@ public class StateProbabilitiesArray implements StateProbabilities {
 	public DoubleMatrix getLineageStateSum() {
 		DoubleMatrix sumAk = DoubleMatrix.zeros(numStates);
    		for (int lin = 0; lin < numExtant; lin++) {
-   			//System.out.println(extantProbs[lin]);
    			sumAk = sumAk.add(extantProbs[lin]);
    		}
     	return sumAk;  
@@ -211,13 +271,13 @@ public class StateProbabilitiesArray implements StateProbabilities {
 	}
 	
     // Debug
-    void printExtantProbabilities() {
+    public void printExtantProbabilities() {
     	System.out.println("Extant Lineages Probabilities");
     	int lineage;
     	DoubleMatrix pvec;
     	for (int l = 0; l < numExtant; l++) {
     		lineage = this.getLineageFromIndex(l);
-    		pvec = this.getStateProbsFromIndex(l);
+    		pvec = this.getExtantProbsFromIndex(l);
 			System.out.println("lin: "+lineage+" probs "+ pvec);
 		}
     }

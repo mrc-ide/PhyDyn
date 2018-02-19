@@ -3,6 +3,9 @@ package phydyn.distribution;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
 
+import phydyn.model.TimeSeriesFGY;
+import phydyn.model.TimeSeriesFGY.FGY;
+
 /*
  * Structured Coalescent likelihood matrix exponentiation implementation
  * Based on code by D. Rasmussen & NF. Mueller
@@ -17,11 +20,11 @@ public class STreeLikelihoodExp extends STreeLikelihood {
 	
 	
 	/* updates t,h,tsPoint and lineage probabilities */
-    protected double processInterval(int interval, double intervalDuration, double[] tsTimes ) {
+    protected double processInterval(int interval, double intervalDuration, TimeSeriesFGY ts) {
         double segmentDuration;
         
     	double hEvent = h + intervalDuration; 		// event height
-    	double tEvent = tsTimes[0] - hEvent;      // event time
+    	double tEvent = ts.getTime(0) - hEvent;      // event time
     	
     	// traverse timeseries until closest latest point is found
     	// tsTimes[tsPoint+1] <= tEvent < tsTimes[tsPoint] -- note that ts points are in reverse time
@@ -29,14 +32,14 @@ public class STreeLikelihoodExp extends STreeLikelihood {
     	
     	// Process Interval
     	double lhinterval = 0;
-    	while (tsTimes[tsPoint+1] > tEvent) {
+    	while (ts.getTime(tsPoint+1) > tEvent) {
     		//System.out.println("tsPoint: "+tsPoint+" Y="+ts.getYs()[tsPoint]);
-    		segmentDuration = t - tsTimes[tsPoint+1];
+    		segmentDuration = t - ts.getTime(tsPoint+1);
     		lhinterval += processIntervalSegment(tsPoint,segmentDuration);
     		if (lhinterval == Double.NEGATIVE_INFINITY) {
     			return Double.NEGATIVE_INFINITY;
     		} 				
-    		t = tsTimes[tsPoint+1];
+    		t = ts.getTime(tsPoint+1);
     		h += segmentDuration;
     		tsPoint++;
     		// tsTimes[0] = t + h -- CONSTANT
@@ -52,7 +55,7 @@ public class STreeLikelihoodExp extends STreeLikelihood {
     	//System.out.println("tsPoint: "+tsPoint+" Y="+ts.getYs()[tsPoint]);
     	// update h and t to match tree node/event
     	h = hEvent;
-    	t = tsTimes[0] - h;
+    	t = ts.getTime(0) - h;
     	return lhinterval;
     }
 	
@@ -70,9 +73,10 @@ public class STreeLikelihoodExp extends STreeLikelihood {
     protected boolean updateLineProbs(int tsPoint, double dt) { 
  
 		DoubleMatrix A = stateProbabilities.getLineageStateSum();
-		DoubleMatrix Y = ts.getYs()[tsPoint];
-		DoubleMatrix F = ts.getFs()[tsPoint];
-		DoubleMatrix G = ts.getGs()[tsPoint];
+		FGY fgy = ts.getFGY(tsPoint);
+		DoubleMatrix Y = fgy.Y; // ts.getYs()[tsPoint];
+		DoubleMatrix F = fgy.F; // ts.getFs()[tsPoint];
+		DoubleMatrix G = fgy.G; // ts.getGs()[tsPoint];
 		DoubleMatrix mul = Y.sub(A).div(Y);  
 		
 		/*
@@ -180,12 +184,13 @@ public class STreeLikelihoodExp extends STreeLikelihood {
     	double lambda;
     	
     	DoubleMatrix F,Y;
-    	Y = ts.getYs()[t];
-    	F = ts.getFs()[t];	
+    	FGY fgy = ts.getFGY(t);
+    	Y = fgy.Y; // ts.getYs()[t];
+    	F = fgy.F; // ts.getFs()[t];	
     	
 		DoubleMatrix pa, pvec1, pvec2;		
-		pvec1 = stateProbabilities.getStateProbsFromIndex(childIdx1);
-		pvec2 = stateProbabilities.getStateProbsFromIndex(childIdx2);
+		pvec1 = stateProbabilities.getExtantProbsFromIndex(childIdx1);
+		pvec2 = stateProbabilities.getExtantProbsFromIndex(childIdx2);
 		/* previous version */
 	    DoubleMatrix coalRates = DoubleMatrix.zeros(numStates, numStates);
 	    for (int k = 0; k < numStates; k++) {

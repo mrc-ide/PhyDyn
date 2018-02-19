@@ -24,19 +24,20 @@ import phydyn.model.parser.PopModelParser.PowerExprContext;
 import phydyn.model.parser.PopModelParser.ProdExprContext;
 import phydyn.model.parser.PopModelParser.StmContext;
 import phydyn.model.parser.PopModelParser.SumExprContext;
+import phydyn.model.parser.PopModelParser.VectorExprContext;
 
 @Description("Compiles a PopModel expression parse tree into a sequence of equivalent PMStackMachine instructions."
 		+ "Performs basic type checking and calculates the addresses (indexes/offsets) of all declated variables")
 public class PopModelCompiler extends PopModelBaseVisitor<PMMachineCode> {
 	// Keeps track of indices in environment array
 	private final Map<String, Integer> envIndex;
-	private int lastIndex;
+	private int nextIndex;
 	private PMMachineCode code;
 	
 	PopModelCompiler() {
 		super();
 		envIndex = new HashMap<>();
-		lastIndex = -1;
+		nextIndex = 0;
 	}
 	
 	/* Enters new variables to the environment - 
@@ -46,10 +47,10 @@ public class PopModelCompiler extends PopModelBaseVisitor<PMMachineCode> {
 		for(String name: names) {
 			if (envIndex.containsKey(name)) {
 				indices[i] = (int) envIndex.get(name);
-			} else {
-				lastIndex++;
-				envIndex.put(name, lastIndex);
-				indices[i] = lastIndex;
+			} else {			
+				envIndex.put(name, nextIndex);
+				indices[i] = nextIndex;
+				nextIndex++;
 			}
 			i++;
 		}
@@ -61,22 +62,39 @@ public class PopModelCompiler extends PopModelBaseVisitor<PMMachineCode> {
 			if (envIndex.containsKey(name)) {
 				indices[i] = (int) envIndex.get(name);
 			} else {
-				lastIndex++;
-				envIndex.put(name, lastIndex);
-				indices[i] = lastIndex;
+				envIndex.put(name, nextIndex);
+				indices[i] = nextIndex;
+				nextIndex++;
 			}
 			i++;
 		}
 	}
+	
+	/* Enters new for vector variables to the environment
+	* Copies their corresponding indices into the second argument */
+	void updateEnv(String[] names, double[][] vectors, int[] indices) {
+		int i=0;
+		for(String name: names) {
+			if (envIndex.containsKey(name)) {
+				indices[i] = (int) envIndex.get(name);
+			} else {				
+				envIndex.put(name, nextIndex);
+				indices[i] = nextIndex;
+				nextIndex += vectors[i].length;
+			}
+			i++;
+		}
+	}
+	
 	
 	int updateEnv(String name) {
 		int idx;
 		if (envIndex.containsKey(name)) {
 			idx = (int) envIndex.get(name);
 		} else {
-			lastIndex++;
-			envIndex.put(name, lastIndex);
-			idx = lastIndex;
+			idx = nextIndex;
+			envIndex.put(name, idx);
+			nextIndex++;
 		}
 		return idx;
 	}
@@ -87,7 +105,8 @@ public class PopModelCompiler extends PopModelBaseVisitor<PMMachineCode> {
 	}
 	
 	public int getEnvSize() {
-		return envIndex.size();
+		// return envIndex.size(); // no longer true
+		return nextIndex;
 	}
 	
 	public PMMachineCode compile(ParseTree ast) {
@@ -135,12 +154,26 @@ public class PopModelCompiler extends PopModelBaseVisitor<PMMachineCode> {
 		String id = ctx.IDENT().getText();
 		if (envIndex.containsKey(id)) {
 			code.generatePushVar(envIndex.get(id));
-		} else {
-			throw new IllegalArgumentException("Variable " + id
+		} else { // Shouldn't be necessary - check Semantic checker
+			throw new IllegalArgumentException("Compiler: Variable " + id
 	            + " unkown");
 		}
 		return code;
 	}
+	
+	@Override
+	public PMMachineCode visitVectorExpr(VectorExprContext ctx) {
+		String id = ctx.IDENT().getText();
+		visit(ctx.expr()); // calculate ofsset
+		if (envIndex.containsKey(id)) {
+			code.generatePushVarOffset(envIndex.get(id));
+		} else { // Shouldn't be necessary - check Semantic checker
+			throw new IllegalArgumentException("Compiler: Vector " + id
+	            + " unkown");
+		}
+		return code;		
+	}
+	
 	
 	@Override
 	public PMMachineCode visitFloatExpr(FloatExprContext ctx) {

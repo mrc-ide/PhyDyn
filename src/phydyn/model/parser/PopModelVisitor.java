@@ -46,6 +46,13 @@ public interface PopModelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCondExpr(PopModelParser.CondExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code vectorExpr}
+	 * labeled alternative in {@link PopModelParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVectorExpr(PopModelParser.VectorExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code minusExpr}
 	 * labeled alternative in {@link PopModelParser#expr}.
 	 * @param ctx the parse tree

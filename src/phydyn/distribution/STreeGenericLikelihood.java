@@ -4,7 +4,6 @@ package phydyn.distribution;
 import java.util.List;
 import java.util.Random;
 
-import org.jblas.DoubleMatrix;
 
 import beast.core.Description;
 import beast.core.Distribution;
@@ -16,38 +15,36 @@ import beast.core.Input.Validate;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeInterface;
-import phydyn.model.PopModelODE;
+import phydyn.model.PopModel;
 
 
 @Description("Distribution on a structured tree")
-public class STreeGenericLikelihood extends Distribution {
+public abstract class STreeGenericLikelihood extends Distribution {
 	
-	/* XML/Beast Input objects */
-	//public Input<Tree> treeInput = new Input<Tree>("tree", "tree over which to calculate a prior or likelihood");
-	
-	
-	// removed: calculated from Tree input
 	public Input<STreeIntervals> treeIntervalsInput = new Input<STreeIntervals>("treeIntervals",
 	  		 "Structured Intervals for a phylogenetic beast tree", Validate.REQUIRED);
-	// "Structured Intervals for a phylogenetic beast tree", Validate.XOR, treeInput);
 	
-	public Input<PopModelODE> popModelInput = new Input<>(
+	public Input<PopModel> popModelInput = new Input<>(
 			 "popmodel","Population Model",Validate.REQUIRED);
 	
+	public Input<Boolean> forgiveT0Input = new Input<>("forgiveT0",
+			"Use Constant Coalescent if root precedes t0",new Boolean(true));
 	public Input<RealParameter> NeInput = new Input<>("Ne","Effective Population Size");
 	
-	/* Type trait that maps taxa to demes in the population model - if type trait is missing, the program assumes
+	/* Type trait that maps taxa to demes in the population model.
+	 * If type trait is missing, the program assumes
 	 * that taxa names are suffixed with deme names or numbers e.g taxaname_I0 or taxaname_0 */
-	/* It is also possible the tree contains a typeTrait TraitSet */
+	/* TODO: It is also possible the tree contains a typeTrait TraitSet */
 	 public Input<TraitSet> typeTraitInput = new Input<>(
 	            "typeTrait", "Type trait set maps taxa to state number.");
 	 public Input<BooleanParameter> useStateNameInput = new Input<>(
 	    		"useStateName",
 	            "whether to use a state's name or number when extracting type annotation or reading trait value (default true)");
 	 
-	 public PopModelODE popModel;
-	 //public TreeInterface tree;
+	 public Input<Boolean> ancestralInput = new Input<>("ancestral",
+				"Compute ancestral states",new Boolean(false));
+	 
+	 public PopModel popModel;
 	 public Tree tree;
 	 public STreeIntervals intervals;
 	 	 
@@ -57,43 +54,34 @@ public class STreeGenericLikelihood extends Distribution {
 	 
 	 private boolean traitInput = false;
 	 private boolean useStateName = true;
+	 protected boolean computeAncestral;
 	 
-	 public StateProbabilities stateProbabilities; // initialised by subclasses
-	 public double Ne;
+	 // the state
+	 // double logP; -- defined by Distribution
+	 public StateProbabilities stateProbabilities; 
 	  
 	 
 	 @Override
 	 public void initAndValidate() {
 		 popModel = popModelInput.get();
-		 //if (treeIntervalsInput.get() == null)
-		 //    throw new Exception("Expected treeIntervals to be specified");
-		 
-		 intervals = treeIntervalsInput.get();
-		 
+		 intervals = treeIntervalsInput.get();	 
 		 tree = intervals.treeInput.get();
 		 
 		 if (typeTraitInput.get() != null) traitInput = true;
 		 if (useStateNameInput.get() != null) {
 			 useStateName = useStateNameInput.get().getValue();
 		 }	
-		     	
+		 computeAncestral = ancestralInput.get();
 		 numStates = popModel.getNumStates(); 
-		 mapNodesToStates();
-	   	    	    
+
 	 }
 	 
-	 public void initValues() {
-
-		 tree = intervals.treeInput.get();
-		 		 
-		 if (typeTraitInput.get() != null) traitInput = true;
-		 if (useStateNameInput.get() != null) {
-			 useStateName = useStateNameInput.get().getValue();
-		 }	
-		     	
-		 numStates = popModel.getNumStates(); 
+	 public boolean initValues() {
 		 mapNodesToStates();
+		 return false;
 	 }
+	 
+	 public PopModel getModel() { return popModel; }
 	 
 	 public StateProbabilities getStateProbabilities() {
 		 return stateProbabilities;
@@ -124,10 +112,13 @@ public class STreeGenericLikelihood extends Distribution {
 			 /* assumption: node.nr < numNodes */
 			 final int nr = node.getNr();
 			 if (traitInput) { /* use type trait and extract state number */
-				 //System.out.println("TraitInput");
+				 //System.out.println("Using TraitInput");
 				 if (useStateName) {
 					 sampleState = popModel.getStateFromName(typeTraitInput.get().getStringValue(node.getID()) );
 				 } else {
+					 // important: if trait values are, by mistake, deme names, then
+					 // the sampleState will be zero (parseDouble)
+					 // may want to check for valid state strings
 					 sampleState = (int) typeTraitInput.get().getValue(node.getID());  // should be a number
 				 }
 			 } else {

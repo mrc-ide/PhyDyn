@@ -8,8 +8,9 @@ import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 import org.jblas.DoubleMatrix;
 
 import phydyn.model.TimeSeriesFGY;
+import phydyn.model.TimeSeriesFGY.FGY;
 
-public class SolverQL extends SolverInterval implements FirstOrderDifferentialEquations {
+public class SolverQL extends SolverIntervalODE implements FirstOrderDifferentialEquations {
 	
 	 private double[] ql0, ql1, qdata;
 	 
@@ -18,6 +19,8 @@ public class SolverQL extends SolverInterval implements FirstOrderDifferentialEq
 	 private TimeSeriesFGY ts;
 	 private double sumA0;
 	 private DoubleMatrix A0;
+	 boolean negQ;
+	 int iterations;
 
 	 static double MIN_Y = 1e-12 ;
 	 
@@ -27,6 +30,7 @@ public class SolverQL extends SolverInterval implements FirstOrderDifferentialEq
     	ql0 = new double[numStatesSQ+1];
     	ql1 = new double[numStatesSQ+1];
     	qdata = new double[numStatesSQ];
+    	// we could set tsTimes0 and setMinP HERE
 	}
 	
 	
@@ -39,6 +43,7 @@ public class SolverQL extends SolverInterval implements FirstOrderDifferentialEq
 		A0 = sp.getLineageStateSum(); // numStates column vector
 		sumA0 = A0.sum();		
 		
+		//System.out.println("A0="+A0);
 		
 		// prepare ql arrays
 		int k=0;
@@ -54,7 +59,17 @@ public class SolverQL extends SolverInterval implements FirstOrderDifferentialEq
 		}
 		ql0[k] = ql1[k] = 0.0;
 		
-		foi.integrate(this, h0, ql0, h1, ql1);
+		negQ=false;	
+		iterations=0;
+		
+		if ((h1-h0) < stlh.stepSize) {	
+			FirstOrderIntegrator newfoi;
+			newfoi = new ClassicalRungeKuttaIntegrator((h1-h0)/10);
+			if (debug) System.out.println("--- length="+(h1-h0));
+			newfoi.integrate(this, h0, ql0, h1, ql1);
+		}  else {
+			foi.integrate(this, h0, ql0, h1, ql1);
+		}
 		
 		DoubleMatrix Q = new DoubleMatrix(numStates,numStates);
 		
@@ -63,27 +78,17 @@ public class SolverQL extends SolverInterval implements FirstOrderDifferentialEq
 		 
 		Q.diviRowVector(Q.columnSums());  // normalise columns
 		 
-		logLh = -ql1[numStatesSQ]; // likelihood - negative because it needs to be subtracted
+		logLh = -ql1[numStatesSQ]; // likelihood - negative 
 		// TODO: check if sign has to be modified in main loop
 		if (Double.isNaN(logLh)) logLh = Double.NEGATIVE_INFINITY;
 
 		// Update state probabilities in Likelihood object 
 		DoubleMatrix Qtrans = Q.transpose();
 		// Update lineage probabilities
-		int numExtant = sp.getNumExtant();
-		
 		sp.mulExtantProbabilities(Qtrans, true);
 		if (stlh.setMinP) {
 			sp.setMinP(stlh.minP);
 		}
-		// replaces below
-		//for (int l = 0; l < numExtant; l++) {
-		//	DoubleMatrix probs = (stlh.extantProbs[l]).mmul(Qtrans); // row-vector
-		//	probs.divi(probs.sum()); /* normalise */
-		//	probs.maxi(0.0); /* clamp(0,1) */
-		//	probs.mini(1.0);
-		//	stlh.extantProbs[l] = probs;
-		//}
 		ts = null;
 		return;
 	}
@@ -95,19 +100,37 @@ public class SolverQL extends SolverInterval implements FirstOrderDifferentialEq
 		int tsPointCurrent = ts.getTimePoint(tsTimes0-h, tsPointLast);
 		
 		tsPointLast = tsPointCurrent;
-		DoubleMatrix Y = ts.getYs()[tsPointCurrent];
-		DoubleMatrix F = ts.getFs()[tsPointCurrent];
-		DoubleMatrix G = ts.getGs()[tsPointCurrent];
+		FGY fgy = ts.getFGY(tsPointCurrent);
+		DoubleMatrix Y = fgy.Y;
+		DoubleMatrix F = fgy.F;
+		DoubleMatrix G = fgy.G;
 		
 		if (forgiveY) Y.maxi(1.0); else Y.maxi(MIN_Y);
-				
 		int i;
-		for(i=0; i < numStatesSQ; i++) qdata[i] = ql[i];
-		DoubleMatrix Q =  new DoubleMatrix(numStates,numStates,qdata);		
+		
+		
+		for(i=0; i < numStatesSQ; i++) {
+			if (ql[i]<0) {
+				negQ=true;
+				qdata[i] = ql[i];
+				//qdata[i] = 0.00001;
+			} else {
+				qdata[i] = ql[i];
+			}
+			
+		}		
+		
+		DoubleMatrix Q =  new DoubleMatrix(numStates,numStates,qdata);
+		
+		
 		DoubleMatrix Qnorm = Q.dup();
 		Qnorm.diviRowVector(Q.columnSums());
 		
 		DoubleMatrix A = Qnorm.mmul(A0);
+		
+		
+			
+		//System.out.println("A="+A);
 		A.divi(A.sum());  // normalised
 		A.muli(sumA0);    // sum of A = sum(A0)
 		//A = A.mul(sumA0).div(A.sum());
@@ -125,30 +148,35 @@ public class SolverQL extends SolverInterval implements FirstOrderDifferentialEq
 	        	for(l=0; l < numStates; l++) {
 	        		if (k != l) {
 	        			if (Q.get(l,z) > 0) {
-	        				accum += FG.get(k,l) *  Q.get(l,z)/ Math.max(Q.get(l,z), Y.get(l));
+	        				accum += FG.get(k,l) *  Q.get(l,z)/Math.max(Q.get(l,z), Y.get(l));
 	        			}
 	        			if (Q.get(k,z) > 0) {
-	        				accum -= FG.get(l,k) *  Q.get(k,z)/  Math.max(Q.get(k,z), Y.get(k));
+	        				accum -= FG.get(l,k) *  Q.get(k,z)/Math.max(Q.get(k,z), Y.get(k));
 	        			}
 	        		}
 	        		if (Q.get(k,z) > 0) {
-	        			accum -= F.get(k,l) * a.get(l) * Q.get(k,z)/  Math.max(Q.get(k,z), Y.get(k));
+	        			accum -= F.get(k,l) * a.get(l) * Q.get(k,z)/Math.max(Q.get(k,z), Y.get(k));
 	        		}
 	        	}
 	        	//dQ.put(k,z,accum);
 	        	dql[i++] = accum;
 	        }
-	    }	
+	    }
+	    
+	    double deltaDL = 0;
 	    for (k= 0; k < numStates; k++){
 	    	for (l =0 ; l < numStates; l++){			
 	    		if (k == l && A.get(k) >= 1. ){
-	    			dL += (A.get(k) / Y.get(k)) * ((A.get(k)-1.) / Y.get(k)) * F.get(k,l) ; 
+	    			deltaDL = (A.get(k) / Y.get(k)) * ((A.get(k)-1.) / Y.get(k)) * F.get(k,l) ; 
 	      		} else {
-	      			dL += a.get(k) * a.get(l) * F.get(k,l);
+	      			deltaDL = a.get(k) * a.get(l) * F.get(k,l);
 	      		}
+	    		//System.out.println("---deltaDL="+deltaDL);
+	    		dL += deltaDL;
 	    	}
 	    }
-	    dL = Math.max(dL, 0.);   
+	    dL = Math.max(dL, 0.);
+	    //System.out.println("dL="+dL);
 	    dql[numStatesSQ] = dL;					
 
 	}

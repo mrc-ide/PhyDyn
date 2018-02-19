@@ -12,6 +12,7 @@ import phydyn.distribution.STreeDistribution;
 import phydyn.distribution.STreeIntervals;
 import phydyn.model.PopModelODE;
 import phydyn.model.TimeSeriesFGY;
+import phydyn.model.TimeSeriesFGYStd;
 
 
 public class PhyDynTest extends Runnable {
@@ -70,19 +71,20 @@ public class PhyDynTest extends Runnable {
 		System.out.println("logP="+densityInput.get().getCurrentLogP());
 		
 		TimeSeriesFGY ts = model.getTimeSeries();
-		double[] points = ts.timePoints;
-		double previous, min,max, stepSize;;
+		//double[] points = ts.getTimePoints();
+		double previous, min,max, stepSize;
+		int numPoints = ts.getNumTimePoints();
 		
-		previous = points[0];
-		max=0.0; min=points[0];
-		for(int i = 1; i < points.length; i++) {
-			stepSize = (previous-points[i]);
+		previous = ts.getTime(0);
+		max=0.0; min=previous;
+		for(int i = 1; i < numPoints; i++) {
+			stepSize = (previous-ts.getTime(i));
 			if (stepSize>max) max=stepSize;
 			if (stepSize<min) min=stepSize;
 			//System.out.println(points[i]+" - stepSize = "+ stepSize);
-			previous = points[i];
+			previous = ts.getTime(i);
 		}
-		System.out.println("Number of points: "+points.length);
+		System.out.println("Number of points: "+numPoints);
 		System.out.println("Stepsizes (min,max)=(" + min + ","+max+")");
 				
 		// timeTrajectory();

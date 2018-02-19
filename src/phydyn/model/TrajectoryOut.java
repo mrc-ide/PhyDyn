@@ -7,10 +7,11 @@ import org.jblas.DoubleMatrix;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.Runnable;
+import phydyn.model.TimeSeriesFGY.FGY;
 
 public class TrajectoryOut extends Runnable {
 	
-	public Input<PopModelODE> modelInput = new Input<>("model","Complex Population Model", Validate.REQUIRED);
+	public Input<PopModel> modelInput = new Input<>("model","Complex Population Model", Validate.REQUIRED);
 	public Input<String> fileInput = new Input<>("file", "output trajectory file");
 	// file type. Currently only option is csv (default)
 	
@@ -32,13 +33,18 @@ public class TrajectoryOut extends Runnable {
 
 	@Override
 	public void run() throws Exception {
-		TimeSeriesFGY ts = modelInput.get().integrate();
+		//TimeSeriesFGY ts = modelInput.get().integrate();
+		modelInput.get().update();
+		TimeSeriesFGY ts = modelInput.get().getTimeSeries();
 		ts.reverse();
 		
 		FileWriter writer = new FileWriter(fileName);
-		double[] timePoints = ts.getTimePoints();
-		DoubleMatrix[] Ys = ts.getAllYs();
-		int n = ts.numDemes+ts.numNonDemes;
+		
+		//double[] timePoints = ts.getTimePoints();
+		//DoubleMatrix[] Ys = ts.getAllYs();
+		
+		int n = ts.lengthYall();
+		int numPoints = ts.getNumTimePoints();
 		
 		String[] demeNames = modelInput.get().demeNames;
 		String[] nonDemeNames = modelInput.get().nonDemeNames;
@@ -50,10 +56,13 @@ public class TrajectoryOut extends Runnable {
 			writer.append(","+nonDemeNames[i]);
 		writer.append("\n");
 		
-		for(int i = 0; i < timePoints.length; i++) {
-			writer.append(""+timePoints[i]);
+		for(int i = 0; i < numPoints; i++) {
+			FGY fgy = ts.getFGY(i);
+			writer.append(""+ts.getTime(i));
+			//System.out.println("F="+fgy.F);
+			//System.out.println("G="+fgy.G);
 			for(int j = 0; j < n; j++) {
-				writer.append(","+Ys[i].get(j));
+				writer.append(","+fgy.Yall.get(j));
 			}
 			writer.append("\n");
 		}

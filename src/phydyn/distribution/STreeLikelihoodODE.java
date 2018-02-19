@@ -10,12 +10,13 @@ import org.jblas.DoubleMatrix;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
+import phydyn.model.TimeSeriesFGY;
 
 /**
  * @author Igor Siveroni
  */
 
-@Description("Calculates the probability of a beast.tree using under a structured population model "
+@Description("Calculates the probability of a beast.tree  under a structured population model "
 		+ "using the framework of Volz (2012). Lineage state probabilities are calculated by"
 		+ "solving ODEs at each step in the tree's interval")
 @Citation("Erik M. Volz. 2012. Complex population dynamics and the coalescent under neutrality."
@@ -26,18 +27,24 @@ enum IntegrationMethod { MIDPOINT, CLASSICRK, GILL
 	,ADAMSBASHFORTH 
 	,ADAMSMOULTON  
 	};
+	
+enum EquationsType { PL, QL, LogQL };
 
 
 public class STreeLikelihoodODE extends STreeLikelihood {
 	
-	public final static double MIN_H = 1.0e-8;
+	public final static double MIN_H = 1.0e-6;
 	public IntegrationMethod method;
 	public boolean fixedStepSize, setMinP;
 	public double stepSize, aTol, rTol, minP;
 	public int order;
+	public EquationsType eqType;
 	
 	public Input<Boolean> solvePLInput = new Input<>(
-			"solvePL", "Solve dP equations instead of dQ", new Boolean(false));
+			"solvePL", "Solve dP equations instead of dQ");
+	
+	public Input<String> equationsInput = new Input<>(
+			"equations", "Type of likelihood and state differential equations");
 	
 	public Input<Double> stepSizeInput = new Input<>("stepSize",
 			"ODE solver stepsize", new Double(0.01));
@@ -57,7 +64,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 	 public Input<Double> minPInput = new Input<>("minP",
 			 "minimum value of state probilities i.e. avoid zero");
 	 
-	 private SolverInterval solver=null; 
+	 private SolverIntervalODE solver=null; 
 	 
 	 @Override
 	 public void initAndValidate() {
@@ -89,33 +96,74 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 			 }
 			 setMinP=true;
 		 }
-		 if (solvePLInput.get()) {
-			 solver = new SolverPL(this);
-		 } else {
-			 solver = new SolverQL(this);
+		 // Equations / solver.
+		 if (equationsInput.get()!=null) {
+			 String eq = equationsInput.get();
+			 if (eq.equals("PL")) eqType = EquationsType.PL;
+			 else if (eq.equals("QL")) eqType = EquationsType.QL;
+			 else if (eq.equals("LogQL")) eqType = EquationsType.LogQL;
+			 else 
+				 throw new IllegalArgumentException("Invalid Equations type. Use: PL, QL or LogQL");			 
+			 // if there's solverInput, even if redundant, they must agree
+			 if (solvePLInput.get()!=null) {
+				 if ((solvePLInput.get() && (eqType!=EquationsType.PL)) ||
+					 (!solvePLInput.get() && (eqType!=EquationsType.QL))) {
+					 throw new IllegalArgumentException("Incompatible values of solverPL and equations");
+				 }
+			 } 
+		 } else { // legacy
+			 eqType = EquationsType.PL; // default
+			 if ( (solvePLInput.get()!=null)&& (!solvePLInput.get())) {				 
+					 eqType = EquationsType.QL;									
+			 }			 
 		 }
+		 switch (eqType) {
+		 case PL:
+			 if (popModel.isConstant())
+				 solver = new SolverPLConstant(this);
+			 else
+				 solver = new SolverPL(this); 
+			 break;
+		 case QL:
+			 if (popModel.isConstant()) {
+				 solver = new SolverQLConstant(this);
+				 //solver.setDebug(true);
+			 } else
+				 solver = new SolverQL(this); 
+			 break;
+		 default:
+			 solver = new SolverLogQL(this);
+		 }
+		 
+	 }
+	 
+	 public boolean initValues() {
+		 super.initValues();
+		 solver.initValues(this);
+		 return false;
 	 }
 
 
 	 /* updates t,h,tsPoint and lineage probabilities */
-	 protected double processInterval(int interval, double intervalDuration, double[] tsTimes ) {
+	 protected double processInterval(int interval, double intervalDuration, TimeSeriesFGY ts) {
 		 double lh=0.0;
 		 double hEvent = h + intervalDuration; 		// event height
-		 double tEvent = tsTimes[0] - hEvent;      // event time  
-		 		 
-		 // New call - update probs and compute likelihood contribution
-		 // sorry, no dynamic dispatch yet
+		 double tEvent = ts.getTime(0) - hEvent;      // event time
+		 // Update probs and compute likelihood contribution
 		 if (intervalDuration > MIN_H) {
 			 solver.solve(h,hEvent,tsPoint,this);
 			 lh = solver.getLogLh();
 		 }
-		 
+		 //if (interval==15) solver.setDebug(false);
 		 /* update tsPoint, h and t */
-		 while (tsTimes[tsPoint+1] > tEvent) {
-	    		tsPoint++;
+
+		 if (ts.getTime(tsPoint) > tEvent) {
+			 while (ts.getTime(tsPoint+1) > tEvent) {
+				 tsPoint++;
+			 }
 		 }		 
 		 h = hEvent;
-		 t = tsTimes[0] - h;
+		 t = ts.getTime(0) - h;
 		 return lh;
 	 }
 

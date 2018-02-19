@@ -19,11 +19,11 @@ public class PopModelParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, EQ=4, ASSIGN=5, AND=6, OR=7, NOT=8, LEQ=9, GT=10, 
-		LT=11, GEQ=12, ADD=13, SUB=14, MUL=15, DIV=16, POW=17, EXP=18, LOG=19, 
-		SQRT=20, SIN=21, COS=22, MAX=23, MIN=24, MOD=25, ABS=26, FLOOR=27, CEIL=28, 
-		IF=29, THEN=30, ELSE=31, INT=32, FLOAT=33, IDENT=34, LINE_COMMENT=35, 
-		MULTILINE_COMENT=36, WS=37;
+		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, EQ=6, ASSIGN=7, AND=8, OR=9, NOT=10, 
+		LEQ=11, GT=12, LT=13, GEQ=14, ADD=15, SUB=16, MUL=17, DIV=18, POW=19, 
+		EXP=20, LOG=21, SQRT=22, SIN=23, COS=24, MAX=25, MIN=26, MOD=27, ABS=28, 
+		FLOOR=29, CEIL=30, IF=31, THEN=32, ELSE=33, INT=34, FLOAT=35, IDENT=36, 
+		LINE_COMMENT=37, MULTILINE_COMENT=38, WS=39;
 	public static final int
 		RULE_stm = 0, RULE_equation = 1, RULE_expr = 2;
 	public static final String[] ruleNames = {
@@ -31,16 +31,17 @@ public class PopModelParser extends Parser {
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "'('", "')'", "','", "'=='", "'='", "'and'", "'or'", "'not'", "'!>'", 
-		"'>'", "'!>='", "'>='", "'+'", "'-'", "'*'", "'/'", "'^'", "'exp'", "'log'", 
-		"'sqrt'", "'sin'", "'cos'", "'max'", "'min'", "'mod'", "'abs'", "'floor'", 
-		"'ceil'", "'if'", "'then'", "'else'"
+		null, "'('", "')'", "','", "'['", "']'", "'=='", "'='", "'and'", "'or'", 
+		"'not'", "'!>'", "'>'", "'!>='", "'>='", "'+'", "'-'", "'*'", "'/'", "'^'", 
+		"'exp'", "'log'", "'sqrt'", "'sin'", "'cos'", "'max'", "'min'", "'mod'", 
+		"'abs'", "'floor'", "'ceil'", "'if'", "'then'", "'else'"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, "EQ", "ASSIGN", "AND", "OR", "NOT", "LEQ", "GT", 
-		"LT", "GEQ", "ADD", "SUB", "MUL", "DIV", "POW", "EXP", "LOG", "SQRT", 
-		"SIN", "COS", "MAX", "MIN", "MOD", "ABS", "FLOOR", "CEIL", "IF", "THEN", 
-		"ELSE", "INT", "FLOAT", "IDENT", "LINE_COMMENT", "MULTILINE_COMENT", "WS"
+		null, null, null, null, null, null, "EQ", "ASSIGN", "AND", "OR", "NOT", 
+		"LEQ", "GT", "LT", "GEQ", "ADD", "SUB", "MUL", "DIV", "POW", "EXP", "LOG", 
+		"SQRT", "SIN", "COS", "MAX", "MIN", "MOD", "ABS", "FLOOR", "CEIL", "IF", 
+		"THEN", "ELSE", "INT", "FLOAT", "IDENT", "LINE_COMMENT", "MULTILINE_COMENT", 
+		"WS"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -218,6 +219,18 @@ public class PopModelParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof PopModelVisitor ) return ((PopModelVisitor<? extends T>)visitor).visitCondExpr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class VectorExprContext extends ExprContext {
+		public TerminalNode IDENT() { return getToken(PopModelParser.IDENT, 0); }
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
+		}
+		public VectorExprContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PopModelVisitor ) return ((PopModelVisitor<? extends T>)visitor).visitVectorExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -401,9 +414,10 @@ public class PopModelParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(43);
-			switch (_input.LA(1)) {
-			case SUB:
+			setState(48);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,0,_ctx) ) {
+			case 1:
 				{
 				_localctx = new MinusExprContext(_localctx);
 				_ctx = _localctx;
@@ -412,10 +426,10 @@ public class PopModelParser extends Parser {
 				setState(13);
 				match(SUB);
 				setState(14);
-				expr(13);
+				expr(14);
 				}
 				break;
-			case NOT:
+			case 2:
 				{
 				_localctx = new NotExprContext(_localctx);
 				_ctx = _localctx;
@@ -423,10 +437,10 @@ public class PopModelParser extends Parser {
 				setState(15);
 				match(NOT);
 				setState(16);
-				expr(12);
+				expr(13);
 				}
 				break;
-			case T__0:
+			case 3:
 				{
 				_localctx = new ParenthExprContext(_localctx);
 				_ctx = _localctx;
@@ -439,7 +453,7 @@ public class PopModelParser extends Parser {
 				match(T__1);
 				}
 				break;
-			case IF:
+			case 4:
 				{
 				_localctx = new CondExprContext(_localctx);
 				_ctx = _localctx;
@@ -458,14 +472,7 @@ public class PopModelParser extends Parser {
 				expr(0);
 				}
 				break;
-			case EXP:
-			case LOG:
-			case SQRT:
-			case SIN:
-			case COS:
-			case ABS:
-			case FLOOR:
-			case CEIL:
+			case 5:
 				{
 				_localctx = new CallSpecialExprContext(_localctx);
 				_ctx = _localctx;
@@ -486,9 +493,7 @@ public class PopModelParser extends Parser {
 				match(T__1);
 				}
 				break;
-			case MAX:
-			case MIN:
-			case MOD:
+			case 6:
 				{
 				_localctx = new CallBinaryExprContext(_localctx);
 				_ctx = _localctx;
@@ -513,38 +518,51 @@ public class PopModelParser extends Parser {
 				match(T__1);
 				}
 				break;
-			case IDENT:
+			case 7:
 				{
-				_localctx = new IdentExprContext(_localctx);
+				_localctx = new VectorExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(40);
 				match(IDENT);
+				setState(41);
+				match(T__3);
+				setState(42);
+				expr(0);
+				setState(43);
+				match(T__4);
 				}
 				break;
-			case INT:
+			case 8:
+				{
+				_localctx = new IdentExprContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(45);
+				match(IDENT);
+				}
+				break;
+			case 9:
 				{
 				_localctx = new IntExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(41);
+				setState(46);
 				((IntExprContext)_localctx).val = match(INT);
 				}
 				break;
-			case FLOAT:
+			case 10:
 				{
 				_localctx = new FloatExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(42);
+				setState(47);
 				((FloatExprContext)_localctx).val = match(FLOAT);
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(62);
+			setState(67);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
@@ -552,28 +570,28 @@ public class PopModelParser extends Parser {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					setState(60);
+					setState(65);
 					_errHandler.sync(this);
 					switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 					case 1:
 						{
 						_localctx = new PowerExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(45);
-						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
-						setState(46);
+						setState(50);
+						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
+						setState(51);
 						match(POW);
-						setState(47);
-						expr(10);
+						setState(52);
+						expr(11);
 						}
 						break;
 					case 2:
 						{
 						_localctx = new ProdExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(48);
-						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
-						setState(49);
+						setState(53);
+						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
+						setState(54);
 						((ProdExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==MUL || _la==DIV) ) {
@@ -581,17 +599,17 @@ public class PopModelParser extends Parser {
 						} else {
 							consume();
 						}
-						setState(50);
-						expr(10);
+						setState(55);
+						expr(11);
 						}
 						break;
 					case 3:
 						{
 						_localctx = new SumExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(51);
-						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
-						setState(52);
+						setState(56);
+						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
+						setState(57);
 						((SumExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==ADD || _la==SUB) ) {
@@ -599,17 +617,17 @@ public class PopModelParser extends Parser {
 						} else {
 							consume();
 						}
-						setState(53);
-						expr(9);
+						setState(58);
+						expr(10);
 						}
 						break;
 					case 4:
 						{
 						_localctx = new CmpExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(54);
-						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
-						setState(55);
+						setState(59);
+						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
+						setState(60);
 						((CmpExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EQ) | (1L << LEQ) | (1L << GT) | (1L << LT) | (1L << GEQ))) != 0)) ) {
@@ -617,17 +635,17 @@ public class PopModelParser extends Parser {
 						} else {
 							consume();
 						}
-						setState(56);
-						expr(8);
+						setState(61);
+						expr(9);
 						}
 						break;
 					case 5:
 						{
 						_localctx = new BoolExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(57);
-						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
-						setState(58);
+						setState(62);
+						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
+						setState(63);
 						((BoolExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==AND || _la==OR) ) {
@@ -635,14 +653,14 @@ public class PopModelParser extends Parser {
 						} else {
 							consume();
 						}
-						setState(59);
-						expr(7);
+						setState(64);
+						expr(8);
 						}
 						break;
 					}
 					} 
 				}
-				setState(64);
+				setState(69);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
 			}
@@ -669,39 +687,41 @@ public class PopModelParser extends Parser {
 	private boolean expr_sempred(ExprContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 0:
-			return precpred(_ctx, 10);
+			return precpred(_ctx, 11);
 		case 1:
-			return precpred(_ctx, 9);
+			return precpred(_ctx, 10);
 		case 2:
-			return precpred(_ctx, 8);
+			return precpred(_ctx, 9);
 		case 3:
-			return precpred(_ctx, 7);
+			return precpred(_ctx, 8);
 		case 4:
-			return precpred(_ctx, 6);
+			return precpred(_ctx, 7);
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\'D\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\3\2\3\2\3\2\3\2\3\3\3\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4"+
-		"\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3"+
-		"\4\3\4\3\4\3\4\3\4\5\4.\n\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3"+
-		"\4\3\4\3\4\3\4\3\4\7\4?\n\4\f\4\16\4B\13\4\3\4\2\3\6\5\2\4\6\2\b\4\2\24"+
-		"\30\34\36\3\2\31\33\3\2\21\22\3\2\17\20\4\2\6\6\13\16\3\2\b\tM\2\b\3\2"+
-		"\2\2\4\f\3\2\2\2\6-\3\2\2\2\b\t\7$\2\2\t\n\7\7\2\2\n\13\5\6\4\2\13\3\3"+
-		"\2\2\2\f\r\5\6\4\2\r\5\3\2\2\2\16\17\b\4\1\2\17\20\7\20\2\2\20.\5\6\4"+
-		"\17\21\22\7\n\2\2\22.\5\6\4\16\23\24\7\3\2\2\24\25\5\6\4\2\25\26\7\4\2"+
-		"\2\26.\3\2\2\2\27\30\7\37\2\2\30\31\5\6\4\2\31\32\7 \2\2\32\33\5\6\4\2"+
-		"\33\34\7!\2\2\34\35\5\6\4\2\35.\3\2\2\2\36\37\t\2\2\2\37 \7\3\2\2 !\5"+
-		"\6\4\2!\"\7\4\2\2\".\3\2\2\2#$\t\3\2\2$%\7\3\2\2%&\5\6\4\2&\'\7\5\2\2"+
-		"\'(\5\6\4\2()\7\4\2\2).\3\2\2\2*.\7$\2\2+.\7\"\2\2,.\7#\2\2-\16\3\2\2"+
-		"\2-\21\3\2\2\2-\23\3\2\2\2-\27\3\2\2\2-\36\3\2\2\2-#\3\2\2\2-*\3\2\2\2"+
-		"-+\3\2\2\2-,\3\2\2\2.@\3\2\2\2/\60\f\f\2\2\60\61\7\23\2\2\61?\5\6\4\f"+
-		"\62\63\f\13\2\2\63\64\t\4\2\2\64?\5\6\4\f\65\66\f\n\2\2\66\67\t\5\2\2"+
-		"\67?\5\6\4\1389\f\t\2\29:\t\6\2\2:?\5\6\4\n;<\f\b\2\2<=\t\7\2\2=?\5\6"+
-		"\4\t>/\3\2\2\2>\62\3\2\2\2>\65\3\2\2\2>8\3\2\2\2>;\3\2\2\2?B\3\2\2\2@"+
-		">\3\2\2\2@A\3\2\2\2A\7\3\2\2\2B@\3\2\2\2\5->@";
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3)I\4\2\t\2\4\3\t\3"+
+		"\4\4\t\4\3\2\3\2\3\2\3\2\3\3\3\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3"+
+		"\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4"+
+		"\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4\63\n\4\3\4\3\4\3\4\3\4\3\4\3"+
+		"\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\7\4D\n\4\f\4\16\4G\13\4\3\4\2\3"+
+		"\6\5\2\4\6\2\b\4\2\26\32\36 \3\2\33\35\3\2\23\24\3\2\21\22\4\2\b\b\r\20"+
+		"\3\2\n\13S\2\b\3\2\2\2\4\f\3\2\2\2\6\62\3\2\2\2\b\t\7&\2\2\t\n\7\t\2\2"+
+		"\n\13\5\6\4\2\13\3\3\2\2\2\f\r\5\6\4\2\r\5\3\2\2\2\16\17\b\4\1\2\17\20"+
+		"\7\22\2\2\20\63\5\6\4\20\21\22\7\f\2\2\22\63\5\6\4\17\23\24\7\3\2\2\24"+
+		"\25\5\6\4\2\25\26\7\4\2\2\26\63\3\2\2\2\27\30\7!\2\2\30\31\5\6\4\2\31"+
+		"\32\7\"\2\2\32\33\5\6\4\2\33\34\7#\2\2\34\35\5\6\4\2\35\63\3\2\2\2\36"+
+		"\37\t\2\2\2\37 \7\3\2\2 !\5\6\4\2!\"\7\4\2\2\"\63\3\2\2\2#$\t\3\2\2$%"+
+		"\7\3\2\2%&\5\6\4\2&\'\7\5\2\2\'(\5\6\4\2()\7\4\2\2)\63\3\2\2\2*+\7&\2"+
+		"\2+,\7\6\2\2,-\5\6\4\2-.\7\7\2\2.\63\3\2\2\2/\63\7&\2\2\60\63\7$\2\2\61"+
+		"\63\7%\2\2\62\16\3\2\2\2\62\21\3\2\2\2\62\23\3\2\2\2\62\27\3\2\2\2\62"+
+		"\36\3\2\2\2\62#\3\2\2\2\62*\3\2\2\2\62/\3\2\2\2\62\60\3\2\2\2\62\61\3"+
+		"\2\2\2\63E\3\2\2\2\64\65\f\r\2\2\65\66\7\25\2\2\66D\5\6\4\r\678\f\f\2"+
+		"\289\t\4\2\29D\5\6\4\r:;\f\13\2\2;<\t\5\2\2<D\5\6\4\f=>\f\n\2\2>?\t\6"+
+		"\2\2?D\5\6\4\13@A\f\t\2\2AB\t\7\2\2BD\5\6\4\nC\64\3\2\2\2C\67\3\2\2\2"+
+		"C:\3\2\2\2C=\3\2\2\2C@\3\2\2\2DG\3\2\2\2EC\3\2\2\2EF\3\2\2\2F\7\3\2\2"+
+		"\2GE\3\2\2\2\5\62CE";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

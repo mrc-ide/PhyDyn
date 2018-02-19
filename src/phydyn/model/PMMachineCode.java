@@ -58,6 +58,13 @@ public class PMMachineCode {
 		updateStackSize(1);
 	}
 	
+	public void generatePushVarOffset(int address) {
+		instrList.add(PMStackMachine.IPUSH_VAR_OFFSET);
+		instrList.add(address);
+		// no change in stack size - input top=offset
+	}
+	
+	
 	public void generateWriteVar(int address) {
 		instrList.add(PMStackMachine.IWRITE_VAR);
 		instrList.add(address);

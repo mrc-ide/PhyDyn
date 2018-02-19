@@ -75,6 +75,14 @@ public class TrajectoryParameters extends CalculationNode {
 			}
 		}
 		
+		// new: checking for vector parameters
+		for (ParamValue pValue: initialValuesInput.get()) {
+			if (pValue.isVector) {
+				throw new IllegalArgumentException("Parameter Value "+pValue.names+": Vector parameters "
+						+ " not allowed as initial values");
+			}
+		}
+		
 		//t0 = t0Input.get().getValue(); // RealParameter - removed 
 		if (t1Input.get()!=null) {
 			t1 = t1Input.get();
