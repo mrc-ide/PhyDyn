@@ -11,7 +11,7 @@ This package enables simultaneous estimation of epidemiological parameters and p
 
 ## Distribution and Installation
 
-Only version v1.0.0 of the package is currently available from the Beast repository i.e. version 1.0.0 can be installed with Beauti's package manager. The latest version should be available soon.
+Only version v1.0.0 of the package is currently available from the Beast repository i.e. only version 1.0.0 can be installed with Beauti's package manager. The latest version should be available soon.
 
 The latest version of the package (v.1.1.0) must be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
 
