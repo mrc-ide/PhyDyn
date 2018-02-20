@@ -67,4 +67,5 @@ Work on this project is made possible by support from the MRC Centre for Outbrea
 
 ## References
 * [1] Volz EM, 2012, [Complex population dynamics and the coalescent under neutrality](http://www.genetics.org/content/190/1/187), Genetics, Vol:190, ISSN:0016-6731, Pages:187-201
-* [2] Volz EM and Siveroni IA, 2018, Bayesian phylodynamic inference with complex demographic and epidemiological models.
+* [2] Volz EM and Siveroni IA, 2018, [Bayesian phylodynamic inference with complex demographic and epidemiological models](https://www.biorxiv.org/content/early/2018/02/19/268052)
+
