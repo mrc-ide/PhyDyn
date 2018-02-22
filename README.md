@@ -11,9 +11,9 @@ This package enables simultaneous estimation of epidemiological parameters and p
 
 ## Distribution and Installation
 
-Only version v1.0.0 of the package is currently available from the Beast repository i.e. only version 1.0.0 can be installed with Beauti's package manager. The latest version should be available soon.
+The latest version of the package (**v1.0.0**) is currently available from the Beast repository and can  be installed with Beauti's package manager. 
 
-The latest version of the package (v.1.1.0) must be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
+The package (v.1.1.0) can also be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
 
 ### Installation by-hand
 The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.1.0.zip`.
@@ -34,7 +34,7 @@ That's all. Beast should recognize the package next time it runs.
 
 ### Standalone
 
-In order to run an example with the package's stand-alone version, `jars/phydyn.jar`, type the following:
+In order to run an example with the package's stand-alone version, `jars/phydynv1.1.0.jar`, type the following:
 ```
     java -jar phydynv1.1.0.jar examplefile.xml
 ```
@@ -58,7 +58,7 @@ This software is free (as in freedom). With the exception of the libraries on wh
 
 The following libraries are bundled with PhyDyn:
 
-* [ANTLR](http://www.antlr.org/) : Another Toll for Language recorgnition
+* [ANTLR](http://www.antlr.org/) : Another Tool for Language recorgnition
 * Apache Commons (http://commons.apache.org/)
 * jblas (http://jblas.org) : Linear Algebra for Java
 
