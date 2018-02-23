@@ -1,5 +1,4 @@
-#!/usr/bin/Rscript
-# NOTE replace the preceding line with the correct path to Rscript or littler
+#!/usr/bin/env Rscript
 #~  ./plot_trajectory.R -h
 #~  ./plot_trajectory.R -i sn_crf02ag_structure1.1.traj -l 0 -u 35 -d msm
 #~  ./plot_trajectory.R -i sn_crf02ag_structure1.1.traj -l 0 -u 35 -d msm --log FALSE -o sn_crf02ag_st1.1.msm.pdf
