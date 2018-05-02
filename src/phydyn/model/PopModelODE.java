@@ -17,13 +17,14 @@ import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 import org.apache.commons.math3.ode.nonstiff.MidpointIntegrator;
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
-import org.jblas.DoubleMatrix;
 
 import beast.core.BEASTObject;
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 enum IntegrationMethod { EULER, MIDPOINT, CLASSICRK, GILL
 	,HIGHAMHALL 
@@ -85,7 +86,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 //protected int nsteps;
 	 // y = (I0,I1,I2,S)
 	 TimeSeriesFGY timeseries;
-	 DoubleMatrix births,migrations,deaths;
+	 DMatrix births,migrations;
+	 DVector deaths;
 	 double[] nondemeYdot;
 	 double[] eqValues;
 	 
@@ -148,7 +150,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		}
 		
 		/* Derivatives related */
-		births = migrations = deaths = null;
+		births = migrations= null;
+		deaths = null;
 		nondemeYdot = null;
 		
 		// Check if variables are defined
@@ -342,9 +345,9 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		foi.addStepHandler(this);
 		
 		/* initialize matrices */
-		births = DoubleMatrix.zeros(numDemes,numDemes);
-		migrations= DoubleMatrix.zeros(numDemes,numDemes);
-		deaths = DoubleMatrix.zeros(numDemes,1);
+		births = new DMatrix(numDemes,numDemes);
+		migrations= new DMatrix(numDemes,numDemes);
+		deaths = new DVector(numDemes);
 		if (numNonDemes > 0) {
 			nondemeYdot = new double[numNonDemes];
 			for(i=0; i < numNonDemes; i++) { nondemeYdot[i] = 0.0; }
@@ -386,7 +389,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			} else if (eq.type==EquationType.MIGRATION) {
 				migrations.put(eq.row,  eq.column, val);
 			} else if (eq.type==EquationType.DEATH) {
-				deaths.put(eq.row,0, val);
+				deaths.put(eq.row,val);
 			} else { /* non deme dynamics */
 				nondemeYdot[eq.row] = val;
 			}
@@ -400,15 +403,15 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			throws MaxCountExceededException, DimensionMismatchException {
 		int i,j;
 		
-		DoubleMatrix demeYdot;
+		DVector demeYdot;
 		
 		updateMatrices(t,y);
-		demeYdot = births.columnSums().transpose();
-		demeYdot.addi(migrations.columnSums().transpose());
+		demeYdot = births.columnSums(); // transpose();
+		demeYdot.addi(migrations.columnSums()); //transpose());
 		demeYdot.subi(migrations.rowSums());
 		demeYdot.subi(deaths);
 		
-		for(i=0; i<numDemes; i++) { yDot[i] = demeYdot.get(i,0); }
+		for(i=0; i<numDemes; i++) { yDot[i] = demeYdot.get(i); }  // demeYdot.get(i,0);
 		for(j=0; i<numDemes+numNonDemes; i++,j++) { yDot[i] = nondemeYdot[j]; }
 		
 		/* -- previous code optimisation

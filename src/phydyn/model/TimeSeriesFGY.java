@@ -1,20 +1,23 @@
 package phydyn.model;
 
-import org.jblas.DoubleMatrix;
+
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public interface TimeSeriesFGY {
 	
 	public class FGY {
-		public  DoubleMatrix F, G, Y, Yall, D;
-		public FGY(DoubleMatrix inF, DoubleMatrix inG, DoubleMatrix inY, 
-				DoubleMatrix inYall, DoubleMatrix inD) { 
+		public  DMatrix F, G;
+		public DVector D, Y, Yall;
+		public FGY(DMatrix inF, DMatrix inG, DVector inY, 
+				DVector inYall, DVector inD) { 
 			F = inF; G = inG; Y = inY; Yall = inYall;D = inD; 
 		}
 	}
 	
 	public int lengthYall();
 	
-	public void addFGY(double t, DoubleMatrix F, DoubleMatrix G, double[] y, DoubleMatrix D);
+	public void addFGY(double t, DMatrix F, DMatrix G, double[] y, DVector D);
 
 	public void reverse();
 	
@@ -23,8 +26,8 @@ public interface TimeSeriesFGY {
 	public double getTime(int tp);
 	public FGY getFGY(int tp);
 	public FGY getFGYfromTime(double t, int tp);
-	public DoubleMatrix getY(int tp);
-	public DoubleMatrix getYall(int tp);
+	public DVector getY(int tp);
+	public DVector getYall(int tp);
 	public void setMinY(int minY);
 	
 	public TimeSeriesFGY toFixedStep(int numPoints, PopModelODE model);

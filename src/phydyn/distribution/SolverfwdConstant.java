@@ -10,6 +10,8 @@ import org.jblas.DoubleMatrix;
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.model.TimeSeriesFGYStd;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public class SolverfwdConstant extends SolverIntervalForward implements FirstOrderDifferentialEquations {
 	
@@ -17,7 +19,8 @@ public class SolverfwdConstant extends SolverIntervalForward implements FirstOrd
 	private double[] q0, q1;
 	 boolean isDiagF;
 	private FirstOrderIntegrator foi;
-	DoubleMatrix F,G,Y;
+	DMatrix F,G;
+	DVector Y;
 
 	 static double MIN_Y = 1e-12 ;
 	 
@@ -62,9 +65,10 @@ public class SolverfwdConstant extends SolverIntervalForward implements FirstOrd
 		foi = new ClassicalRungeKuttaIntegrator(stepSize);
 		foi.integrate(this, t0, q0, t1, q1);
 						
-		DoubleMatrix Q = new DoubleMatrix(numStates,numStates,q1);
+		DMatrix Q = new DMatrix(numStates,numStates,q1);
 		
-		stlh.stateProbabilities.mulExtantProbabilities(Q.transpose(), true);
+		// stlh.stateProbabilities.mulExtantProbabilities(Q.transpose(), true);
+		stlh.stateProbabilities.mulExtantProbabilities(Q, true);
 	}
 
 	@Override

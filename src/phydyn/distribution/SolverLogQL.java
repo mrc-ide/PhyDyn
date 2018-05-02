@@ -5,11 +5,14 @@ import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-import org.jblas.DoubleMatrix;
+
+// import org.jblas.DoubleMatrix;
 
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.model.TimeSeriesFGYStd;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public class SolverLogQL extends SolverIntervalODE implements FirstOrderDifferentialEquations {
 	
@@ -19,7 +22,7 @@ public class SolverLogQL extends SolverIntervalODE implements FirstOrderDifferen
 	 private int tsPointLast, numStatesSQ;
 	 private TimeSeriesFGY ts;
 	 private double sumA0;
-	 private DoubleMatrix A0;
+	 private DVector A0;
 
 	 static double MIN_Y = 1e-12 ;
 	 static double MIN_P = 1e-12 ;
@@ -80,7 +83,7 @@ public class SolverLogQL extends SolverIntervalODE implements FirstOrderDifferen
 		
 		foi.integrate(this, h0, ql0, h1, ql1);
 		
-		DoubleMatrix Q = new DoubleMatrix(numStates,numStates);
+		DMatrix Q = new DMatrix(numStates,numStates);
 		
 		double[] Qdata = Q.data;
 		for(k=0; k < numStatesSQ; k++) Qdata[k] = logit2p(ql1[k]); 
@@ -92,11 +95,12 @@ public class SolverLogQL extends SolverIntervalODE implements FirstOrderDifferen
 		if (Double.isNaN(logLh)) logLh = Double.NEGATIVE_INFINITY;
 
 		// Update state probabilities in Likelihood object 
-		DoubleMatrix Qtrans = Q.transpose();
 		// Update lineage probabilities
 
 		// sp stores state probs as row-vectors - p * Qt
-		sp.mulExtantProbabilities(Qtrans, true);
+		// changed to Q * p
+		// DoubleMatrix Qtrans = Q.transpose();
+		sp.mulExtantProbabilities(Q, true);
 		if (stlh.setMinP) {
 			sp.setMinP(stlh.minP);
 		}
@@ -113,9 +117,9 @@ public class SolverLogQL extends SolverIntervalODE implements FirstOrderDifferen
 		
 		tsPointLast = tsPointCurrent;
 		FGY fgy = ts.getFGY(tsPointCurrent);
-		DoubleMatrix Y = fgy.Y; // ts.getYs()[tsPointCurrent];
-		DoubleMatrix F = fgy.F; // ts.getFs()[tsPointCurrent];
-		DoubleMatrix G = fgy.G; // ts.getGs()[tsPointCurrent];
+		DVector Y = fgy.Y; // ts.getYs()[tsPointCurrent];
+		DMatrix F = fgy.F; // ts.getFs()[tsPointCurrent];
+		DMatrix G = fgy.G; // ts.getGs()[tsPointCurrent];
 		
 		if (forgiveY) Y.maxi(1.0); else Y.maxi(MIN_Y);
 		int i;
@@ -128,18 +132,21 @@ public class SolverLogQL extends SolverIntervalODE implements FirstOrderDifferen
 		
 		
 		// compute A and a
-		DoubleMatrix Q =  new DoubleMatrix(numStates,numStates,qdata);				
-		DoubleMatrix Qnorm = Q.dup();
-		Qnorm.diviRowVector(Q.columnSums());		
-		DoubleMatrix A = Qnorm.mmul(A0);
+		DMatrix Q =  new DMatrix(numStates,numStates,qdata);				
+		DMatrix Qnorm = new DMatrix(Q); // igor: Q.dup();
+		Qnorm.diviRowVector(Q.columnSums());
+		
+		DVector A =  A0.rmul(Qnorm);  // Qnorm*A -- Qnorm.mmul(A0);
+		
 		A.divi(A.sum());  // normalised
 		A.muli(sumA0);    // sum of A = sum(A0)
 		//A = A.mul(sumA0).div(A.sum());
-		DoubleMatrix a = A.div(Y);  // column vector 
+		
+		DVector a = A.div(Y);  // column vector 
 
 		// DoubleMatrix dQ = new DoubleMatrix(numStates,numStates,dql);
 		double dL = 0;
-		DoubleMatrix FG = F.add(G);
+		DMatrix FG = F.add(G);
 		double pdot, Qkz;
 		int k,l,z;
 		i=0;

@@ -5,11 +5,15 @@ import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-import org.jblas.DoubleMatrix;
+
+
+//import org.jblas.DoubleMatrix;
 
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.model.TimeSeriesFGYStd;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public class Solverfwd extends SolverIntervalForward implements FirstOrderDifferentialEquations {
 	
@@ -54,9 +58,10 @@ public class Solverfwd extends SolverIntervalForward implements FirstOrderDiffer
 		foi = new ClassicalRungeKuttaIntegrator(stepSize);
 		foi.integrate(this, t0, q0, t1, q1);
 						
-		DoubleMatrix Q = new DoubleMatrix(numStates,numStates,q1);
+		DMatrix Q = new DMatrix(numStates,numStates,q1);
 		
-		stlh.stateProbabilities.mulExtantProbabilities(Q.transpose(), true);
+		// stlh.stateProbabilities.mulExtantProbabilities(Q.transpose(), true);
+		stlh.stateProbabilities.mulExtantProbabilities(Q, true);
 	}
 
 	@Override
@@ -67,13 +72,13 @@ public class Solverfwd extends SolverIntervalForward implements FirstOrderDiffer
 		int tsPointCurrent = ts.getTimePoint(t, tsPointLast);		
 		tsPointLast = tsPointCurrent;
 		FGY fgy = ts.getFGY(tsPointCurrent);
-		DoubleMatrix Y = fgy.Y; // ts.getYs()[tsPointCurrent];
-		DoubleMatrix F = fgy.F; // ts.getFs()[tsPointCurrent];
-		DoubleMatrix G = fgy.G; // ts.getGs()[tsPointCurrent];
+		DVector Y = fgy.Y; // ts.getYs()[tsPointCurrent];
+		DMatrix F = fgy.F; // ts.getFs()[tsPointCurrent];
+		DMatrix G = fgy.G; // ts.getGs()[tsPointCurrent];
 		
 		//DoubleMatrix D = DoubleMatrix.zeros(numStates);
-		DoubleMatrix D = fgy.D;
-		DoubleMatrix Q = new DoubleMatrix(numStates,numStates,q);
+		DVector D = fgy.D;
+		DMatrix Q = new DMatrix(numStates,numStates,q);
 				
 		
 		int k,z,l,idx;

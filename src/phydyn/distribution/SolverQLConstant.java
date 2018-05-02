@@ -5,27 +5,34 @@ import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-import org.jblas.DoubleMatrix;
+
+// import org.jblas.DoubleMatrix;
 
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.model.TimeSeriesFGYStd;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDifferentialEquations {
 	
-	 private double[] ql0, ql1, qdata;
+	 private double[] ql0, ql1;
 	 
 	 private double tsTimes0;
 	 private int tsPointLast, numStatesSQ;
 	 private TimeSeriesFGY ts;
 	 private double sumA0;
-	 private DoubleMatrix A0;
+	 private DVector A0;
+	 private DVector a;
 	 //boolean negQ;
 	 int iterations;
 	 boolean isDiagF=false;
 	 
-	 private double[] diagF;
-	 private DoubleMatrix F,G,Y,FG, FdivY2, sumColumnsG, diagG;
+	 private double[] diagF, diagFa;
+	 private DMatrix F,G,FG, FdivY2, Gtrans;
+	 private DMatrix QdivY, Qnorm;
+	 private DVector FdivY2vector, sumColumnsG, diagG  ;
+	 DVector Y;
 
 	 static double MIN_Y = 1e-12 ;
 	 
@@ -34,9 +41,13 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
     	numStatesSQ = numStates*numStates;
     	ql0 = new double[numStatesSQ+1];
     	ql1 = new double[numStatesSQ+1];
-    	qdata = new double[numStatesSQ];
+    	QdivY = new DMatrix(numStates,numStates);
+    	Qnorm = new DMatrix(numStates,numStates);
+    	a = new DVector(numStates);
+
     	isDiagF = stlh.popModel.isDiagF();
     	diagF = new double[numStates];
+    	diagFa = new double[numStates];
     	// we could set tsTimes0 and setMinP HERE
 	}
 	
@@ -49,18 +60,20 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
 		if (forgiveY) Y.maxi(1.0); else Y.maxi(MIN_Y);
 		F = fgy.F; 
 		G = fgy.G; 
+		Gtrans = G.transpose();
 		FG = F.add(G);
-		if (isDiagF) {
-			FdivY2 = new DoubleMatrix(numStates);
+		if (isDiagF) {  // igor: check that this works! note FdivY2
+			FdivY2vector = new DVector(numStates);
 			for(int i = 0; i < numStates; i++) {
 				diagF[i] = F.get(i,i);
-				FdivY2.data[i] = diagF[i]/Y.get(i)/Y.get(i);
+				FdivY2vector.data[i] = diagF[i]/Y.get(i)/Y.get(i);
 			}
 			sumColumnsG = G.columnSums();
 			//diagG = G.sub(DoubleMatrix.diag(sumColumnsG));
 			
 		} else {
-			FdivY2 = (F.divRowVector(Y)).divRowVector(Y);
+			// DoubleMatrix Ydm = new DoubleMatrix(numStates,1,Y.data); // igor: temp
+			FdivY2 = (F.divRowVector(Y)).divRowVector(Y);  // igor: changed to Y
 		}
 		return false;
 	}
@@ -101,10 +114,8 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
 			foi.integrate(this, h0, ql0, h1, ql1);
 		}
 		
-		DoubleMatrix Q = new DoubleMatrix(numStates,numStates);
 		
-		double[] Qdata = Q.data;
-		for(k=0; k < numStatesSQ; k++) Qdata[k] = ql1[k]; 
+		DMatrix Q = new DMatrix(numStates,numStates,ql1);
 		 
 		Q.diviRowVector(Q.columnSums());  // normalise columns
 		 
@@ -113,19 +124,10 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
 		if (Double.isNaN(logLh)) logLh = Double.NEGATIVE_INFINITY;
 
 		// Update state probabilities in Likelihood object 
-		DoubleMatrix Qtrans = Q.transpose();	
-		sp.mulExtantProbabilities(Qtrans, true);
+		sp.mulExtantProbabilities(Q, true);
 		if (stlh.setMinP) {
 			sp.setMinP(stlh.minP);
 		}
-		// replaces below
-		//for (int l = 0; l < numExtant; l++) {
-		//	DoubleMatrix probs = (stlh.extantProbs[l]).mmul(Qtrans); // row-vector
-		//	probs.divi(probs.sum()); /* normalise */
-		//	probs.maxi(0.0); /* clamp(0,1) */
-		//	probs.mini(1.0);
-		//	stlh.extantProbs[l] = probs;
-		//}
 		ts = null;
 		return;
 	}
@@ -141,33 +143,26 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
 		tsPointLast = tsPointCurrent;		
 		
 		int idx;				
-		for(idx=0; idx < numStatesSQ; idx++) {
-			qdata[idx] = ql[idx];
-			//if (ql[idx]<0) {
-			//	negQ=true;
-			//	qdata[idx] = ql[idx];
-			//} else {
-			//	qdata[idx] = ql[idx];
-			//}
-			
-		}		
 		
-		DoubleMatrix Q =  new DoubleMatrix(numStates,numStates,qdata);
+		DMatrix Q =  new DMatrix(numStates,numStates,ql);
+		Q.diviColumnVector(Y,QdivY); // QdivY = Q /row Y		
 		
-		DoubleMatrix QdivY = Q.divColumnVector(Y);
-		QdivY.mini(1.0);
-		QdivY.maxi(0.0); // zeroe if negative
+		QdivY.clampi(0.0,  1.0);
 				
-		DoubleMatrix Qnorm = Q.dup();
-		Qnorm.diviRowVector(Q.columnSums());
+		Q.diviRowVector(Q.columnSums(),Qnorm); // Qnorm = Q /row Q.colSums
 		
-		DoubleMatrix A = Qnorm.mmul(A0);					
+		DVector A = A0.rmul(Qnorm); // changed new function - old  Qnorm.mmul(A0);	
+		
 		A.divi(A.sum());  // normalise
 		A.muli(sumA0);    // sum of A = sum(A0)
 		//A = A.mul(sumA0).div(A.sum());
-		DoubleMatrix a = A.div(Y);  // column vector 
+		
+		// DVector a = A.div(Y);  // column vector 
+		A.divi(Y,a);
+		for(int i=0; i < numStates; i++) {
+			diagFa[i] = diagF[i]* a.data[i];
+		}
 
-		// DoubleMatrix dQ = new DoubleMatrix(numStates,numStates,dql);
 		double dL = 0;
 
 		//DoubleMatrix GQ = G.mmul(QdivY);		
@@ -176,17 +171,22 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
 		idx=0;
 		double deltaDL = 0;
 		double qdivy;
-		if (isDiagF) { /* F is diagonal */
-
+		int lk, lz;
+		if (isDiagF) { /* F is diagonal */			
 			for (z = 0; z < numStates; z++){
+				lk = Gtrans.start;
 				for (k = 0; k < numStates; k++){
 					accum = 0;
+					lz = z*numStates;
 			        for(l=0; l < numStates; l++) {
-			        	accum += G.get(k,l) *  QdivY.get(l,z);  
+			        	accum += Gtrans.data[lk] * QdivY.data[lz];     // QdivY.get(l,z);
+			        	lk++; lz++;
+			        	// accum += G.get(k,l) *  QdivY.get(l,z);  
 		        		//accum -= G.get(l,k) * QdivY.get(k,z)
 			        }
 			        // Matrix[idx] = Matrix(k,z)
-			        accum -= QdivY.data[idx] * (sumColumnsG.get(k) + diagF[k] * a.get(k)	);	             	
+			        accum -= QdivY.data[idx] * (sumColumnsG.get(k) + diagFa[k] );
+			        // accum -= QdivY.data[idx] * (sumColumnsG.get(k) + diagF[k] * a.get(k) );	             	
 					dql[idx] = accum;  //dQ.put(k,z,accum);
 					idx++;
 				}
@@ -194,9 +194,9 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
 			
 			for (k= 0; k < numStates; k++){
 				if (A.get(k) >= 1. )
-					deltaDL = (A.get(k) ) * ((A.get(k)-1.) ) * FdivY2.get(k); 
+					deltaDL = (A.get(k) ) * ((A.get(k)-1.) ) * FdivY2vector.get(k); 
 				else
-					deltaDL = a.get(k) * a.get(k) * diagF[k];
+					deltaDL = a.get(k) * diagFa[k]; // giagFa =  diagF * a
 				dL += deltaDL;
 			}
 
@@ -244,7 +244,6 @@ public class SolverQLConstant extends SolverIntervalODE implements FirstOrderDif
 	    
 	    
 	    dL = Math.max(dL, 0.);
-	    //System.out.println("dL="+dL);
 	    dql[numStatesSQ] = dL;					
 
 	}

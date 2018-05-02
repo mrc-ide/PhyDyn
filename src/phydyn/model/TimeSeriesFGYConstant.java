@@ -2,7 +2,8 @@ package phydyn.model;
 
 import java.util.Collections;
 
-import org.jblas.DoubleMatrix;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public class TimeSeriesFGYConstant implements TimeSeriesFGY {
 	private int numDemes, numNonDemes, numPoints;
@@ -34,28 +35,25 @@ public class TimeSeriesFGYConstant implements TimeSeriesFGY {
 	}
 
 	@Override
-	public void addFGY(double t, DoubleMatrix F, DoubleMatrix G, double[] y, DoubleMatrix D) {
+	public void addFGY(double t, DMatrix F, DMatrix G, double[] y, DVector D) {
 		if (fgy!=null)
 			return;
 		int i,j;
-    	DoubleMatrix Ynew,YnewAll;
+    	DVector Ynew,YnewAll;
     	double[] yDemes = new double[numDemes]; 
     	for(i=0; i < numDemes; i++) { yDemes[i] = y[i]; }
-    	Ynew = new DoubleMatrix(numDemes,1,yDemes); /*  keeps buffer yDemes */    	
+    	Ynew = new DVector(numDemes,yDemes); /*  keeps buffer yDemes */    	
     	// copy all y's 
     	double[] yall = new double[numDemes+numNonDemes];
     	for(i=0; i < numDemes+numNonDemes; i++) { yall[i] = y[i]; }
-    	YnewAll = new DoubleMatrix(numDemes+numNonDemes,1,yall);   	
-		// add FG
-    	DoubleMatrix Fnew = new DoubleMatrix();
-    	DoubleMatrix Gnew = new DoubleMatrix();	
-    	Fnew.copy(F);
-    	Gnew.copy(G); 
-    	DoubleMatrix Dnew;
+    	YnewAll = new DVector(numDemes+numNonDemes,yall);   	
+		// add FG -- using copy constructor
+    	DMatrix Fnew = new DMatrix(F);
+    	DMatrix Gnew = new DMatrix(G);   	
+    	DVector Dnew;
     	if (D==null) Dnew=null;
     	else {
-    		Dnew = new DoubleMatrix();
-    		Dnew.copy(D);
+    		Dnew = new DVector(D);
     	}    		
 		fgy = new FGY(Fnew,Gnew,YnewAll, Ynew, Dnew);
 
@@ -95,12 +93,12 @@ public class TimeSeriesFGYConstant implements TimeSeriesFGY {
 	}
 
 	@Override
-	public DoubleMatrix getY(int tp) {
+	public DVector getY(int tp) {
 		return fgy.Y;
 	}
 
 	@Override
-	public DoubleMatrix getYall(int tp) {
+	public DVector getYall(int tp) {
 		return fgy.Yall;
 	}
 	

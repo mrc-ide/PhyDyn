@@ -1,4 +1,4 @@
-// Generated from /home/igor/z/imperial/eclipsews/phydyndev/src/phydyn/model/parser/PopModel.g4 by ANTLR 4.5.2
+// Generated from PopModel.g4 by ANTLR 4.7.1
 
 package phydyn.model.parser;
 
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class PopModelParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.5.2", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -419,38 +419,38 @@ public class PopModelParser extends Parser {
 			switch ( getInterpreter().adaptivePredict(_input,0,_ctx) ) {
 			case 1:
 				{
-				_localctx = new MinusExprContext(_localctx);
+				_localctx = new ParenthExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 
 				setState(13);
-				match(SUB);
+				match(T__0);
 				setState(14);
-				expr(14);
+				expr(0);
+				setState(15);
+				match(T__1);
 				}
 				break;
 			case 2:
 				{
-				_localctx = new NotExprContext(_localctx);
+				_localctx = new MinusExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(15);
-				match(NOT);
-				setState(16);
-				expr(13);
+				setState(17);
+				match(SUB);
+				setState(18);
+				expr(14);
 				}
 				break;
 			case 3:
 				{
-				_localctx = new ParenthExprContext(_localctx);
+				_localctx = new NotExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(17);
-				match(T__0);
-				setState(18);
-				expr(0);
 				setState(19);
-				match(T__1);
+				match(NOT);
+				setState(20);
+				expr(13);
 				}
 				break;
 			case 4:
@@ -469,7 +469,7 @@ public class PopModelParser extends Parser {
 				setState(25);
 				match(ELSE);
 				setState(26);
-				expr(0);
+				expr(12);
 				}
 				break;
 			case 5:
@@ -482,7 +482,10 @@ public class PopModelParser extends Parser {
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EXP) | (1L << LOG) | (1L << SQRT) | (1L << SIN) | (1L << COS) | (1L << ABS) | (1L << FLOOR) | (1L << CEIL))) != 0)) ) {
 					((CallSpecialExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-				} else {
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
 					consume();
 				}
 				setState(29);
@@ -503,7 +506,10 @@ public class PopModelParser extends Parser {
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << MAX) | (1L << MIN) | (1L << MOD))) != 0)) ) {
 					((CallBinaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-				} else {
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
 					consume();
 				}
 				setState(34);
@@ -596,7 +602,10 @@ public class PopModelParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==MUL || _la==DIV) ) {
 							((ProdExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(55);
@@ -614,7 +623,10 @@ public class PopModelParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==ADD || _la==SUB) ) {
 							((SumExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(58);
@@ -632,7 +644,10 @@ public class PopModelParser extends Parser {
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EQ) | (1L << LEQ) | (1L << GT) | (1L << LT) | (1L << GEQ))) != 0)) ) {
 							((CmpExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(61);
@@ -650,7 +665,10 @@ public class PopModelParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==AND || _la==OR) ) {
 							((BoolExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(64);
@@ -701,21 +719,21 @@ public class PopModelParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3)I\4\2\t\2\4\3\t\3"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3)I\4\2\t\2\4\3\t\3"+
 		"\4\4\t\4\3\2\3\2\3\2\3\2\3\3\3\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3"+
 		"\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4"+
 		"\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4\63\n\4\3\4\3\4\3\4\3\4\3\4\3"+
 		"\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\7\4D\n\4\f\4\16\4G\13\4\3\4\2\3"+
 		"\6\5\2\4\6\2\b\4\2\26\32\36 \3\2\33\35\3\2\23\24\3\2\21\22\4\2\b\b\r\20"+
-		"\3\2\n\13S\2\b\3\2\2\2\4\f\3\2\2\2\6\62\3\2\2\2\b\t\7&\2\2\t\n\7\t\2\2"+
-		"\n\13\5\6\4\2\13\3\3\2\2\2\f\r\5\6\4\2\r\5\3\2\2\2\16\17\b\4\1\2\17\20"+
-		"\7\22\2\2\20\63\5\6\4\20\21\22\7\f\2\2\22\63\5\6\4\17\23\24\7\3\2\2\24"+
-		"\25\5\6\4\2\25\26\7\4\2\2\26\63\3\2\2\2\27\30\7!\2\2\30\31\5\6\4\2\31"+
-		"\32\7\"\2\2\32\33\5\6\4\2\33\34\7#\2\2\34\35\5\6\4\2\35\63\3\2\2\2\36"+
+		"\3\2\n\13\2S\2\b\3\2\2\2\4\f\3\2\2\2\6\62\3\2\2\2\b\t\7&\2\2\t\n\7\t\2"+
+		"\2\n\13\5\6\4\2\13\3\3\2\2\2\f\r\5\6\4\2\r\5\3\2\2\2\16\17\b\4\1\2\17"+
+		"\20\7\3\2\2\20\21\5\6\4\2\21\22\7\4\2\2\22\63\3\2\2\2\23\24\7\22\2\2\24"+
+		"\63\5\6\4\20\25\26\7\f\2\2\26\63\5\6\4\17\27\30\7!\2\2\30\31\5\6\4\2\31"+
+		"\32\7\"\2\2\32\33\5\6\4\2\33\34\7#\2\2\34\35\5\6\4\16\35\63\3\2\2\2\36"+
 		"\37\t\2\2\2\37 \7\3\2\2 !\5\6\4\2!\"\7\4\2\2\"\63\3\2\2\2#$\t\3\2\2$%"+
 		"\7\3\2\2%&\5\6\4\2&\'\7\5\2\2\'(\5\6\4\2()\7\4\2\2)\63\3\2\2\2*+\7&\2"+
 		"\2+,\7\6\2\2,-\5\6\4\2-.\7\7\2\2.\63\3\2\2\2/\63\7&\2\2\60\63\7$\2\2\61"+
-		"\63\7%\2\2\62\16\3\2\2\2\62\21\3\2\2\2\62\23\3\2\2\2\62\27\3\2\2\2\62"+
+		"\63\7%\2\2\62\16\3\2\2\2\62\23\3\2\2\2\62\25\3\2\2\2\62\27\3\2\2\2\62"+
 		"\36\3\2\2\2\62#\3\2\2\2\62*\3\2\2\2\62/\3\2\2\2\62\60\3\2\2\2\62\61\3"+
 		"\2\2\2\63E\3\2\2\2\64\65\f\r\2\2\65\66\7\25\2\2\66D\5\6\4\r\678\f\f\2"+
 		"\289\t\4\2\29D\5\6\4\r:;\f\13\2\2;<\t\5\2\2<D\5\6\4\f=>\f\n\2\2>?\t\6"+

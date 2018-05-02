@@ -5,22 +5,28 @@ import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-import org.jblas.DoubleMatrix;
+
+// import org.jblas.DoubleMatrix;
 
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.model.TimeSeriesFGYStd;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDifferentialEquations {
 	private double[] pl0, pl1;
 	
 	private double tsTimes0;
-	private int tsPointLast, sizeP;
+	private int tsPointLast;
 	private TimeSeriesFGY ts;
-	private double sumA0;
-	private DoubleMatrix A0;
+	//private double sumA0;
+
+	private DVector AmP;
 	private int numExtant, dimensionP;
-	DoubleMatrix F,G,Y,R,FdivY;
+	private DMatrix F,G,R,FdivY;
+	private DMatrix Pnorm;
+	DVector Y;
 	double[] inv2Ne;
 	boolean isDiagF;
 	
@@ -43,10 +49,13 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 		G = fgy.G; 
 		R = F.add(G);
 		// divide each row by Y
-		R.diviRowVector(Y);
-		DoubleMatrix sumCols = R.columnSums(); // row vector
+		R.diviRowVector(Y); 
+		
+		DVector sumCols = R.columnSums(); // row vector
 		for(int i=0; i < numStates; i++)
-		R.put(i,i,R.get(i,i)-sumCols.get(i)); // diagonal
+			R.put(i,i,R.get(i,i)-sumCols.get(i)); // diagonal
+		
+		AmP = new DVector(numStates); // = DoubleMatrix.zeros(numStates, 1);
 		
 		if (isDiagF) {
 			inv2Ne = new double[numStates];
@@ -54,8 +63,9 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 				inv2Ne[i] = F.get(i,i)/Y.get(i)/Y.get(i);
 			} 
 		} else {
-			FdivY = F.divRowVector(Y);
-			FdivY.diviColumnVector(Y);
+			//DoubleMatrix Ydm = new DoubleMatrix(numStates,1,Y.data); // igor: temp
+			FdivY = F.divRowVector(Y); // F.divRowVector(Ydm)
+			FdivY.diviColumnVector(Y); // igor: new dmatrix implementations
 		}
 		
 		return false;
@@ -67,21 +77,18 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 		tsTimes0 = stlh.tsTimes0;
 		
 		StateProbabilities sp = stlh.stateProbabilities;
-		A0 = sp.getLineageStateSum(); // numStates column vector
-		sumA0 = A0.sum();
+		//A0 = sp.getLineageStateSum(); // numStates column vector
+
 		numExtant = sp.getNumExtant();
 		dimensionP = numStates*numExtant;
+		Pnorm =  new DMatrix(numStates,numExtant);
 				
 		// initialise arrays
 		pl0 = new double[dimensionP+1];
 		pl1 = new double[dimensionP+1];
-		int idx=0;
-		DoubleMatrix probs;
-		
-		// Copy extant to array
-		sp.copyProbabilitesToArray(pl0); // column = probs
-		
 
+		// Copy extant to array
+		sp.copyProbabilitiesToArray(pl0); 
 		pl0[dimensionP] = 0.0;
 				
 		if ((h1-h0) < stlh.stepSize) {	
@@ -93,28 +100,13 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 			foi.integrate(this, h0, pl0, h1, pl1);
 		}
 		
-		// foi.integrate(this, h0, pl0, h1, pl1);
-			
 		// copy new state probabilities
-		idx=0;
-		//DoubleMatrix A = DoubleMatrix.zeros(numStates);
+		sp.copyProbabilitiesFromArray(pl1);
 		
-		for(int i = 0; i < numExtant; i++) {
-			//probs = stlh.extantProbs[i];
-			probs = sp.getExtantProbsFromIndex(i);
-			//System.out.println("probs: "+probs);
-			//A.addi(probs);
-			for(int j=0; j < numStates; j++) {
-				probs.put(j,pl1[idx]);
-				idx++;
-			}
-			probs.maxi(0.0);
-			probs.divi(probs.sum());
-		}
 		if (stlh.setMinP) {
 			sp.setMinP(stlh.minP);
 		}
-		logLh = -pl1[idx];
+		logLh = -pl1[dimensionP];
 		return;
 	}
 
@@ -125,42 +117,42 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 		int tsPointCurrent = ts.getTimePoint(tsTimes0-h, tsPointLast);
 		
 		tsPointLast = tsPointCurrent;
-
-
 		if (forgiveY) Y.maxi(1.0); else Y.maxi(MIN_Y);
 		
-		
-		
-		double[] pdata = new double[dimensionP];
-		
 		int idx,k,l,z;
-		idx = 0;
-		for(k = 0; k < dimensionP; k++) {
-			pdata[idx] = pl[idx];
-			idx++;
-		}
-		DoubleMatrix P =  new DoubleMatrix(numStates,numExtant,pdata);
 		
-		DoubleMatrix Pnorm = P.dup();
-		Pnorm.diviRowVector(Pnorm.columnSums());  // normalise columns		
+		DMatrix P =  new DMatrix(numStates,numExtant,pl);
 		
-
+		// DMatrix Pnorm = new DMatrix(P); // P.dup(); 
+		
+		
+		//Pnorm.diviRowVector(Pnorm.columnSums());  // normalise columns		
+		
+		P.diviRowVector(P.columnSums(), Pnorm); 
+		
 		double accum, dL = 0.0;
 		
-		DoubleMatrix A = P.rowSums(); // column vector		
-		DoubleMatrix AmP; // = DoubleMatrix.zeros(numStates, 1);
-		DoubleMatrix dP = R.mmul(P);
-		double[] dpData = dP.data;
+		DVector A = P.rowSums(); // column vector		
+		
+		
+		// DMatrix dP = R.mmul(P);
+		//double[] dpData = dP.data;
+		
+		// dP.data = dpl
+		DMatrix dP = new DMatrix(numStates,numExtant,dpl);
+		R.mmuli(P,dP);
 		
 		// dL = -dP.sum();  -- this is zero
 		idx=0;
 		double fdivy;
 		for (z = 0; z < numExtant; z++){
-			// dPik.col(z) = R * Pik.col(z) ; 
-			
+			// dPik.col(z) = R * Pik.col(z) ; 			
 			//Ampik = clamp( A - Pik.col(z), 0., INFINITY);
-			AmP = A.sub(P.getColumn(z));
-			AmP.maxi(0.0);
+			
+			//AmP = A.sub(P.getColumn(z));
+			
+			A.subi( P.getColumn(z), AmP );
+
 			/*
 			for (k = 0; k < numStates; k++){
 				accum = 0;
@@ -177,7 +169,7 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 			*/
 			if (isDiagF) { 
 				for(k=0; k < numStates; k++) {
-					dpData[idx] = dpData[idx]- (pdata[idx]* inv2Ne[k]* AmP.get(k) );
+					dpl[idx] -= (pl[idx]* inv2Ne[k]* AmP.get(k) );
 					dL += (Pnorm.data[idx]* inv2Ne[k] * AmP.get(k));
 					idx++;
 				}
@@ -186,11 +178,11 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 					accum = 0;
 					for( l = 0; l < numStates; l++){
 						fdivy = FdivY.get(k,l); // Fkl/(YkYl)
-						accum += (pdata[idx]*fdivy) * AmP.get(l) ;
+						accum += (pl[idx]*fdivy) * AmP.get(l) ;
 						dL += (Pnorm.data[idx]*fdivy) * AmP.get(l);
 						
 					}
-					dpData[idx] = dpData[idx]-accum;
+					dpl[idx] = dpl[idx]-accum;
 					idx++;
 					// dP.put(k, z,dP.get(k,z)-accum);
 				}
@@ -199,13 +191,13 @@ public class SolverPLConstant extends SolverIntervalODE implements FirstOrderDif
 		}
 		
 		
-		idx = 0;
-		double[] dPdata = dP.data;
-		for(k = 0; k < dimensionP; k++) {
-			dpl[idx] = dPdata[idx];
-			idx++;
-		}
-		dpl[idx] = dL;
+		//idx = 0;
+		//double[] dPdata = dP.data;
+		//for(k = 0; k < dimensionP; k++) {
+		//	dpl[idx] = dPdata[idx];
+		//	idx++;
+		//}
+		dpl[dimensionP] = dL;
 
 	}
 

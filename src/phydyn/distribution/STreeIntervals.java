@@ -102,16 +102,17 @@ public class STreeIntervals extends TreeIntervals {
     }    
     
     protected void addLineage(int interval, Node node) {
-    	super.addLineage(interval, node);
+    		super.addLineage(interval, node);
         //if (storedLineagesAdded[interval] == null) storedLineagesAdded[interval] = new ArrayList<Node>();
         //storedLineagesAdded[interval].add(node);
     }
     
     protected void removeLineage(int interval, Node node) {
-    	super.removeLineage(interval,  node);;
+    		super.removeLineage(interval,  node);;
         //if (storedLineagesRemoved[interval] == null) storedLineagesRemoved[interval] = new ArrayList<Node>();
         //storedLineagesRemoved[interval].add(node);
     }
+    
     public List<Node> getLineagesAdded(int i) {
         if (!intervalsKnown) {
             calculateIntervals();
@@ -120,12 +121,36 @@ public class STreeIntervals extends TreeIntervals {
         return lineagesAdded[i];
     }
     
+    // return node number
+    // igor: new version should not use lists
+    public int getLineageAdded(int i) {
+    	 if (!intervalsKnown) {
+             calculateIntervals();
+         }
+         if (i >= intervalCount) throw new IllegalArgumentException();
+         // todo: check for binary trees
+         return lineagesAdded[i].get(0).getNr();
+    }
+    
     public List<Node> getLineagesRemoved(int i) {
         if (!intervalsKnown) {
             calculateIntervals();
         }
         if (i >= intervalCount) throw new IllegalArgumentException();
         return lineagesRemoved[i];
+    }
+    
+    // New version - copies node ids to array instead of returning a list
+    public int getLineagesRemoved(int i, int[] lineages) {
+        if (!intervalsKnown) {
+            calculateIntervals();
+        }
+        if (i >= intervalCount) throw new IllegalArgumentException();
+        List<Node> lrem = lineagesRemoved[i];
+        // lrem must be <= 2 - checked by tree interval
+        for (int l=0; l < lrem.size(); l++)
+        		lineages[l] = lrem.get(l).getNr(); 
+        return lrem.size();
     }
     
     /**

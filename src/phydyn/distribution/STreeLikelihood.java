@@ -4,7 +4,6 @@ import java.util.List;
 import java.lang.Math;
 
 import org.jblas.DoubleMatrix;
-import org.jblas.MatrixFunctions;
 
 import beast.core.Citation;
 import beast.core.Description;
@@ -17,6 +16,8 @@ import beast.evolution.tree.coalescent.IntervalType;
 
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 
 /**
@@ -59,25 +60,23 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 		   
     public TimeSeriesFGY ts;
 	public int samples;
-	public int nrSamples;
 	
 	private SolverIntervalForward aceSolver=null;
 	
-	protected double[] FdivY2; // island = 1/2Ne
+	protected double[] phiDiag; // island = 1/2Ne -- phi(k) = F(k,k) / Y(k)^2
 	
 	// loop variables
 	protected int tsPoint;
 	double h, t, tsTimes0;
+	// helper variables
+	DVector[] coalProbs;
+	int[] pair = new int[2];
       
-    // debug
-    protected int numCoal=0;
-    
-   
-    
+ 
     @Override
     public void initAndValidate() {
     	super.initAndValidate(); /* important: call first */
-    	stateProbabilities = new StateProbabilitiesArray(); // declared in superclass    
+    	stateProbabilities = new StateProbabilitiesVectors(); // declared in superclass    
     	//initValues();
     	if (ancestralInput.get()) {
     		if (popModel.isConstant())
@@ -94,11 +93,11 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	// if t1 has t1 Input, do nothing, else t1 to Tree's height
     	if (!popModel.hasEndTime()) {
     		if (tree.getDateTrait()==null) {
-    			//System.out.println(" NO date trait, setting t1 = "+intervals.getTotalDuration());
+    			//System.out.println("NO date trait, setting t1 = "+intervals.getTotalDuration());
     			popModel.setEndTime( intervals.getTotalDuration() );
     		} else {
     			if (tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
-    				//System.out.println(" backward date trait, setting t1 = "+intervals.getTotalDuration());
+    				//System.out.println("backward date trait, setting t1 = "+intervals.getTotalDuration());
     				popModel.setEndTime( intervals.getTotalDuration());
     			} else {  
     				//System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
@@ -129,7 +128,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		}
     	}
         
-    	boolean reject = popModel.update(); // compute timeseries
+    	boolean reject = popModel.update(); // compute fgy.timeseries
     	if (reject) {
         	System.out.println("rejecting population update");
             return true;
@@ -138,33 +137,30 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	ts = popModel.getTimeSeries();
     	
 		FGY fgy = ts.getFGY(0);
-		DoubleMatrix Y = fgy.Y; // ts.getYs()[t];
-		DoubleMatrix F = fgy.F; // ts.getFs()[t];
+		DVector Y = fgy.Y; // ts.getYs()[t];
+		DMatrix F = fgy.F; // ts.getFs()[t];
 		
+		phiDiag = new double[numStates];
 		if (popModel.isConstant() && popModel.isDiagF()) {
-			FdivY2 = new double[numStates];
+			// phi = new double[numStates];
 			for(int i=0; i < numStates; i++) {
-				FdivY2[i] = F.get(i,i) / Y.get(i) / Y.get(i);
+				phiDiag[i] = F.get(i,i) / Y.get(i) / Y.get(i);
 			}
 		}
-    	
-        nrSamples = intervals.getSampleCount();
-              
-        nrSamples++;
-        // Extant Lineages and state probabilities
+ 
+		// Extant Lineages and state probabilities
         stateProbabilities.init(tree.getNodeCount(), numStates);
         
         if (aceSolver!=null)
-        	aceSolver.initValues(this);    	
+        	aceSolver.initValues(this);
+        // helper variables
+        coalProbs = new DVector[2];
         return false;
     }
      
     public double calculateLogP() {
-    	//System.out.println("Calculate logLh");
-    	//printMemory();  	
-    	boolean reject = initValues();
-    	
-        if (reject) {
+    	boolean errorInit = initValues();
+        if (errorInit) {
             logP = Double.NEGATIVE_INFINITY;
             return logP;
         }
@@ -172,14 +168,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         double trajDuration = popModel.getEndTime() - popModel.getStartTime();
         logP = 0;  
         
-        final int intervalCount = intervals.getIntervalCount();
-        
-        double pairCoalRate;
-  
-        IntervalType intervalType;
+        final int numIntervals = intervals.getIntervalCount();
        
         // initialisations        		
-        int interval = 0, numExtant, numLeaves;  	// first interval
+        int numExtant, numLeaves; 
         tsPoint = 0;
         h = 0.0;		// used to initialise first (h0,h1) interval 
         t = tsTimes0 = ts.getTime(0); // tsTimes[0];
@@ -188,7 +180,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         numLeaves = tree.getLeafNodeCount();
         double duration;
               
-        do { 
+        int interval;
+        for(interval=0; interval < numIntervals; interval++) { 
         	duration = intervals.getInterval(interval);
         	      	
         	if (trajDuration < (h+duration)) break;
@@ -218,19 +211,18 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	
         	// Make sure times and heights are in sync
         	// assert(h==hEvent) and assert(t = tsTimes[0] - h)
-        	      	     	
-        	intervalType = intervals.getIntervalType(interval);
-        	if (intervalType == IntervalType.SAMPLE) {
-       			processSampleEvent(interval);
-        	} else if (intervalType == IntervalType.COALESCENT) {     			
-        		pairCoalRate = processCoalEvent(tsPoint, interval);
-        		if (pairCoalRate >= 0) {
-        			logP += Math.log(pairCoalRate);
-        		}
-        	} else {
-        		throw new IllegalArgumentException("Unknown Interval Type");
+        	
+        	switch (intervals.getIntervalType(interval)) {
+        	case SAMPLE:
+        		processSampleEvent(interval); break;
+        	case COALESCENT:
+        		logP += processCoalEvent(tsPoint, interval); break;
+        	default:
+        		throw new IllegalArgumentException("Unknown Interval Type");      		
         	}
-        	      	
+        	
+        	
+        	// Check value of logLh is sound
         	if (Double.isNaN(logP)) {
         		System.out.println("NAN - quitting likelihood");
         		logP = Double.NEGATIVE_INFINITY;
@@ -239,31 +231,27 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 				return logP;
     		} 
     		       	
-        	interval++;
-        } while (interval < intervalCount);
+        } 
         
-        int lastInterval = interval;
-                   
-        if (interval < intervalCount) { // root < t0
+        int lastInterval = interval;               
+        if (interval < numIntervals) { // root < t0
         	// process first half of interval
         	duration = trajDuration - h;
         	lhinterval = processInterval(interval, duration, ts);
         	logP += lhinterval;
         	// at this point h = trajDuration
         	// process second half of interval, and remaining intervals
-        	duration = intervals.getInterval(interval)-duration;
-        	
-        	logP += calculateLogP_root2t0(interval, duration);
-        	       	
+        	duration = intervals.getInterval(interval)-duration;      	
+        	logP += calculateLogP_root2t0(interval, duration);       	       	
         }
         
         if (ancestralInput.get()) {
         	computeAncestralStates(lastInterval);
-        }
-               
+        }              
         ts = null;
         if (Double.isInfinite(logP)) logP = Double.NEGATIVE_INFINITY;
                 
+        // System.out.println("LogLh is ="+logP);
         return logP;
    	
     }
@@ -279,7 +267,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	double numLineages = intervals.getIntervalCount();
     	comb = numLineages*(numLineages-1)/2.0;
     	if (NeInput.get()==null) {
-    		lambda = computeLambdaSum(tsPoint);
+    		lambda = calcTotalCoal(tsPoint);
     		Ne = comb/lambda;  // should be user input - first trying this
     	} else {
     		Ne = NeInput.get().getValue();
@@ -293,8 +281,6 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		duration = intervals.getInterval(interval);       		
     		numLineages = intervals.getIntervalCount();
     		coef = numLineages*(numLineages-1)/Ne;
-        	//logP += coef*duration + Math.log(coef);
-        	//logP += Math.log(coef) - coef*duration;
         	lh += (Math.log(1/Ne) - coef*duration);
     		interval++;
     	}
@@ -310,17 +296,16 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			interval = intervalCount; // should be this value already
     		}
 
-    		DoubleMatrix[] backwardProbs = stateProbabilities.clearAncestralProbs();
+    		DVector[] backwardProbs = stateProbabilities.clearAncestralProbs(); // igor: changed
     		FGY fgy;
-    		DoubleMatrix pParent, pChild;
+    		DVector pParent, pChild;
     		
     		// SolverQfwd solverQfwd = new SolverQfwd(intervals,ts, numStates);
-    		DoubleMatrix Q;
     		double t0, t1, duration;
     	
     		interval--;
     		int lineageAdded = intervals.getLineagesAdded(interval).get(0).getNr();  // root 
-    		pParent = stateProbabilities.removeLineageNr(lineageAdded);
+    		pParent = stateProbabilities.removeLineage(lineageAdded);
     		stateProbabilities.storeAncestralProbs(lineageAdded, pParent, false);
     		t1 = tsTimes0-intervals.getIntervalTime(interval);
     		
@@ -334,7 +319,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     				List<Node> coalLineages = intervals.getLineagesRemoved(interval);
     				if (coalLineages.size()>0) {
     					fgy = ts.getFGY(tsPoint);
-    					pChild = pParent.mmul(fgy.F);
+    					pChild = pParent.lmul(fgy.F);
     					pChild.divi(pChild.sum());
     					pChild.addi(pParent);
     					pChild.divi(2);
@@ -354,7 +339,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			// remove incoming lineage
     			interval--;
     			lineageAdded = intervals.getLineagesAdded(interval).get(0).getNr();  
-    			pParent = stateProbabilities.removeLineageNr(lineageAdded); 
+    			pParent = stateProbabilities.removeLineage(lineageAdded); 
     			// update incoming lineage - pParent pointing to original vector
     			pParent.muli(backwardProbs[lineageAdded]);
     			pParent.divi(pParent.sum());
@@ -364,11 +349,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	// this.stateProbabilities.printAncestralProbabilities();
     }
     
-    /* updates t,h,tsPoint and lineage probabilities */
+    /* updates t,h,tsPoint and lineage state probabilities */
     /* default version: logLh=0, state probabilities remain unchanged */
     protected double processInterval(int interval, double intervalDuration, TimeSeriesFGY  ts) {
-        double segmentDuration;
-        
+        double segmentDuration;      
     	double hEvent = h + intervalDuration; 		// event height
     	double tEvent = ts.getTime(0) - hEvent;      // event time
     	
@@ -392,8 +376,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	// process (sub)interval before event
     	segmentDuration = hEvent - h;  // t - tEvent
     	if (segmentDuration > 0) {
-    		// lhinterval += processIntervalSegment(tsPoint,segmentDuration);
-    		
+    		// lhinterval += processIntervalSegment(tsPoint,segmentDuration);  		
     		if (lhinterval == Double.NEGATIVE_INFINITY) {
     			return Double.NEGATIVE_INFINITY;
     		} 	
@@ -410,180 +393,165 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	int sampleState;
 		List<Node> incomingLines = intervals.getLineagesAdded(interval);
 		for (Node l : incomingLines) {	
-			// System.out.println("Nr="+l.getNr()+" ID="+l.getID());
 			/* uses pre-computed nodeNrToState */
-			sampleState = nodeNrToState[l.getNr()];	/* suceeds if node is a leaf, otherwise state=-1 */	
-			DoubleMatrix sVec = DoubleMatrix.zeros(1,numStates); // row-vector
-			sVec.put(sampleState, 1.0);
-			stateProbabilities.addLineage(l.getNr(),sVec);
+			sampleState = nodeNrToState[l.getNr()]; /* suceeds if node is a leaf, otherwise state=-1 */	
+			stateProbabilities.addSample(l.getNr(), sampleState);
 			if (computeAncestral)
-				stateProbabilities.storeAncestralProbs(l.getNr(), sVec, true);
+				stateProbabilities.storeAncestralProbs(l.getNr());
 		}	
     }
-    
-    
-          
-    protected double processCoalEvent(int t, int currTreeInterval) {
-    	List<DoubleMatrix> coalVectors = stateProbabilities.getCoalescentVectors(intervals, currTreeInterval);
-    	DoubleMatrix pvec1, pvec2;	
-    	pvec1 = coalVectors.get(0);
-    	pvec2 = coalVectors.get(1);
-    	  	
-		List<Node> parentLines = intervals.getLineagesAdded(currTreeInterval);
-		if (parentLines.size() > 1) throw new RuntimeException("Unsupported coalescent at non-binary node");			
-		//Add parent to activeLineage and initialise parent's state probability vector
-		Node parentNode = parentLines.get(0);
+              
+    protected double processCoalEvent(int t, int interval) {
+    	
+    	//List<Node> coalLines = intervals.getLineagesRemoved(interval);
+    	int numRemoved = intervals.getLineagesRemoved(interval, pair);
+    	if (numRemoved!=2)
+    		throw new IllegalArgumentException("Expecting two lineages removed at coalescent");
+    	stateProbabilities.getExtantProbabilities(pair, 2, coalProbs);    		
+    	DVector pvec1 = coalProbs[0];
+   		DVector pvec2 = coalProbs[1];
 		
-
+		int coalNode =  intervals.getLineageAdded(interval);
+	
 		//Compute parent lineage state probabilities in p				
 		FGY fgy = ts.getFGY(t);
-		DoubleMatrix Y = fgy.Y; // ts.getYs()[t];
-		DoubleMatrix F = fgy.F; // ts.getFs()[t];		
+		DVector Y = fgy.Y; // ts.getYs()[t];
+		DMatrix F = fgy.F; // ts.getFs()[t];		
     	
-    	if (forgiveYInput.get()) {
+   		if (forgiveYInput.get()) {
  			Y.maxi(1.0);
  		} else { // however, Y_i > 1e-12 by default
  			Y.maxi(1e-12); 
  		}
  
-    	 double lambda=0;
-	    /* Compute Lambda = pair coalescense rate */
-    	DoubleMatrix pa;
+    	double pairCoal=0;
+	    /* Compute Lambda_12 = pair coalescence rate */
+    	DVector pa;
     	if (popModel.isDiagF()) {
     		double[] pa_data = new double[numStates];
     		if (popModel.isConstant()) {
     			for(int j=0; j < numStates; j++ ) {
-    				pa_data[j] = 2 *  pvec1.get(j) * pvec2.get(j) * FdivY2[j];
+    				pa_data[j] = 2 *  pvec1.get(j) * pvec2.get(j) * phiDiag[j];
     			}
     		} else {
     			for(int j=0; j < numStates; j++ ) {
     				pa_data[j] = 2 *  pvec1.get(j) * pvec2.get(j) * F.get(j,j) /Y.get(j) / Y.get(j); 
     			}
     		}
-    	    pa = new DoubleMatrix(1,numStates,pa_data);
+    		pa = new DVector(numStates,pa_data);
     	} else {  		
-    	    DoubleMatrix pi_Y = pvec1.div(Y);
-    	    pi_Y.reshape(numStates, 1);	    	
-    	    DoubleMatrix pj_Y = pvec2.div(Y);
-    	    pj_Y.reshape(numStates, 1);	
-    	    pa = pi_Y.mul(F.mmul(pj_Y));	    	
-    	    pa.addi(pj_Y.mul(F.mmul(pi_Y)));
-    	    pa.reshape(1,numStates);		
+    		DVector pi_Y = pvec1.div(Y);
+    		DVector pj_Y = pvec2.div(Y);	
+    		pa = pi_Y.mul(pj_Y.rmul(F));      // pj_Y * F	
+    		pa.addi(pj_Y.mul(pi_Y.rmul(F)));   // pi_Y * F
     	}
-    	lambda = pa.sum(); 
-	    pa.divi(lambda);
+    	pairCoal = pa.sum(); 
+	    pa.divi(pairCoal); // normalise
 					
-		stateProbabilities.addLineage(parentNode.getNr(),pa);	
+		stateProbabilities.addLineage(coalNode,pa);	
 		if (computeAncestral)
-			stateProbabilities.storeAncestralProbs(parentNode.getNr(), pa, true);
+			stateProbabilities.storeAncestralProbs(coalNode);
  
-		//Remove child lineages
-		List<Node> coalLines = intervals.getLineagesRemoved(currTreeInterval);
-		stateProbabilities.removeLineageNr(coalLines.get(0).getNr() );
-		stateProbabilities.removeLineageNr(coalLines.get(1).getNr()); 
+		//Remove child lineages	
+		stateProbabilities.removeLineage(pair[0]);
+		stateProbabilities.removeLineage(pair[1]); 
+		
+		//stateProbabilities.removeLineage(coalLines.get(0).getNr());
+		//stateProbabilities.removeLineage(coalLines.get(1).getNr()); 
 	
 		if (fsCorrectionsInput.get()) {
-			doFiniteSizeCorrections(parentNode,pa);
+			doFiniteSizeCorrections(coalNode,pa);
 		}
 		
-		return lambda;
+		return Math.log(pairCoal);
     }
         
     /*
      * tspoint: Point in time series (trajectory)
      */
-    protected double computeLambdaSum(int tsPoint) {
-    	DoubleMatrix A = stateProbabilities.getLineageStateSum();
-		double lambdaSum = 0.0; // holds the sum of the pairwise coalescent rates over all lineage pairs
+    protected double calcTotalCoal(int tsPoint) {
+    	DVector A = stateProbabilities.getLineageStateSum();
+		double totalCoal = 0.0; // holds the sum of the pairwise coalescent rates over all lineage pairs
 		int numExtant = stateProbabilities.getNumExtant();
 
-		if (numExtant < 2) return lambdaSum;	// Zero probability of two lineages coalescing	
-	
+		if (numExtant < 2) return totalCoal;	// Zero probability of two lineages coalescing
+		
 		FGY fgy = ts.getFGY(tsPoint);
-		DoubleMatrix F = fgy.F; // ts.getFs()[tsPoint];
-		DoubleMatrix Y = fgy.Y; // ts.getYs()[tsPoint];
+		DMatrix F = fgy.F; // ts.getFs()[tsPoint];
+		DVector Y = fgy.Y; // ts.getYs()[tsPoint];
 		
 		Y.maxi(1e-12);  // Fixes Y lower bound
-		/*
-		 * Sum over line pairs (scales better with numbers of demes and lineages)
-		 */	
 			
 		if (approxLambdaInput.get()) {  // (A/Y)' * F * (A/Y)
-			DoubleMatrix A_Y = A.div(Y);
-			return A_Y.dot(F.mmul(A_Y));
+			DVector A_Y = A.div(Y);
+			return A_Y.dot( A_Y.rmul(F) );  // igor: F.mmul(A_Y)
 		}
 				
 		/*
 		 * Simplify if F is diagonal.
 		 */
-		DoubleMatrix popCoalRates,pI;
+		DVector pI;
+		DVector[] extantProbs = stateProbabilities.getExtantProbs();
     	if(popModel.isDiagF()){
-			popCoalRates = new DoubleMatrix(numStates);
-			for (int k = 0; k < numStates; k++){
-				final double Yk = Y.get(k); 
-				if(Yk>0)
-					popCoalRates.put(k, (F.get(k,k) / (Yk*Yk)));
-			}
-			DoubleMatrix sumStates = DoubleMatrix.zeros(numStates);
-			DoubleMatrix diagElements = DoubleMatrix.zeros(numStates);
-			for (int linI = 0; linI < numExtant; linI++) {
-				pI = stateProbabilities.getExtantProbsFromIndex(linI);
-				sumStates = sumStates.add( pI);
-				diagElements = diagElements.add(pI.mul(pI));
-			}
-			DoubleMatrix M = sumStates.mul(sumStates);
-			lambdaSum = M.sub(diagElements).mul(popCoalRates).sum();
+    		if (!popModel.isConstant()) { // if constant, phiDiag was already calculated
+    			for (int k = 0; k < numStates; k++){
+    				phiDiag[k] = F.get(k, k) / (Y.get(k)*Y.get(k));
+    			}
+    		}
+    		DVector phiDiagVector = new DVector(numStates,phiDiag);    		  		
+    		DVector A2 = this.stateProbabilities.getLineageStateSum();
+    		A2.squarei();
+    		A2.subi( this.stateProbabilities.getLineageSumSquares()  );
+    		totalCoal = A2.dot(phiDiagVector);    					
     	} else {
-    		DoubleMatrix pi_Y, pj_Y, pa, pJ;
+    		DVector pi_Y, pj_Y, pa, pJ;
 			for (int linI = 0; linI < numExtant; linI++) {
-				pI = stateProbabilities.getExtantProbsFromIndex(linI);
+				pI = extantProbs[linI];
 				pi_Y = pI.div(Y);
-				pi_Y.reshape(numStates, 1);
 				for (int linJ = linI+1; linJ < numExtant; linJ++) {
-					pJ = stateProbabilities.getExtantProbsFromIndex(linJ);
+					pJ = extantProbs[linJ];
 					pj_Y = pJ.div(Y);
-					pj_Y.reshape(numStates, 1);
-					pa = pi_Y.mul(F.mmul(pj_Y));
-					pa.addi(pj_Y.mul(F.mmul(pi_Y)));
-					lambdaSum += pa.sum();
-				
+					pa = pi_Y.mul( pj_Y.rmul(F) );   // F.mmul(pj_Y)
+					pa.addi(pj_Y.mul( pi_Y.rmul(F) )); // F..mmul(pi_Y)
+					totalCoal += pa.sum();				
 				}	
 			}
-    	}
-  
-    	return lambdaSum;    	
+    	} 
+    	return totalCoal;    	
     }
     
   
-    private void doFiniteSizeCorrections(Node alphaNode, DoubleMatrix pAlpha) {
-    	DoubleMatrix p, AminusP;
+    private void doFiniteSizeCorrections(int alphaNode, DVector pAlpha) {
+    	DVector p, AminusP;
     	int numExtant = stateProbabilities.getNumExtant();    	
-    	int alphaIdx =  stateProbabilities.getLineageIndex(alphaNode.getNr());
+    	// igor: want to change index references
+    	// int alphaLineage = alphaNode.getNr();
+    	//	int alphaIdx =  stateProbabilities.getLineageIndex(alphaNode.getNr());
     	
-    	DoubleMatrix A = stateProbabilities.getLineageStateSum();
+    	DVector A = stateProbabilities.getLineageStateSum();
+    	int[] extantLineages = stateProbabilities.getExtantLineages();
+    	DVector[] extantProbs = stateProbabilities.getExtantProbs();
     	double sum;    	
-    	// traverse all extant lineages
+    	// traverse all extant lineages - do if lineage diff from alphanode
     	for(int lineIdx=0; lineIdx < numExtant; lineIdx++) {
-    		if (lineIdx!=alphaIdx) {
-    			p = stateProbabilities.getExtantProbsFromIndex(lineIdx);
+    		if (extantLineages[lineIdx] !=alphaNode) {  // (lineIdx != alphaIdx)
+    			p = extantProbs[lineIdx]; // stateProbabilities.getExtantProbsFromIndex(lineIdx);
     			AminusP = A.sub(p);
     			AminusP.maxi(1e-12);
     			// rterm = p_a / clamp(( A - p_u), 1e-12, INFINITY );
-    		    DoubleMatrix rterm = pAlpha.div(AminusP);
+    		    DVector rterm = pAlpha.div(AminusP);
     		    //rho = A / clamp(( A - p_u), 1e-12, INFINITY );
-    		    DoubleMatrix rho = A.div(AminusP);
-                //lterm = dot( rho, p_a); //
+    		    DVector rho = A.div(AminusP);
+            //lterm = dot( rho, p_a); //
     		    double lterm = rho.dot(pAlpha);
                 //p_u = p_u % clamp((lterm - rterm), 0., INFINITY) ;
-    		    rterm.rsubi(lterm);
-    		    //rterm.subi(lterm);
-    		    //rterm.muli(-1);
+    		    rterm.rsubi(lterm);  //  r = l - r
     		    rterm.maxi(0.0);
     		    // p = p.muli(rterm); 
     		    sum = p.dot(rterm);
     		    if (sum > 0) {  // update p
-    		    	p.muli(rterm); // in-place element-wise multiplication,
-    		    	p.divi(sum);  // in-pace normalisation
+    		    		p.muli(rterm); // in-place element-wise multiplication,
+    		    		p.divi(sum);  // in-pace normalisation
     		    }
     		}   		
     	}

@@ -138,7 +138,8 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 	 }
 	 
 	 public boolean initValues() {
-		 super.initValues();
+		 if (super.initValues())
+			 return true;
 		 solver.initValues(this);
 		 return false;
 	 }

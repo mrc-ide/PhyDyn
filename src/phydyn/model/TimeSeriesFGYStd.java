@@ -7,7 +7,8 @@ import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
 import org.jblas.DoubleMatrix;
 
-//import org.jblas.DoubleMatrix;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,29 +43,27 @@ public class TimeSeriesFGYStd implements TimeSeriesFGY {
 	
     /* Creates a new entry for time step t with deme values stored in y */
     /* the size of y is >= nstates since it also contains the nonDeme elements */
-	public void addFGY(double t, DoubleMatrix F, DoubleMatrix G, double[] y, DoubleMatrix D) {
+	public void addFGY(double t, DMatrix F, DMatrix G, double[] y, DVector D) {
     	int i;
-    	DoubleMatrix Ynew,YnewAll;
+    	DVector Ynew,YnewAll;
     	timePointsList.add(t);
     	double[] yDemes = new double[numDemes]; 
     	for(i=0; i < numDemes; i++) { yDemes[i] = y[i]; }
-    	Ynew = new DoubleMatrix(numDemes,1,yDemes); /*  keeps buffer yDemes */    	
+    	Ynew = new DVector(numDemes,yDemes); /*  keeps buffer yDemes */    	
     	// copy all y's 
     	double[] yall = new double[numDemes+numNonDemes];
     	for(i=0; i < numDemes+numNonDemes; i++) { yall[i] = y[i]; }
-    	YnewAll = new DoubleMatrix(numDemes+numNonDemes,1,yall); /*  keeps buffer yDemes */   	
+    	YnewAll = new DVector(numDemes+numNonDemes,yall); /*  keeps buffer yDemes */   	
     	numPoints++;
 		// add FG
-    	DoubleMatrix Fnew = new DoubleMatrix();
-    	DoubleMatrix Gnew = new DoubleMatrix();	
-    	Fnew.copy(F);
-    	Gnew.copy(G);
-    	DoubleMatrix Dnew;
+    	DMatrix Fnew = new DMatrix(F);
+    	DMatrix Gnew = new DMatrix(G); 
+    	DVector Dnew;
     	if (D==null) Dnew=null;
     	else {
-    		Dnew = new DoubleMatrix();
-    		Dnew.copy(D);
-    	}    		
+    		Dnew = new DVector(D);
+    	}    	    	
+    	
     	FGYlist.add(new FGY(Fnew,Gnew,Ynew,YnewAll,Dnew));
 	}
     
@@ -104,12 +103,12 @@ public class TimeSeriesFGYStd implements TimeSeriesFGY {
 	}
 	
 	@Override
-	public DoubleMatrix getY(int tp) {
+	public DVector getY(int tp) {
 		return this.getFGY(tp).Y;
 	}
 
 	@Override
-	public DoubleMatrix getYall(int tp) {
+	public DVector getYall(int tp) {
 		return this.getFGY(tp).Yall;
 	}
     
@@ -125,7 +124,7 @@ public class TimeSeriesFGYStd implements TimeSeriesFGY {
     public TimeSeriesFGY toFixedStep(int numPoints, PopModelODE model) {
     	int n,idx;
     	double t0, t1, t, f;
-    	DoubleMatrix y;
+    	DVector y;
     	TimeSeriesFGYStd ts = new TimeSeriesFGYStd(model);
     	ts.isFixedStep = true;
     	double[] timePoints = this.getTimePoints();  // access timePoints Array
@@ -138,14 +137,15 @@ public class TimeSeriesFGYStd implements TimeSeriesFGY {
     	// tstep = (t1-t0)/(numPoints-1);
     	// Process first point
     	y = this.getYall(0);  // allYs[0];
-    	model.updateMatrices(t0, y.data);
+    	model.updateMatrices(t0, y.data);  // igor: be careful
     	
     	ts.addFGY(t0,model.births,model.migrations, y.data, model.deaths);
     	
     	t = t0;
     	if (numPoints==1) return ts;
     	idx = 0;
-    	y = new DoubleMatrix(y.rows,y.columns);
+    	y = new DVector(y.length);
+    	
     	for(int i=1; i < numPoints-1; i++) {
     		// more precise
     		t = t0 + (t1-t0)*i/(numPoints-1);
@@ -158,7 +158,7 @@ public class TimeSeriesFGYStd implements TimeSeriesFGY {
     		// f = (t-t1)/(t2-t1)
     		f = (t-timePoints[idx])/(timePoints[idx+1]-timePoints[idx]);
     		// y = y1 + (y2-y1)*f
-    		this.getYall(idx+1).subi(this.getYall(idx),y);
+    		this.getYall(idx+1).subi(this.getYall(idx),y); // igor: check this
     		y.muli(f);  // in-place
     		y.addi(this.getYall(idx)); // in-place
         	model.updateMatrices(t, y.data);

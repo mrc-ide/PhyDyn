@@ -12,6 +12,7 @@ import phydyn.model.PopModelODE;
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.model.TimeSeriesFGYStd;
+import phydyn.util.DVector;
 
 public class TrajectoryLogger extends CalculationNode implements Loggable {
 	
@@ -56,7 +57,7 @@ public class TrajectoryLogger extends CalculationNode implements Loggable {
 		TimeSeriesFGY timeseries = popModel.getTimeSeries();
 		
 		FGY fgy; // = ts.getFGY(0);
-		DoubleMatrix y; // = ySeries[0];
+		DVector y; // = ySeries[0];
 		int j;
 		int idx = timeseries.getNumTimePoints() - 1;
 		// The timeseries runs backwards in time

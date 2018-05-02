@@ -4,12 +4,12 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jblas.DoubleMatrix;
-
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
+import phydyn.util.DMatrix;
+import phydyn.util.DVector;
 
 public class PopModelIsland extends PopModel implements Loggable {
 
@@ -34,7 +34,8 @@ public class PopModelIsland extends PopModel implements Loggable {
 	//public String[] demeNames, nonDemeNames;
 	//boolean diagF;
 	
-	DoubleMatrix F,G,D;
+	DMatrix F,G;
+	DVector D;
 	double[] yAll;
 	TimeSeriesFGYConstant ts;
 		
@@ -74,9 +75,9 @@ public class PopModelIsland extends PopModel implements Loggable {
 		}
 		
 		diagF = true;
-		F = DoubleMatrix.zeros(numDemes, numDemes);
-		G = DoubleMatrix.zeros(numDemes, numDemes);
-		D = DoubleMatrix.zeros(numDemes, 1);
+		F = new DMatrix(numDemes, numDemes);
+		G = new DMatrix(numDemes, numDemes);
+		D = new DVector(numDemes);
 		yAll = new double[numDemes+numNonDemes]; // numNonDemes is 0
 	}
 
