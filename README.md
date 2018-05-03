@@ -16,7 +16,7 @@ The latest version of the package (**v1.2.0**) is not currently available from t
 The package (v.1.2.0) can  be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
 
 ### Installation by-hand
-The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.1.0.zip`.
+The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.2.0.zip`.
 Instructions on how to install Beast packages by hand can be found [here](https://www.beast2.org/managing-packages/). The steps are:
 * Locate the directory where the current Beast version  keeps add-ons and packages. In Linux, it's usually `/users/<username>/.beast/2.5`. Move there, create a directory for PhyDyn, and then move inside the new directory:
 ```
