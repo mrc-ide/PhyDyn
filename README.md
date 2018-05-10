@@ -26,8 +26,8 @@ Instructions on how to install Beast packages by hand can be found [here](https:
 ```
 * Copy the zipped distribution to the package's directory (current directory). Unzip the file.
 ```
-> cp path-to-file/PhyDyn.v1.1.0.zip .
-> unzip PhyDyn.v1.1.0.zip
+> cp path-to-file/PhyDyn.v1.2.0.zip .
+> unzip PhyDyn.v1.2.0.zip
 ```
 That's all. Beast should recognize the package next time it runs.
 
