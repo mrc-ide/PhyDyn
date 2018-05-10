@@ -11,9 +11,9 @@ This package enables simultaneous estimation of epidemiological parameters and p
 
 ## Distribution and Installation
 
-The latest version of the package (**v1.2.0**) is not currently available from the Beast repository - it will be soon. It has been compiled against BEAST v2.5.0.
+The latest version of the package (**v1.2.0**) is currently available from the Beast repository. It has been compiled against BEAST v2.5.0.
 
-The package (v.1.2.0) can  be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
+The package (v.1.2.0) can also be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
 
 ### Installation by-hand
 The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.2.0.zip`.
