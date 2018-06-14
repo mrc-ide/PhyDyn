@@ -33,8 +33,9 @@ public class TrajectoryOut extends Runnable {
 
 	@Override
 	public void run() throws Exception {
-		//TimeSeriesFGY ts = modelInput.get().integrate();
+				
 		modelInput.get().update();
+		modelInput.get().printModel();  // print equations
 		TimeSeriesFGY ts = modelInput.get().getTimeSeries();
 		ts.reverse();
 		

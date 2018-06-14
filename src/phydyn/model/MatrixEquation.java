@@ -1,11 +1,12 @@
 package phydyn.model;
 
-import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
+//import org.antlr.v4.runtime.CharStreams;
+//import org.antlr.v4.runtime.CodePointCharStream;
+
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.jblas.DoubleMatrix;
 
 import beast.core.BEASTObject;
 import beast.core.Input;
@@ -13,7 +14,10 @@ import beast.core.Input.Validate;
 import phydyn.model.parser.PopModelLexer;
 import phydyn.model.parser.PopModelParser;
 
-enum EquationType { BIRTH, DEATH, MIGRATION, NONDEME };
+/*
+ * PhyDyn Matrix equations with XML input
+ */
+		
 
 public class MatrixEquation extends BEASTObject {
 	
@@ -62,6 +66,7 @@ public class MatrixEquation extends BEASTObject {
 			throw new IllegalArgumentException("Should not specify column name for equation: "+equationStringInput.get());
 		}
 		/* parse equation string */
+		//CodePointCharStream  input = CharStreams.fromString( equationStringInput.get()  );
 		ANTLRInputStream input = new ANTLRInputStream(equationStringInput.get());
 		try {
 			PopModelLexer lexer = new PopModelBailLexer(input); 
@@ -70,42 +75,48 @@ public class MatrixEquation extends BEASTObject {
 			parser.setErrorHandler(new PopModelParserErrorStrategy());
 			tree = parser.expr();
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Error while parsing equation"+equationStringInput.get());
+			System.out.println("Error while parsing equation:"+ equationStringInput.get());
+			throw new IllegalArgumentException("Parsing error");
 		}
 		return;
 	}
+	
+	public MatrixEquationObj createMatrixEquation() { 
+		MatrixEquationObj eq=null;
+		switch(type) {
+		case BIRTH:
+			eq = new MatrixEquationObj(type,originNameInput.get(),destinationNameInput.get(), tree);
+			break;
+		case MIGRATION:
+			eq = new MatrixEquationObj(type,originNameInput.get(),destinationNameInput.get(), tree);
+			break;
+		case DEATH:
+			eq = new MatrixEquationObj(type,originNameInput.get(), tree);
+			break;
+		case NONDEME:
+			eq = new MatrixEquationObj(type,originNameInput.get(), tree);
+			break;
+		default:
+			throw new IllegalArgumentException("Missing Matrix type: "+type);
 
-	public void completeValidation(PopModelODE model) {
-		if (type==EquationType.NONDEME) {
-			row = model.indexOf(model.nonDemeNames, originNameInput.get() );
-		} else {
-			row = model.indexOf( model.demeNames, originNameInput.get());
 		}
-		
-		// rows (origin) must be correct since they name lists were collected from originName
-		// if (row == -1) {
-		//	throw new IllegalArgumentException("Unknown origin name in matrix eq: "+originNameInput.get());
-		//}
-		
-		if (destinationNameInput.get() != null) {
-			column = model.indexOf( model.demeNames, destinationNameInput.get());
-			if (column==-1) {
-				throw new IllegalArgumentException("Unknown destination name in matrix eq: "+destinationNameInput.get());
-			}
-		}
-		if ((type==EquationType.BIRTH) && (row != column)) { 
-			model.setDiagF(false);
-		}
-		// additional type checking would be ideal
-		
+		return eq;
 	}
 	
-	public int compile(PopModelCompiler compiler) {
-		code = compiler.compile(tree);
-		return code.maxStackSize;
+	public String getLHS() {
+		String s="";
+		switch(type) {
+		case BIRTH:
+			s = "F("+this.originNameInput.get()+","+this.destinationNameInput.get()+")"; break;
+		case MIGRATION:
+			s = "G("+this.originNameInput.get()+","+this.destinationNameInput.get()+")"; break;
+		case DEATH:
+			s = "D("+this.originNameInput.get()+")"; break;
+		default: // non-deme
+			s = this.originNameInput.get();
+		}
+		return s;
 	}
-	
-	
 
 	
 }

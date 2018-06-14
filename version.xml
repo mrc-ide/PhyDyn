@@ -1,4 +1,4 @@
-<addon name="PhyDyn" version="1.2.0">
+<addon name="PhyDyn" version="1.2.1">
   <depends on="beast2" atleast="2.2.1"/>
 
   <!-- Add other dependencies as necessary. -->

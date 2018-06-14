@@ -1,14 +1,12 @@
 package phydyn.model;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import phydyn.model.parser.PopModelBaseVisitor;
 import phydyn.model.parser.PopModelParser.IdentExprContext;
 import phydyn.model.parser.PopModelParser.ProdExprContext;
+import phydyn.model.parser.PopModelParser.StmContext;
 import phydyn.model.parser.PopModelParser.SumExprContext;
 
 /**
@@ -30,13 +28,14 @@ public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
 		numericConstants.put(E, Math.E);
 	}
 	public static String[]  T0T1 = { T0, T1 };
+	public static String[]  reservedIds = { T0, T1, T, PI, E };
 	//private static final Set<String> systemVariables = new HashSet<String>(Arrays.asList(
 	//	     new String[] {T, T0,T1}));
 
 
 	public Map<String, Integer> envTypes;
 	public Map<String,Double> usedConstants;
-	public boolean useT, useT0T1;;
+	public boolean useT, useT0T1;
 	boolean typeError;
 	
 	public SemanticChecker() {
@@ -51,20 +50,35 @@ public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
 		envTypes.clear(); 
 		usedConstants.clear();
 		useT0T1 = useT = false;
-		for(Definition def: model.definitions) envTypes.put(def.name, 0);
+		//for(Definition def: model.definitions) envTypes.put(def.name, 0);
 		for(i=0; i< model.numDemes; i++) envTypes.put(model.demeNames[i], 1);
 		for(i=0; i< model.numNonDemes; i++) envTypes.put(model.nonDemeNames[i], 2);
 		for(i=0; i< model.modelParams.numParams; i++) envTypes.put(model.modelParams.paramNames[i], 3);
 		typeError = false;
 		// definitions
-		for(Definition def: model.definitions) {
-			visit(def.tree); //System.out.println("");
+		// for(Definition def: model.definitions) envTypes.put(def.name, 0);
+		for(DefinitionObj def: model.definitions) {
+			envTypes.put(def.name, 0);
+			visit(def.stm); 
 		}
-		for(MatrixEquation eq: model.equations) {
-			visit(eq.tree); //System.out.println("");
+		for(MatrixEquationObj eq: model.equations) {
+			visit(eq.tree); 
 		}
 		return typeError;
 		
+	}
+	
+	@Override
+	public Boolean visitStm(StmContext ctx) {
+		String id = ctx.IDENT().getText();
+		for(int i=0; i < reservedIds.length; i++) {
+			if (id.equals(reservedIds[i])) {
+				System.out.println("Illegal use of system constant/id: "+id);
+				typeError = true;
+				break;
+			}				
+		}
+		return visit(ctx.expr());
 	}
 	
 	@Override

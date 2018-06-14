@@ -50,5 +50,9 @@ public abstract class PopModel extends CalculationNode {
 	public abstract int getYindex(String yName);
 	public abstract void updateRate(String rateName, double v);
 	public abstract boolean updateParam(String paramName, double paramValue);
+	
+	public void printModel() {
+		System.out.println("Population Model:");
+	}
 
 }

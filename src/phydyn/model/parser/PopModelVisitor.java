@@ -1,4 +1,4 @@
-// Generated from PopModel.g4 by ANTLR 4.7.1
+// Generated from PopModel.g4 by ANTLR 4.5.2
 
 package phydyn.model.parser;
 
@@ -12,6 +12,46 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * operations with no return type.
  */
 public interface PopModelVisitor<T> extends ParseTreeVisitor<T> {
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#definitions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefinitions(PopModelParser.DefinitionsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code birthEquation}
+	 * labeled alternative in {@link PopModelParser#matrixEquation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBirthEquation(PopModelParser.BirthEquationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code migrationEquation}
+	 * labeled alternative in {@link PopModelParser#matrixEquation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMigrationEquation(PopModelParser.MigrationEquationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code deathEquation}
+	 * labeled alternative in {@link PopModelParser#matrixEquation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeathEquation(PopModelParser.DeathEquationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code nondemeEquation}
+	 * labeled alternative in {@link PopModelParser#matrixEquation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNondemeEquation(PopModelParser.NondemeEquationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#matrixEquations}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMatrixEquations(PopModelParser.MatrixEquationsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PopModelParser#stm}.
 	 * @param ctx the parse tree

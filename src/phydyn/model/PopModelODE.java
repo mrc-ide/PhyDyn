@@ -3,7 +3,6 @@ package phydyn.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
@@ -33,7 +32,7 @@ enum IntegrationMethod { EULER, MIDPOINT, CLASSICRK, GILL
 	};
 
 /**
- * Class describing a birth-death viral population genetics model 
+ * Class describing a birth-death population genetics model 
  * in terms of Ordinary Differential Equations.
  *
  * @author Igor Siveroni
@@ -47,8 +46,21 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	            "matrixeq",
 	            "Equations used to generate the rate matrices",
 	            new ArrayList<>());
+	 
+	 public Input<MatrixEquations> matrixEquationsStringInput = new Input<>(
+	            "matrixeqs",
+	            "Equations used to generate the rate matrices");
+	
+	 
+	 
+	 
 	 public Input<List<Definition>> definitionsInput = new Input<>(
 			 "definition","List of definitions var = exp",new ArrayList<>());
+	 
+	 public Input<Definitions> definitionsStringInput = new Input<>(
+			 "definitions","Semi-colon separated list of assignment statements");
+
+	 
 	 
 	 public Input<String> evaluatorTypeInput = new Input<>(
 			 "evaluator","Evaluator type: interpreter, compiled, optimised","compiled");
@@ -57,23 +69,20 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 public Input<TrajectoryParameters> popParametersInput = new Input<>(
 				"popParams", "Population Model Trajectory Parameters",Validate.REQUIRED);
 		
-	public Input<ModelParameters> modelParametersInput = new Input<>(
+	 public Input<ModelParameters> modelParametersInput = new Input<>(
 				"modelParams", "Population Model Rate Parameters",Validate.REQUIRED);
 		
-	protected TrajectoryParameters trajParams;	
-	protected ModelParameters modelParams;
-	 
-	 
+	 protected TrajectoryParameters trajParams;	
+	 protected ModelParameters modelParams;
 
 	 
 	 public int yLength;
 	 public String[] yNames;
+	 
 	 protected List<String> defNames;
-	 List<Definition> definitions;
-	 // Could add some declarations
-	 protected List<MatrixEquation> equations;
+	 List<DefinitionObj> definitions;
 	 
-	 
+	 	 
 	 // now part of modelParams
 	 //public String[] rateNames;
 	 //protected double[] rateValues;
@@ -95,24 +104,42 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 String evaluatorType;
 	 private boolean useT, useT0T1;
 	 
-	
-	 
+	 List<MatrixEquationObj> equations;
 	 
 	@Override
 	public void initAndValidate() {
-		equations = matrixEquationsInput.get();
-		// Deme and NonDeme names are extraxted from Matrix Equations
+		List<MatrixEquation> equationsXML = matrixEquationsInput.get();
+		// Deme and NonDeme names are extracted from Matrix Equations
 		List<String> ldemes = new ArrayList<>();
 		List<String> lnondemes = new ArrayList<>();
 		String name;
-		for(MatrixEquation eq: equations) {
-			name = eq.originNameInput.get();
+		
+		// Create/Collect equations
+		equations = new ArrayList<>();
+		for(MatrixEquation eqxml: equationsXML) {
+			equations.add(eqxml.createMatrixEquation());
+		}
+		
+		if (matrixEquationsStringInput.get() != null) {
+			MatrixEquations eqsXML = matrixEquationsStringInput.get();
+			List<MatrixEquationObj> eqs = eqsXML.createMatrixEquations();
+			for(MatrixEquationObj eq: eqs) {
+				equations.add(eq);
+			}
+		}
+
+			
+		for(MatrixEquationObj eq: equations) {
+			name = eq.originName;
 			if (eq.type == EquationType.NONDEME) {
 				if (!lnondemes.contains(name)) lnondemes.add(name);
 			} else {
 				if (!ldemes.contains(name)) ldemes.add(name);
 			}
 		}
+		
+		
+		
 		// collect deme names
 		numDemes = ldemes.size();
 		demeNames = new String[numDemes];
@@ -138,16 +165,34 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		// process equations
 		diagF = true;
 		
-		for(MatrixEquation eq: equations) {
+		for(MatrixEquationObj eq: equations) {
 			eq.completeValidation(this);
 		}
 		eqValues = new double[equations.size()];
 		
-		definitions = definitionsInput.get();
+		// Definitions
+		if (definitionsStringInput.get()==null ) {			
+			definitions = new ArrayList<>();
+			for (Definition defxml:  definitionsInput.get()) {
+				definitions.add(  defxml.createDefinition()  );
+			}
+		} else {
+			if (definitionsInput.get().size()>0) {
+				System.out.println("PopModelODE Input Error. Definitions must be introduced by:");
+				System.out.println("- A single Definitions object (a semi-colon separated string) XOR");
+				System.out.println("- A series of Definition objects");
+				throw new IllegalArgumentException("PopModelODE Input error");
+			}
+ 			definitions = definitionsStringInput.get().createDefinitions();
+		}
+		
+		
+		// Collect definition names
 		defNames = new ArrayList<>();
-		for (Definition def: definitions) {
+		for (DefinitionObj def: definitions) {
 			defNames.add(def.name);
 		}
+		
 		
 		/* Derivatives related */
 		births = migrations= null;
@@ -181,8 +226,6 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			throw new IllegalArgumentException("Error(s) found in Trajectory Parameters");
 		}
 		
-		
-		
 	}	
 	
 	
@@ -207,6 +250,11 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		//modifiedValues = false;
 	}
 	
+	@Override
+	public void printModel() {
+		PopModelODEPrinter printer = new PopModelODEPrinter();
+		printer.printModel(this);
+	}
 	
 	
 	/* End CalculationNode Interface */
@@ -308,6 +356,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			eqEvaluator.updateT0T1(t0t1);
 		}
 		
+		
 		int i;
 		FirstOrderIntegrator foi=null;
 		double fixedStepSize = (t0t1[1]-t0t1[0])/(nsteps-1);
@@ -370,6 +419,19 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	/* Matrix updates s*/
 	void updateMatrices(double t, double[] y) {
 		double val;
+		
+		/*
+		if (debugn<10) {
+			System.out.println("\n----- debug ------");
+			System.out.println("t="+t);
+			System.out.print("y= ");
+			for(int i=0; i < numDemes; i++) {
+				System.out.print(y[i]+" ");
+			}
+			System.out.println(" ");
+		}
+		*/
+		
 		eqEvaluator.updateYs(y);
 		if (useT)
 			eqEvaluator.updateT(t);
@@ -380,7 +442,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		// evaluate and store results in eqValues
 		eqEvaluator.evaluateEquations(eqValues);
 		int i=0;
-		for(MatrixEquation eq: equations) {
+		for(MatrixEquationObj eq: equations) {
 			/* evaluate equation */
 			val = eqValues[i++];
 			//System.out.println(val + " - " + eqValues[i++]);
@@ -395,6 +457,15 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			}
 		}
 		
+		/*
+		if (debugn<10) {
+			System.out.println("births="+births);
+			System.out.println("migrations="+migrations);
+			System.out.println("deaths="+deaths);
+		}
+		debugn++;
+		*/
+		
 	}
 	
 	
@@ -404,6 +475,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		int i,j;
 		
 		DVector demeYdot;
+		
+		
 		
 		updateMatrices(t,y);
 		demeYdot = births.columnSums(); // transpose();

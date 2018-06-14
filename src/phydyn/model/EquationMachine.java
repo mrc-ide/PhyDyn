@@ -49,11 +49,11 @@ public class EquationMachine implements EquationEvaluatorAPI {
 		compiler.updateEnv(model.defNames, defAddresses);
 		/* now, compile */
 		int stackSize, maxStackSize=0;
-		for(MatrixEquation eq: model.equations) {
+		for(MatrixEquationObj eq: model.equations) {
 			stackSize = eq.compile(compiler);
 			if (stackSize > maxStackSize) maxStackSize=stackSize;
 		}
-		for (Definition def: model.definitions) {
+		for (DefinitionObj def: model.definitions) {
 			stackSize = def.compile(compiler);
 			if (stackSize > maxStackSize) maxStackSize=stackSize;
 		}
@@ -97,14 +97,14 @@ public class EquationMachine implements EquationEvaluatorAPI {
 	}
 	
 	public void executeDefinitions() {
-		for(Definition def: model.definitions) {
+		for(DefinitionObj def: model.definitions) {
 			machine.execute(def.code);
 		}
 	}
 	
 	public void evaluateEquations(double[] results) {
 		int i=0;
-		for(MatrixEquation eq: model.equations) {
+		for(MatrixEquationObj eq: model.equations) {
 			//System.out.println("Executing: "+eq.equationStringInput.get());
 			results[i++] = machine.execute(eq.code);
 		}

@@ -80,6 +80,10 @@ public class PopModelIsland extends PopModel implements Loggable {
 		D = new DVector(numDemes);
 		yAll = new double[numDemes+numNonDemes]; // numNonDemes is 0
 	}
+	
+	public void printModel() {
+		System.out.println("Island Model");
+	}
 
 	protected void updateMatrices() {
 		double xF;

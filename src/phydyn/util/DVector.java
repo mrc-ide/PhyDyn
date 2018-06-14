@@ -252,10 +252,11 @@ public class DVector {
 	}
 	*/
 	
+	// M x this
 	public DVector rmul(DMatrix M) {
-		if (M.rows != this.length)
-			throw new IllegalArgumentException("DVector rmmul: Incorrect matrix dimensions");
-		DVector r = new DVector(this.length);
+		if (M.columns != this.length)  // was (M.rows != this.length)
+			throw new IllegalArgumentException("DVector: wrong matrix dimensions");
+		DVector r = new DVector(M.rows);  // new DVector(this.length);
 		double[] matrix = M.data;
 		int midx=M.start, idxthis = this.start, ridx;
 		for(int col=0; col < M.columns; col++) {
@@ -291,9 +292,10 @@ public class DVector {
 	*/
 	
 	// Assumes row-vector	
+	// this x M
 	public DVector lmul(DMatrix M) {
 		if (this.length!=M.rows)
-			throw new IllegalArgumentException("Wrong vector/matrix dimensions");
+			throw new IllegalArgumentException("DVector: Wrong vector/matrix dimensions");
 		DVector R = new DVector(M.columns);
 		double sum;
 		int midx, idx;

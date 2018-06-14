@@ -122,12 +122,12 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 			 if (popModel.isConstant())
 				 solver = new SolverPLConstant(this);
 			 else
-				 solver = new SolverPL(this); 
+				//solver = new SolverNewPL(this); 
+			 	solver = new SolverPL(this); 
 			 break;
 		 case QL:
 			 if (popModel.isConstant()) {
 				 solver = new SolverQLConstant(this);
-				 //solver.setDebug(true);
 			 } else
 				 solver = new SolverQL(this); 
 			 break;

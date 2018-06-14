@@ -40,14 +40,14 @@ public class EquationInterpreter implements EquationEvaluatorAPI {
 	}
 	
 	public void executeDefinitions() {
-		for(Definition def: model.definitions) {
-			interpreter.evaluate(def.tree);
+		for(DefinitionObj def: model.definitions) {
+			interpreter.evaluate(def.stm);
 		}
 	}
 	
 	public void evaluateEquations(double[] results) {
 		int i=0;
-		for(MatrixEquation eq: model.equations) {
+		for(MatrixEquationObj eq: model.equations) {
 			results[i++] = interpreter.evaluate(eq.tree);
 		}
 	}

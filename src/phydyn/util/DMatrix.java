@@ -58,11 +58,24 @@ public class DMatrix {
 		return R;
 	}
 
+	// row-based representtaion
 	public String toString() {
-		String r = "[ ";
-		for(int idx =start; idx < (start+length); idx++)
-			r += data[idx]+" ";
-		return r+"]";
+		int idx;
+		String r = "[";
+		for(int row=0; row < rows;) {
+			idx = start+row;
+			for(int col=0; col < columns; col++) {
+				r += " "+data[idx];
+				idx += rows;
+			}
+			row++;
+			if (row<rows) {
+				r += ";";
+			} else {
+				r += "]";
+			}
+		}
+		return r;
 	}
 	
 	public void put(int pos, double v) {
@@ -224,7 +237,7 @@ public class DMatrix {
 			for(int row=0; row<this.rows; row++) {
 				this.data[idx] /= d;
 				idx++;
-			}
+			} 		
 			vidx++;
 		}
 		return this;
@@ -246,6 +259,23 @@ public class DMatrix {
 		return this;
 	}
 	
+	// Multiplication by a vector
+	
+	public DMatrix mulColumnVector(DVector V) {
+		if (V.length != this.rows)
+			throw new IllegalArgumentException("Wrong matrix size");
+		DMatrix R = new DMatrix(this.rows, this.columns);
+		int midx=this.start, vidx;
+		for(int col=0; col < this.columns; col++) {
+			vidx = V.start;
+			for(int row=0; row < this.rows; row++) {
+				R.data[midx] = this.data[midx] * V.data[vidx];
+				midx++; vidx++;
+			}
+		}
+		return R;
+	}
+	
 	public DMatrix add(DMatrix M) {
 		if ((this.columns!=M.columns)||(this.rows!=M.rows))
 			throw new IllegalArgumentException("DMatrix.add: wrong dimensions");
@@ -259,6 +289,20 @@ public class DMatrix {
 			}
 		}
 		return R;		
+	}
+	
+	public DMatrix addi(DMatrix M) {
+		if ((this.columns!=M.columns)||(this.rows!=M.rows))
+			throw new IllegalArgumentException("DMatrix.add: wrong dimensions");
+		int idx, midx;
+		idx = this.start; midx = M.start;
+		for(int col=0; col < this.columns; col++) {  // could do rows*columns
+			for(int row=0; row < this.rows; row++) {
+				this.data[idx] += M.data[midx];
+				idx++; midx++;
+			}
+		}
+		return this;		
 	}
 	
 	/* slow textbook version - start from here 

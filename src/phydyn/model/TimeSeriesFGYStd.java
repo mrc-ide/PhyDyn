@@ -44,11 +44,14 @@ public class TimeSeriesFGYStd implements TimeSeriesFGY {
     /* Creates a new entry for time step t with deme values stored in y */
     /* the size of y is >= nstates since it also contains the nonDeme elements */
 	public void addFGY(double t, DMatrix F, DMatrix G, double[] y, DVector D) {
+		
     	int i;
     	DVector Ynew,YnewAll;
     	timePointsList.add(t);
     	double[] yDemes = new double[numDemes]; 
     	for(i=0; i < numDemes; i++) { yDemes[i] = y[i]; }
+    	
+    	
     	Ynew = new DVector(numDemes,yDemes); /*  keeps buffer yDemes */    	
     	// copy all y's 
     	double[] yall = new double[numDemes+numNonDemes];

@@ -34,7 +34,7 @@ import phydyn.model.parser.PopModelParser.VectorExprContext;
  * @author Igor Siveroni
  */
 
-/* Basic Interpreter of PhyDin expressions implemented as a tree visitor */
+/* Basic Interpreter of PhyDyn expressions implemented as a tree visitor */
 public class PopModelInterpreter extends PopModelBaseVisitor<Double> {
 
 	private final Map<String, Double> env;

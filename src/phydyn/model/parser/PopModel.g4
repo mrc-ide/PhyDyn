@@ -9,12 +9,22 @@ package phydyn.model.parser;
 // @lexer::header { blah}
 // @members { more blah }
 
-// Parsing rules
+// Extended syntax: definition and matrix equation lists
+definitions : (stm ';')+ ;
+matrixEquation: 
+     'F' '(' IDENT ',' IDENT ')' ASSIGN expr     # birthEquation
+   | 'G' '(' IDENT ',' IDENT ')' ASSIGN expr     # migrationEquation
+   | 'D' '(' IDENT ')' ASSIGN expr       # deathEquation
+   | 'dot' '(' IDENT ')' ASSIGN expr     # nondemeEquation
+   ;
+matrixEquations : ( matrixEquation ';' )+ ; 
+
+// Parsing rules - definitions and rhs of equations
 stm : IDENT ASSIGN expr ;
 equation : expr ;
 
 expr:
-     '(' expr ')'			# parenthExpr
+    '(' expr ')'			# parenthExpr
   |  SUB expr               # minusExpr
   |  NOT expr               # notExpr
   |  IF expr THEN expr ELSE expr  # condExpr

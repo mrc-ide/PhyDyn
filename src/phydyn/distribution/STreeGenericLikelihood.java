@@ -74,6 +74,7 @@ public abstract class STreeGenericLikelihood extends Distribution {
 		 computeAncestral = ancestralInput.get();
 		 numStates = popModel.getNumStates(); 
 
+		 popModel.printModel();
 	 }
 	 
 	 public boolean initValues() {

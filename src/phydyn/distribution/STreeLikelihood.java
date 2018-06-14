@@ -30,9 +30,7 @@ import phydyn.util.DVector;
 @Citation("Erik M. Volz. 2012. Complex population dynamics and the coalescent under neutrality."
 		+ "Genetics. 2013 Nov;195(3):1199. ")
 public abstract class STreeLikelihood extends STreeGenericLikelihood  {
-	
-	
-	// replace above with model - already inherited
+
 	public Input<Boolean> fsCorrectionsInput = new Input<>(
 			"finiteSizeCorrections", "Finite Size Corrections", new Boolean(false));
 	
@@ -455,9 +453,6 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 		//Remove child lineages	
 		stateProbabilities.removeLineage(pair[0]);
 		stateProbabilities.removeLineage(pair[1]); 
-		
-		//stateProbabilities.removeLineage(coalLines.get(0).getNr());
-		//stateProbabilities.removeLineage(coalLines.get(1).getNr()); 
 	
 		if (fsCorrectionsInput.get()) {
 			doFiniteSizeCorrections(coalNode,pa);
@@ -471,14 +466,14 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
      */
     protected double calcTotalCoal(int tsPoint) {
     	DVector A = stateProbabilities.getLineageStateSum();
-		double totalCoal = 0.0; // holds the sum of the pairwise coalescent rates over all lineage pairs
+		double totalCoal = 0.0;
 		int numExtant = stateProbabilities.getNumExtant();
 
-		if (numExtant < 2) return totalCoal;	// Zero probability of two lineages coalescing
+		if (numExtant < 2) return totalCoal; 
 		
 		FGY fgy = ts.getFGY(tsPoint);
-		DMatrix F = fgy.F; // ts.getFs()[tsPoint];
-		DVector Y = fgy.Y; // ts.getYs()[tsPoint];
+		DMatrix F = fgy.F; 
+		DVector Y = fgy.Y;
 		
 		Y.maxi(1e-12);  // Fixes Y lower bound
 			
@@ -558,8 +553,6 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	
     }
     
- 
- 
     
     @Override
     protected boolean requiresRecalculation() {
