@@ -4,10 +4,10 @@ package phydyn.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+//import org.antlr.v4.runtime.ANTLRInputStream;
 
-//import org.antlr.v4.runtime.CharStreams;
-//import org.antlr.v4.runtime.CodePointCharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -48,8 +48,8 @@ public class MatrixEquations extends BEASTObject {
 	@Override
 	public void initAndValidate() {
 		/* parse equation string */
-		//CodePointCharStream  input = CharStreams.fromString( equationsStringInput.get()  );
-		ANTLRInputStream input = new ANTLRInputStream(equationsStringInput.get());
+		CodePointCharStream  input = CharStreams.fromString( equationsStringInput.get()  );
+		//ANTLRInputStream input = new ANTLRInputStream(equationsStringInput.get());
 		try {
 			PopModelLexer lexer = new PopModelBailLexer(input); 
 			CommonTokenStream tokens = new CommonTokenStream(lexer);

@@ -3,9 +3,9 @@ package phydyn.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-// import org.antlr.v4.runtime.CharStreams;
-// import org.antlr.v4.runtime.CodePointCharStream;
+// import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 
@@ -30,8 +30,8 @@ public class Definitions extends BEASTObject {
 	@Override
 	public void initAndValidate() {		
 		/* parse equation string */
-		//CodePointCharStream  input = CharStreams.fromString( definitionStringInput.get()  );
-		ANTLRInputStream input = new ANTLRInputStream(definitionStringInput.get());
+		CodePointCharStream  input = CharStreams.fromString( definitionStringInput.get()  );
+		//ANTLRInputStream input = new ANTLRInputStream(definitionStringInput.get());
 		try {
 			PopModelLexer lexer = new PopModelLexer(input);		
 			CommonTokenStream tokens = new CommonTokenStream(lexer);

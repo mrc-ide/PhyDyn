@@ -1,9 +1,9 @@
 package phydyn.model;
 
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-//import org.antlr.v4.runtime.CharStreams;
-//import org.antlr.v4.runtime.CodePointCharStream;
+// import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -66,8 +66,8 @@ public class MatrixEquation extends BEASTObject {
 			throw new IllegalArgumentException("Should not specify column name for equation: "+equationStringInput.get());
 		}
 		/* parse equation string */
-		//CodePointCharStream  input = CharStreams.fromString( equationStringInput.get()  );
-		ANTLRInputStream input = new ANTLRInputStream(equationStringInput.get());
+		CodePointCharStream  input = CharStreams.fromString( equationStringInput.get()  );
+		//ANTLRInputStream input = new ANTLRInputStream(equationStringInput.get());
 		try {
 			PopModelLexer lexer = new PopModelBailLexer(input); 
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
