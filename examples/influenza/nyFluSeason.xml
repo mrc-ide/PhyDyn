@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:phydyn.operators:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="" version="2.4">
 
 <!--
-version m1 estimates gamma with strong prior
+Simple SIR model for seasonal influenza in new york
+estimates recovery rate gamma with strong prior
 see A cori 2012
-
-$HOME/git/phydyndev/R/plot_trajectory.R -i lfs2_m1.traj --deme I -l 2014.75 -u 2015.25 --log FALSE 
-./pt1.R -i lfs2_m1.traj --deme I -l 2014.75 -u 2015.25 --log FALSE 
-
-$HOME/git/phydyndev/R/plot_trajectory.R -i lfs2_m1.traj --deme I -l 2004.75 -u 2005.25 --log FALSE  -n 1000 -o lfs2_m1_I.pdf
-
 -->
 
     <data
@@ -135,7 +130,9 @@ name="alignment">
 <model spec='PopModelODE' id='flumodel' evaluator="compiled"
 	 popParams='@initValues' modelParams='@rates'>
 	
-	
+<!--
+	note constant size coalescent process before 2014-15 flu season
+-->
 	<definition spec='Definition' >
 		foi = if (t > 2004.75) then R0*gamma*S/N
 		else gamma 
@@ -164,7 +161,8 @@ name="alignment">
 	</matrixeq>
 	
 <!--
-	source deme
+	source deme (global flu reservoir)
+	note zero net migration between reservoir and new york
 -->
 	
 	<matrixeq spec='MatrixEquation' type="birth"  origin="src" destination="src"> 
@@ -176,11 +174,11 @@ name="alignment">
 	</matrixeq> 
 	
 	<matrixeq spec='MatrixEquation' type="migration"  origin="src" destination="I"> 
-		mu * I
+		eta * I
 	</matrixeq> 
 	
 	<matrixeq spec='MatrixEquation' type="migration"  origin="I" destination="src"> 
-		mu * I
+		eta * I
 	</matrixeq> 
 
 </model>
@@ -188,7 +186,7 @@ name="alignment">
 <rates spec="ModelParameters" id='rates'>	
 	<param spec='ParamValue' names='gamma' values='@gamma'/>
 	<param spec='ParamValue' names='R0' values='@R0'/>
-	<param spec='ParamValue' names='mu' values='@mu'/>
+	<param spec='ParamValue' names='eta' values='@eta'/>
 </rates>
 
 <trajparams id='initValues' spec='TrajectoryParameters' method="classicrk" 
@@ -200,7 +198,7 @@ name="alignment">
 </trajparams>
 
 
-<run id="mcmc" spec="MCMC" chainLength="2000000" storeEvery="1">
+<run id="mcmc" spec="MCMC" chainLength="15000000" storeEvery="1">
 <!--
 <run id="mcmc" spec="MCMC" chainLength="10011" storeEvery="1">
 -->
@@ -328,7 +326,7 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
 			<parameter id="initS0" lower="100.0" name="stateNode">2000.0</parameter>
 			<parameter id="R0" lower="0.0" upper="10" name="stateNode">1.1</parameter>
 			<parameter id="gamma" lower="0.0" upper="1000" name="stateNode">121.6667</parameter>
-			<parameter id="mu" lower="0.0" upper="10" name="stateNode">2.0</parameter>
+			<parameter id="eta" lower="0.0" upper="10" name="stateNode">2.0</parameter>
 			<parameter id="srcSize" lower="1.0" upper="100000000.0" name="stateNode">10000.0</parameter>
     </state>
 
@@ -337,12 +335,7 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
     <distribution id="posterior" spec="util.CompoundDistribution">
         <distribution id="prior" spec="util.CompoundDistribution">
             
-<!--
-            <distribution id="CoalescentConstant.t:lastFluSeason2" spec="Coalescent">
-                <populationModel id="ConstantPopulation.t:lastFluSeason2" spec="ConstantPopulation" popSize="@popSize.t:lastFluSeason2"/>
-                <treeIntervals id="TreeIntervals.t:lastFluSeason2" spec="TreeIntervals" tree="@Tree.t:lastFluSeason2"/>
-            </distribution>
--->
+
 			<prior id="initI0prior" name="distribution" x="@initI0">
 				<LogNormal id="LogNormal:initI0" M="0" S="1" name="distr" />
 			</prior>
@@ -352,8 +345,8 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
 			<prior id="srcSizePrior" name="distribution" x="@srcSize">
 				<LogNormal id="LogNormal:srcSize" M="9.2" S="1" name="distr" />
 			</prior>
-			<prior id="muPrior" name="distribution" x="@mu">
-				<LogNormal id="LogNormal:mu" M="1.3864" S="1" name="distr" />
+			<prior id="etaPrior" name="distribution" x="@eta">
+				<LogNormal id="LogNormal:eta" M="1.3864" S="1" name="distr" />
 			</prior>
 			<prior id="R0prior" name="distribution" x="@R0">
 				<LogNormal id="LogNormal:R0" M="0" S="1" name="distr" />
@@ -363,7 +356,7 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
 			</prior>
 			<distribution spec='STreeLikelihoodODE' id = 'stlikelihood'
 			  useStateName='true' solvePL='false'
-			  forgiveY='true' forgiveAgtY='0.0' penaltyAgtY='0.0'
+			  forgiveY='false' forgiveAgtY='0.0' penaltyAgtY='0.0'
 			  popmodel='@flumodel'  
 			  stepSize='0.001' 
 			  minP='.001'>
@@ -438,7 +431,7 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
 <!--
     model parameters here 
 -->
-	<operator id="rwoperator:mu" spec="RealRandomWalkOperator" windowSize="0.1" parameter="@mu" useGaussian='true' weight="1" />
+	<operator id="rwoperator:eta" spec="RealRandomWalkOperator" windowSize="0.1" parameter="@eta" useGaussian='true' weight="1" />
 	<operator id="rwoperator:R0" spec="RealRandomWalkOperator" windowSize="0.2" parameter="@R0" useGaussian='true' weight="1" />
 	<operator id="rwoperator:initI0" spec="RealRandomWalkOperator" windowSize="2.0" parameter="@initI0" useGaussian='true' weight="1" />
 	<operator id="rwoperator:initS0" spec="RealRandomWalkOperator" windowSize="2000.0" parameter="@initS0" useGaussian='true' weight="1" />
@@ -450,10 +443,7 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
         <parameter idref="freqParameter.s:lastFluSeason2"/>
     </operator>
 
-    <logger id="tracelog" fileName="lastFluSeason2_m1.log" logEvery="500" model="@posterior" sanitiseHeaders="true" sort="smart">
-<!--
-    <logger id="tracelog" fileName="lastFluSeason2.log" logEvery="10" model="@posterior" sanitiseHeaders="true" sort="smart">
--->
+    <logger id="tracelog" fileName="lastFluSeason2_m1.log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
         <log idref="posterior"/>
         <log idref="likelihood"/>
         <log idref="stlikelihood"/>
@@ -461,7 +451,7 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
         
         <log idref="R0"/>
         <log idref="gamma"/>
-        <log idref="mu"/>
+        <log idref="eta"/>
         <log idref="initS0"/>
         <log idref="initI0"/>
         <log idref="srcSize"/>
@@ -477,13 +467,13 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
         
     </logger>
 
-    <logger id="screenlog" logEvery="100">
+    <logger id="screenlog" logEvery="1000">
         
         <log idref="stlikelihood"/>
         
         <log idref="R0"/>
         <log idref="gamma"/>
-        <log idref="mu"/>
+        <log idref="eta"/>
         <log idref="initS0"/>
         <log idref="initI0"/>
         <log idref="srcSize"/>

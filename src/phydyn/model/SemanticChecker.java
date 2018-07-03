@@ -61,8 +61,13 @@ public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
 			envTypes.put(def.name, 0);
 			visit(def.stm); 
 		}
+		if (typeError) {
+			System.out.println("Error with definition specification.");
+			System.out.println("Definitions are evaluated from top to bottom and must be");
+			System.out.println("defined before usage.");
+		}
 		for(MatrixEquationObj eq: model.equations) {
-			visit(eq.tree); 
+			visit(eq.rhsExprCtx); 
 		}
 		return typeError;
 		

@@ -14,7 +14,7 @@ import phydyn.model.TimeSeriesFGYStd;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
 
-public class SolverPL extends SolverIntervalODE implements FirstOrderDifferentialEquations {
+public class SolverPL1 extends SolverIntervalODE implements FirstOrderDifferentialEquations {
 	private double[] pl0, pl1;
 	private double tsTimes0;
 	private int tsPointLast;
@@ -24,7 +24,7 @@ public class SolverPL extends SolverIntervalODE implements FirstOrderDifferentia
 	
 	static double MIN_Y = 1e-12 ;
 
-	public SolverPL(STreeLikelihoodODE stlh) {
+	public SolverPL1(STreeLikelihoodODE stlh) {
 		super(stlh);
 		dimensionP = numStates; // temporary value
 		// we could set tsTimes0 and setMinP HERE
@@ -93,15 +93,15 @@ public class SolverPL extends SolverIntervalODE implements FirstOrderDifferentia
 		double accum, dL = 0.0;
 		
 		DVector A = P.rowSums(); // column vector  igor: was Avec	
-		DVector Anorm = Pnorm.rowSums();
-		DVector AmPnorm; // = DoubleMatrix.zeros(numStates, 1);
+		//DVector Anorm = Pnorm.rowSums();
+		//DVector AmPnorm; // = DoubleMatrix.zeros(numStates, 1);
 		DVector AmP, pcol;
 		DMatrix PdivY = P.divColumnVector(Y);
 		DMatrix PnormdivY = Pnorm.divColumnVector(Y);
 		DMatrix FdivY = F.divRowVector(Y);
 		
 		DMatrix dP = new DMatrix(numStates,numExtant,dpl);
-		R.mmuli(P,dP);  // igor: check mmul implementation
+		R.mmuli(P,dP); 
 		int k,l,z;
 		// dL = -dP.sum();  -- this is zero
 		int kz =0, klF; // P.start == dP.start == Pnorm.start == 0
@@ -113,8 +113,8 @@ public class SolverPL extends SolverIntervalODE implements FirstOrderDifferentia
 			pcol = P.getColumn(z);  // no memory allocation for buffer
 			AmP = A.sub(pcol);
 			AmP.maxi(0.0);
-			AmPnorm = Anorm.sub(Pnorm.getColumn(z));
-			AmPnorm.maxi(0.0);
+			//AmPnorm = Anorm.sub(Pnorm.getColumn(z));
+			//AmPnorm.maxi(0.0);
 			for (k = 0; k < numStates; k++){
 				accum = 0;
 				klF = F.start + k;	

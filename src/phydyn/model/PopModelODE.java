@@ -50,10 +50,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 public Input<MatrixEquations> matrixEquationsStringInput = new Input<>(
 	            "matrixeqs",
 	            "Equations used to generate the rate matrices");
-	
-	 
-	 
-	 
+		 
 	 public Input<List<Definition>> definitionsInput = new Input<>(
 			 "definition","List of definitions var = exp",new ArrayList<>());
 	 
@@ -203,7 +200,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		// Keep track of special variables and constants used.
 		SemanticChecker checker = new SemanticChecker();
 		if (checker.check(this)) {
-			throw new IllegalArgumentException("Error(s) found in model formulae");
+			throw new IllegalArgumentException("Error(s) found in model formulae\n");
 		}
 		useT = checker.useT;
 		useT0T1 = checker.useT0T1;
@@ -252,8 +249,29 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	
 	@Override
 	public void printModel() {
+		System.out.println(this.toString());	
+		//printer.printModel(this);
+	}
+	
+	@Override
+	public String toString() {
+		String s="";
 		PopModelODEPrinter printer = new PopModelODEPrinter();
-		printer.printModel(this);
+		s += ("model-name = "+this.getID()+";\n");
+		s += "definitions = {\n";		
+		for(DefinitionObj def: this.definitions) {	
+			s += "  "+printer.visit(def.stm)+"\n";
+		}
+		s += "}\nequations = {\n";		
+		for(MatrixEquationObj eq: this.equations) {
+			s += "  "+eq.getLHS() + " = " + printer.visit(eq.rhsExprCtx)+";\n";
+			//System.out.print("  "+eq.getLHS() + " = ");
+			//System.out.println(printer.visit(eq.rhsExprCtx)+";");
+		}
+		s +="}\n";
+		s += (this.modelParams.toString());
+		s += (this.trajParams.toString());
+		return s;
 	}
 	
 	

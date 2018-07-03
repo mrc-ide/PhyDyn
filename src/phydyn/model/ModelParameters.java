@@ -106,6 +106,25 @@ public class ModelParameters extends CalculationNode {
 		}
 		System.out.println(" ");
 	}
+
+	@Override
+	public String toString() {
+		String s = "model-parameters = {\n";
+		for(int i=0; i < paramNames.length; i++) {
+			s += "  "+paramNames[i]+" = "+paramValues[i]+";\n";
+		}
+		for(int i=0; i < paramVectorNames.length; i++) {
+			s += "  "+paramVectorNames[i]+" = { ";
+			s += paramVectorValues[i][0];  // there should at least be one element
+			for(int j=1; j < paramVectorValues[i].length; j++) {
+				s += ", "+paramVectorValues[i][j];
+			}
+			s += "};\n";
+		}
+		return s+"}";
+	}
+	
+	
 	
 	
 	/*

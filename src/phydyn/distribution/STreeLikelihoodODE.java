@@ -28,7 +28,7 @@ enum IntegrationMethod { MIDPOINT, CLASSICRK, GILL
 	,ADAMSMOULTON  
 	};
 	
-enum EquationsType { PL, QL, LogQL };
+enum EquationsType { PL1, PL2, QL, LogQL };
 
 
 public class STreeLikelihoodODE extends STreeLikelihood {
@@ -99,31 +99,39 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 		 // Equations / solver.
 		 if (equationsInput.get()!=null) {
 			 String eq = equationsInput.get();
-			 if (eq.equals("PL")) eqType = EquationsType.PL;
+			 if (eq.equals("PL")) eqType = EquationsType.PL1;
+			 else if (eq.equals("PL1")) eqType = EquationsType.PL1;
+			 else if (eq.equals("PL2")) eqType = EquationsType.PL2;
 			 else if (eq.equals("QL")) eqType = EquationsType.QL;
 			 else if (eq.equals("LogQL")) eqType = EquationsType.LogQL;
 			 else 
-				 throw new IllegalArgumentException("Invalid Equations type. Use: PL, QL or LogQL");			 
+				 throw new IllegalArgumentException("Invalid Equations type. Use: PL1, PL2, QL or LogQL");			 
 			 // if there's solverInput, even if redundant, they must agree
 			 if (solvePLInput.get()!=null) {
-				 if ((solvePLInput.get() && (eqType!=EquationsType.PL)) ||
+				 if ((solvePLInput.get() && (eqType!=EquationsType.PL1)) ||
 					 (!solvePLInput.get() && (eqType!=EquationsType.QL))) {
 					 throw new IllegalArgumentException("Incompatible values of solverPL and equations");
 				 }
 			 } 
 		 } else { // legacy
-			 eqType = EquationsType.PL; // default
+			 eqType = EquationsType.PL1; // default
 			 if ( (solvePLInput.get()!=null)&& (!solvePLInput.get())) {				 
 					 eqType = EquationsType.QL;									
 			 }			 
 		 }
 		 switch (eqType) {
-		 case PL:
+		 case PL1:
+			 if (popModel.isConstant())
+				solver = new SolverPLConstant(this);
+			 else
+			 	solver = new SolverPL1(this); 
+			 break;
+		 case PL2:
 			 if (popModel.isConstant())
 				 solver = new SolverPLConstant(this);
 			 else
-				//solver = new SolverNewPL(this); 
-			 	solver = new SolverPL(this); 
+				solver = new SolverPL2(this); 
+			    //solver = new SolverPL2Slow(this); 
 			 break;
 		 case QL:
 			 if (popModel.isConstant()) {
