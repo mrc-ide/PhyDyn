@@ -18,7 +18,7 @@ import phydyn.util.DVector;
  * Proposed new version of PL equation systems - under development
  */
 
-public class SolverNewPL extends SolverIntervalODE implements FirstOrderDifferentialEquations {
+public class SolverPL2 extends SolverIntervalODE implements FirstOrderDifferentialEquations {
 	private double[] pl0, pl1;
 	private double tsTimes0;
 	private int tsPointLast;
@@ -26,16 +26,23 @@ public class SolverNewPL extends SolverIntervalODE implements FirstOrderDifferen
 
 	private int numExtant, dimensionP;
 	
+	// temps
+	private DVector u;
+	private DMatrix R, Phi;
+	
 	static double MIN_Y = 1e-12 ;
 
-	public SolverNewPL(STreeLikelihoodODE stlh) {
+	public SolverPL2(STreeLikelihoodODE stlh) {
 		super(stlh);
 		dimensionP = numStates; // temporary value
 		// we could set tsTimes0 and setMinP HERE
+		u = new DVector(numStates);
+		R = new DMatrix(numStates,numStates);
+		Phi = new DMatrix(numStates,numStates);
 	}
 	
 	
-	public void solve(double h0, double h1, int lastPoint, STreeLikelihoodODE stlh) { 
+	public void solve(double h0, double h1, int lastPoint, STreeLikelihoodODE stlh) { 		
 		tsPointLast = lastPoint;
 		tsTimes0 = stlh.tsTimes0;
 		ts = stlh.ts;
@@ -79,10 +86,10 @@ public class SolverNewPL extends SolverIntervalODE implements FirstOrderDifferen
 		DMatrix G = fgy.G; 
 		
 		if (forgiveY) Y.maxi(1.0); else Y.maxi(MIN_Y);
-					
+		
 		// no buffer allocation - straight from/to ode solver
 		DMatrix P =  new DMatrix(numStates,numExtant,pl);
-		DMatrix dP = new DMatrix(numStates,numExtant,dpl);
+		
 		
 		DMatrix Pnorm = new DMatrix(P);  // P.dup();
 		Pnorm.diviRowVector(Pnorm.columnSums());  // normalise columns		
@@ -90,52 +97,63 @@ public class SolverNewPL extends SolverIntervalODE implements FirstOrderDifferen
 		// DVector A = P.rowSums(); // pre-allocate - in-place
 		DVector Anorm = Pnorm.rowSums(); // pre-allocate - in-place
 		DVector anorm = Anorm.div(Y);  // pre-allocate - in-place
+		DMatrix PnminusAn = Pnorm.subColumnVector(Anorm);
 		
-		// DVector u = new DVector(numStates);
+		u.put(1.0);
+		u.subi(anorm);  // (1-na)
+		// u <= 1
+		u.maxi(0.0);
+		// 0 <= u <= 1
 		
-		DMatrix Phi = F.divRowVector(Y);
-		Phi.diviColumnVector(Y);		
+		// compute R		
+		F.muliColumnVector(u,R);
+		R.addi(G);
+		R.diviRowVector(Y);
+		for(int i=0; i < numStates; i++)
+			R.put(i,i,0); // set diagonal to zero
+		DVector sumCols = R.columnSums(); // row vector
+		for(int i=0; i < numStates; i++)
+			R.put(i,i,R.get(i,i)-sumCols.get(i)); // set diagonal
+		
+		DMatrix dP = new DMatrix(numStates,numExtant,dpl);
+		R.mmuli(P,dP); 
+		
+		
+		F.diviRowVector(Y,Phi);
+		Phi.diviColumnVector(Y);
+		
+		DMatrix PhiSum = Phi.transposeSum();
 
-		DMatrix PnormdivY = Pnorm.divColumnVector(Y);
+		// Matrix PnormdivY = Pnorm.divColumnVector(Y);
 		
 		int k,l,z;
-
+		
+		double phisum, Pnorm_kz;
 		
 		double accum, dL = 0.0;
+		int kz  = 0;
+		int lz,lk;
 		for (z = 0; z < numExtant; z++){
-			DVector u = PnormdivY.getColumn(z).sub(anorm);
-			u.add(1.0);
-			u.maxi(0.0);
-			
-			DMatrix R = F.mulColumnVector(u);
-			R.addi(G);
-			R.diviRowVector(Y);
-				
-			DVector sumCols = R.columnSums(); // row vector
-			for(int i=0; i < numStates; i++)
-				R.put(i,i,R.get(i,i)-sumCols.get(i)); // set diagonal
-			
-			// pointer to column
-			DVector dPz = dP.getColumn(z);
-			DVector Pz = P.getColumn(z);
-			
-			// dPik.col(z) = R * Pik.col(z) ; 
-			dPz.copy(Pz.rmul(R));
-			
+			lk = 0;		
 			for (k = 0; k < numStates; k++){
 				accum = 0;
+				Pnorm_kz = Pnorm.data[kz];
+				// Pnorm_kz = Pnorm.get(k, z);
+				lz = z * numStates;
 				for( l = 0; l < numStates; l++) {
-					//dPik(k,z) -= Pik(k,z) * (phi(k,l)+phi(l,k)) * (nA(l)- nPik(l,z)); 
-					accum += Pz.get(k)*(Phi.get(k,l)+Phi.get(l,k))*(Anorm.get(l)-Pnorm.get(l, z));
+					// phisum = PhiSum.get(l, k) * (-PnminusAn.data[lz]);
+					phisum = PhiSum.data[lk] * (-PnminusAn.data[lz]);
+					//accum += Pz.get(k) * phisum * (Anorm.get(l)-Pnorm.get(l, z));
+					accum += P.data[kz] * phisum;
 					//dL += nPik(k,z) * (phi(k,l)+phi(l,k)) * (nA(l)- nPik(l,z))/ 2.; 
-					dL += Pnorm.get(k,z)*(Phi.get(k,l)+Phi.get(l,k))*(Anorm.get(l)-Pnorm.get(l, z))/2.0;
+					dL += Pnorm_kz * phisum  /2.0;
+					lz++; lk++;
 				}
-				dPz.put(k, dPz.get(k) - accum  );
-			}
-			
-			
-		}
-		
+				dP.data[kz] -= accum;
+				//dP.put(k,z, dP.get(k,z) - accum    );
+				kz++;
+			}	
+		}		
 		dpl[dimensionP] = dL;
 
 	}

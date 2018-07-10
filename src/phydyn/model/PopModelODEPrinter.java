@@ -1,13 +1,8 @@
 package phydyn.model;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import phydyn.model.parser.PopModelBaseVisitor;
-import phydyn.model.parser.PopModelParser;
 import phydyn.model.parser.PopModelParser.BoolExprContext;
 import phydyn.model.parser.PopModelParser.CallBinaryExprContext;
 import phydyn.model.parser.PopModelParser.CallSpecialExprContext;
@@ -41,24 +36,12 @@ public class PopModelODEPrinter extends PopModelBaseVisitor<String> {
 		super();
 	}
 
-		
-	public void printModel(PopModelODE model) {
-		System.out.println("definitions:");
-		for(DefinitionObj def: model.definitions) {			
-			System.out.println("  "+visit(def.stm));
-		}
-		System.out.println("equations:");
-		for(MatrixEquationObj eq: model.equations) {
-			System.out.print("  "+eq.getLHS() + " = ");
-			System.out.println(visit(eq.tree));
-		}
-	}
 	
 	@Override
 	public String visitStm(StmContext ctx) {
 		String id = ctx.IDENT().getText();
 		String rhs = visit(ctx.expr());
-		return id+" = "+rhs;
+		return id+" = "+rhs+";";
 	}
 
 	@Override

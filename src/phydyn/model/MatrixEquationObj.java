@@ -2,6 +2,8 @@ package phydyn.model;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import phydyn.model.parser.PopModelParser.ExprContext;
+
 
 /* 
  * PhyDyn matrix equation - no XML inputs
@@ -14,23 +16,23 @@ public class MatrixEquationObj {
 	
 	public EquationType type;
 	public int row,column;
-	public ParseTree tree;
+	public ExprContext rhsExprCtx;
 	public String originName, destinationName; 
 	
 	public PMMachineCode code;
 
-	public MatrixEquationObj(EquationType eqType, String originName, String destinationName, ParseTree tree) {
+	public MatrixEquationObj(EquationType eqType, String originName, String destinationName, ExprContext tree) {
 		this.type = eqType;
 		this.originName = originName;
 		this.destinationName = destinationName;
-		this.tree = tree;
+		this.rhsExprCtx = tree;
 	}
 	
-	public MatrixEquationObj(EquationType eqType, String originName, ParseTree tree) {
+	public MatrixEquationObj(EquationType eqType, String originName, ExprContext tree) {
 		this.type = eqType;
 		this.originName = originName;
 		this.destinationName = null;
-		this.tree = tree;
+		this.rhsExprCtx = tree;
 	}
 
 	
@@ -75,7 +77,7 @@ public class MatrixEquationObj {
 	}
 	
 	public int compile(PopModelCompiler compiler) {
-		code = compiler.compile(tree);
+		code = compiler.compile(rhsExprCtx);
 		return code.maxStackSize;
 	}
 	

@@ -46,7 +46,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 			new Double(1.0));
 	
 	public Input<Boolean> forgiveYInput = new Input<>("forgiveY",
-			"Tolerates Y < 1.0 and sets Y = max(Y,1.0)",  new Boolean(false));
+			"Tolerates Y < 1.0 and sets Y = max(Y,1.0)",  new Boolean(true));
 	
 	/* inherits from STreeGenericLikelihood:
 	 *  public PopModelODE popModel;
@@ -172,7 +172,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         int numExtant, numLeaves; 
         tsPoint = 0;
         h = 0.0;		// used to initialise first (h0,h1) interval 
-        t = tsTimes0 = ts.getTime(0); // tsTimes[0];
+        t = tsTimes0 = ts.getTime(0); // tsTimes[0];x
         
         double   lhinterval;
         numLeaves = tree.getLeafNodeCount();
@@ -181,11 +181,17 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         int interval;
         for(interval=0; interval < numIntervals; interval++) { 
         	duration = intervals.getInterval(interval);
-        	      	
+        	   	
         	if (trajDuration < (h+duration)) break;
         	lhinterval = processInterval(interval, duration, ts);
-        	    	
-        	if (lhinterval == Double.NEGATIVE_INFINITY) {
+        	    
+        	if (Double.isNaN(lhinterval)) {
+        		System.out.println("logP NaN (interval) - quitting likelihood");
+        		//System.out.println("model parameters: "+popModel.toString());
+        		//throw new IllegalArgumentException("NAN");
+        		logP = Double.NEGATIVE_INFINITY;
+				return logP;
+        	} else if (lhinterval == Double.NEGATIVE_INFINITY) {
     			logP = Double.NEGATIVE_INFINITY;
 				return logP;
     		} 	
@@ -222,7 +228,9 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	
         	// Check value of logLh is sound
         	if (Double.isNaN(logP)) {
-        		System.out.println("NAN - quitting likelihood");
+        		System.out.println("logP NaN (point) - quitting likelihood");
+        		//System.out.println("model parameters: "+popModel.toString());
+        		//throw new IllegalArgumentException("NAN");
         		logP = Double.NEGATIVE_INFINITY;
 				return logP;
         	} else if (logP == Double.NEGATIVE_INFINITY) {

@@ -48,7 +48,7 @@ public class EquationInterpreter implements EquationEvaluatorAPI {
 	public void evaluateEquations(double[] results) {
 		int i=0;
 		for(MatrixEquationObj eq: model.equations) {
-			results[i++] = interpreter.evaluate(eq.tree);
+			results[i++] = interpreter.evaluate(eq.rhsExprCtx);
 		}
 	}
 

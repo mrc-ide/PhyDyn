@@ -1,6 +1,7 @@
 package phydyn.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -209,6 +210,22 @@ public class TrajectoryParameters extends CalculationNode {
 		}
 		System.out.println(" ");
 	}
+
+	@Override
+	public String toString() {
+		String space2 = "  ";
+		String space4 = "    ";
+		String s = "trajectory-parameters = {\n";
+		s += space2 + "initial-vales = {\n";
+		for(int i=0; i < paramNames.length; i++) {
+			s += space4+paramNames[i]+" = "+ paramValues[i] + ";\n";
+		}
+		s += space2+"}; \n";
+		return s+"}";
+	}
+	
+	
+	
 	
 		
 	/* Calculation Node Interface */

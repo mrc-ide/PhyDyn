@@ -13,6 +13,7 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import phydyn.model.parser.PopModelLexer;
 import phydyn.model.parser.PopModelParser;
+import phydyn.model.parser.PopModelParser.ExprContext;
 
 /*
  * PhyDyn Matrix equations with XML input
@@ -39,7 +40,7 @@ public class MatrixEquation extends BEASTObject {
 	
 	public EquationType type;
 	public int row,column;
-	public ParseTree tree;
+	public ExprContext rhsExprCtx;
 	public PMMachineCode code;
 
 	@Override
@@ -73,7 +74,7 @@ public class MatrixEquation extends BEASTObject {
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			PopModelParser parser = new PopModelParser(tokens);
 			parser.setErrorHandler(new PopModelParserErrorStrategy());
-			tree = parser.expr();
+			rhsExprCtx = parser.expr();
 		} catch (Exception e) {
 			System.out.println("Error while parsing equation:"+ equationStringInput.get());
 			throw new IllegalArgumentException("Parsing error");
@@ -85,16 +86,16 @@ public class MatrixEquation extends BEASTObject {
 		MatrixEquationObj eq=null;
 		switch(type) {
 		case BIRTH:
-			eq = new MatrixEquationObj(type,originNameInput.get(),destinationNameInput.get(), tree);
+			eq = new MatrixEquationObj(type,originNameInput.get(),destinationNameInput.get(), rhsExprCtx);
 			break;
 		case MIGRATION:
-			eq = new MatrixEquationObj(type,originNameInput.get(),destinationNameInput.get(), tree);
+			eq = new MatrixEquationObj(type,originNameInput.get(),destinationNameInput.get(), rhsExprCtx);
 			break;
 		case DEATH:
-			eq = new MatrixEquationObj(type,originNameInput.get(), tree);
+			eq = new MatrixEquationObj(type,originNameInput.get(), rhsExprCtx);
 			break;
 		case NONDEME:
-			eq = new MatrixEquationObj(type,originNameInput.get(), tree);
+			eq = new MatrixEquationObj(type,originNameInput.get(), rhsExprCtx);
 			break;
 		default:
 			throw new IllegalArgumentException("Missing Matrix type: "+type);

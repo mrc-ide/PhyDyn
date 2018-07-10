@@ -84,6 +84,12 @@ public class DVector {
 		return this;
 	}
 	
+	public DVector put(double v) {
+		for(int i=start; i < start+length; i++)
+			data[i] = v;
+		return this;
+	}
+	
 	public double dot(DVector V) {
 		if (this.length!=V.length)
 			throw new IllegalArgumentException("DVector.dot: wrong vector lengths");

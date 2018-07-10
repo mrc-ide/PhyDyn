@@ -57,6 +57,20 @@ public class DMatrix {
 		}
 		return R;
 	}
+	
+	public DMatrix transposeSum() {
+		DMatrix R = new DMatrix(this);
+		int idx, ridx;
+		ridx = R.start; // 0
+		for(int row=0; row<R.rows; row++) {
+			idx = this.start+row;
+			for(int col=0; col<R.columns; col++) {
+				R.data[ridx] += this.data[idx];
+				ridx++; idx += this.rows;
+			}
+		}
+		return R;
+	}
 
 	// row-based representtaion
 	public String toString() {
@@ -152,6 +166,22 @@ public class DMatrix {
 		}
 		return S;
 	}
+	
+	public DMatrix subColumnVector(DVector V) {
+		if (V.length != this.rows)
+			throw new IllegalArgumentException("Wrong matrix size");
+		DMatrix R = new DMatrix(this.rows, this.columns);
+		int midx=this.start, vidx;
+		for(int col=0; col < this.columns; col++) {
+			vidx = V.start;
+			for(int row=0; row < this.rows; row++) {
+				R.data[midx] = this.data[midx] - V.data[vidx];
+				midx++; vidx++;
+			}
+		}
+		return R;
+	}
+	
 	
 	public DMatrix divRowVector(DVector V) {
 		if (V.length!=this.columns)
@@ -265,16 +295,49 @@ public class DMatrix {
 		if (V.length != this.rows)
 			throw new IllegalArgumentException("Wrong matrix size");
 		DMatrix R = new DMatrix(this.rows, this.columns);
-		int midx=this.start, vidx;
+		int midx=this.start, vidx, ridx=R.start;
 		for(int col=0; col < this.columns; col++) {
 			vidx = V.start;
 			for(int row=0; row < this.rows; row++) {
-				R.data[midx] = this.data[midx] * V.data[vidx];
-				midx++; vidx++;
+				R.data[ridx] = this.data[midx] * V.data[vidx];
+				midx++; vidx++; ridx++;
 			}
 		}
 		return R;
 	}
+	
+	public DMatrix muliColumnVector(DVector V) {
+		if (V.length != this.rows)
+			throw new IllegalArgumentException("Wrong matrix size");
+		//DMatrix R = new DMatrix(this.rows, this.columns);
+		int midx=this.start, vidx;
+		for(int col=0; col < this.columns; col++) {
+			vidx = V.start;
+			for(int row=0; row < this.rows; row++) {
+				this.data[midx] *=  V.data[vidx];
+				midx++; vidx++;
+			}
+		}
+		return this;
+	}
+	
+	public DMatrix muliColumnVector(DVector V, DMatrix R) {
+		if (V.length != this.rows)
+			throw new IllegalArgumentException("Wrong matrix size");
+		if ((R.rows != this.rows)||(R.columns != this.columns))
+			throw new IllegalArgumentException("Wrong matrix size");
+		int midx=this.start, vidx, ridx=R.start;
+		for(int col=0; col < this.columns; col++) {
+			vidx = V.start;
+			for(int row=0; row < this.rows; row++) {
+				R.data[ridx] = this.data[midx] * V.data[vidx];
+				midx++; vidx++; ridx++;
+			}
+		}
+		return R;
+	}
+	
+	
 	
 	public DMatrix add(DMatrix M) {
 		if ((this.columns!=M.columns)||(this.rows!=M.rows))
