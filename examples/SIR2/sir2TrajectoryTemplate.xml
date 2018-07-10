@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<beast version="2.5" namespace="phydyn.run:phydyn.model:phydyn.distribution:beast.util:beast.evolution.alignment:beast.evolution.tree">
+  
+  
+<model spec="PopModelODE" id="twodeme"
+       popParams='@initValues' modelParams='@rates'  >
+--insert-equations--
+</model>
+
+<rates spec="ModelParameters" id='rates'>
+--insert-model-parameters--
+</rates>  
+
+<trajparams id="initValues" spec="TrajectoryParameters" method="classicrk"
+	    integrationSteps="1001"  t0="0" t1="20">
+--insert-initial-values--
+</trajparams>
+  
+  <run spec="TrajectoryOut" model='@twodeme' file="sir2.csv" />
+</beast>
