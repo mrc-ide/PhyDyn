@@ -4,19 +4,17 @@
   
 <model spec="PopModelODE" id="twodeme"
        popParams='@initValues' modelParams='@rates'  >
-  <definition spec='Definition' > k0 = beta0*S  </definition>
-  <definition spec='Definition' > k1 = beta1*S </definition>
-  <matrixeq spec="MatrixEquation" type="birth" origin="I0" destination="I0">
-      k0*I0 </matrixeq>
-  <matrixeq spec="MatrixEquation" type="birth" origin="I1" destination="I0">
-      beta1*S*I1 </matrixeq>
-  <matrixeq spec="MatrixEquation" type="migration" origin="I0" destination="I1">
-      gamma0*I0 </matrixeq>
-  <matrixeq spec="MatrixEquation" type="death" origin="I0"> 0 </matrixeq>
-  <matrixeq spec="MatrixEquation" type="death" origin="I1"> gamma1*I1 </matrixeq>
-  <matrixeq spec="MatrixEquation" type="nondeme" origin="S"> 
-       b*S - (beta0*I0+ beta1*I1)*S
-  </matrixeq>
+   <definitions spec='Definitions' > 
+  	k0 = beta0*S; k1 = beta1*S;
+   </definitions> 
+   <matrixeqs spec="MatrixEquations">
+     F(I0,I0) = k0*I0;
+     F(I1,I0) = k1*I1;
+     G(I0,I1) = gamma0*I0;
+     D(I0) = 0;
+     D(I1) = gamma1*I1;
+     dot(S) = b*S-(beta0*I0+beta1*I1)*S;
+   </matrixeqs>
 </model>
 
 <rates spec="ModelParameters" id='rates'>
@@ -34,5 +32,5 @@
       <initialValue spec="ParamValue" names="S" values="999"/>
 </trajparams>
   
-  <run spec="TrajectoryOut" model='@twodeme' file="sir2.csv" />
+  <run spec="TrajectoryOut" model='@twodeme' file="sir2Final.csv" />
 </beast>
