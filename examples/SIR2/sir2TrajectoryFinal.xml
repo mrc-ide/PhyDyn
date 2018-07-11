@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<beast version="2.5" namespace="phydyn.run:phydyn.model:phydyn.distribution:beast.util:beast.evolution.alignment:beast.evolution.tree">
+  
+  
+<model spec="PopModelODE" id="twodeme"
+       popParams='@initValues' modelParams='@rates'  >
+   <definitions spec='Definitions' > 
+  	k0 = beta0*S; k1 = beta1*S;
+   </definitions> 
+   <matrixeqs spec="MatrixEquations">
+     F(I0,I0) = k0*I0;
+     F(I1,I0) = k1*I1;
+     G(I0,I1) = gamma0*I0;
+     D(I0) = 0;
+     D(I1) = gamma1*I1;
+     dot(S) = b*S-(beta0*I0+beta1*I1)*S;
+   </matrixeqs>
+</model>
+
+<rates spec="ModelParameters" id='rates'>
+    <param spec="ParamValue" names="beta0" values="0.001"/>
+    <param spec="ParamValue" names="beta1" values="0.0001"/>
+    <param spec="ParamValue" names="gamma0" values="1.0"/>
+    <param spec="ParamValue" names="gamma1" values="0.1111"/>
+    <param spec="ParamValue" names="b" values="0.01"/>
+</rates>  
+
+<trajparams id="initValues" spec="TrajectoryParameters" method="classicrk"
+	    integrationSteps="1001"  t0="0" t1="20">
+      <initialValue spec="ParamValue" names="I0" values="1"/>
+      <initialValue spec="ParamValue" names="I1" values="0"/>
+      <initialValue spec="ParamValue" names="S" values="999"/>
+</trajparams>
+  
+  <run spec="TrajectoryOut" model='@twodeme' file="sir2.csv" />
+</beast>
