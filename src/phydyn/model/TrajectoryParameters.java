@@ -1,5 +1,7 @@
 package phydyn.model;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,6 +52,7 @@ public class TrajectoryParameters extends CalculationNode {
 	 protected IntegrationMethod method;
 	 protected boolean fixedStepSize;
 	 protected double t1;
+	 protected boolean t1Set;
 	 	 
 	 Map<String, Integer> paramsMap;
 	 protected int numParams;
@@ -85,8 +88,10 @@ public class TrajectoryParameters extends CalculationNode {
 		}
 		
 		//t0 = t0Input.get().getValue(); // RealParameter - removed 
+		t1Set=false;
 		if (t1Input.get()!=null) {
 			t1 = t1Input.get();
+			t1Set = true;
 		}
 		/* Integration Method */
 		String strMethod = methodInput.get();
@@ -115,14 +120,20 @@ public class TrajectoryParameters extends CalculationNode {
 		return t0Input.get().getValue();
 	}
 	
-	/* Must call if (and only if) t1 is not supplied in XML input 
-	 * If called with t1Input present, throw exception (for the time being) */
-	void setEndTime(double t) throws Exception {
-		if (t1Input.get()!=null) {
-			throw new Exception("Error: Trying to set t1 (already provided as input)");
-		}		
+	/* Not any more: Must call if (and only if) t1 is not supplied in XML input 
+	 *       If called with t1Input present, throw exception  
+	 *  We can change t1 if t1 provided eg if date trait provided    */
+	void setEndTime(double t)  {		
+		//if (t1Input.get()!=null) {  
+		//	throw new Exception("Error: Trying to set t1 (already provided as input)");
+		//}		
 		t1 = t;
+		t1Set = true;
 		System.out.println("Setting t1 = "+t1);
+	}
+	
+	void unsetEndTime() {
+		t1Set = false;
 	}
 	
 	/* Sets up initial value parameters for model */
@@ -216,6 +227,11 @@ public class TrajectoryParameters extends CalculationNode {
 		String space2 = "  ";
 		String space4 = "    ";
 		String s = "trajectory-parameters = {\n";
+		s += "  method="+methodInput.get()+"; ";
+		s += "integrationSteps="+integrationSteps+";\n";
+		if (!fixedStepSize) {
+			s += "  order="+order+"; aTol="+aTol+" rTol="+rTol+"\n";
+		}
 		s += space2 + "initial-vales = {\n";
 		for(int i=0; i < paramNames.length; i++) {
 			s += space4+paramNames[i]+" = "+ paramValues[i] + ";\n";
@@ -224,7 +240,38 @@ public class TrajectoryParameters extends CalculationNode {
 		return s+"}";
 	}
 	
-	
+	public String writeXML(FileWriter writer, String tparamID) throws IOException {
+		String xml1 = "<trajparams id=\"*id*\" spec=\"TrajectoryParameters\" method=\"*m*\" ";
+		String xml2 = "  <initialValue spec=\"ParamValue\" names=\"*n*\" values=\"*v*\"/>";
+		// order="*o* aTol="*a* rTol="*r*"
+		String xml3 = "order=\"*o*\" aTol=\"*a*\" rTol=\"*r*\" ";
+		//<trajparams id="initValues" spec="TrajectoryParameters" method="classicrk"
+		//	    integrationSteps="1001"  order="3" t0="-0.01" t1="10">
+		//      <initialValue spec="ParamValue" names="I0" values="1"/>
+		//      <initialValue spec="ParamValue" names="I1" values="1"/>
+		//      <initialValue spec="ParamValue" names="S" values="12000.0"/>
+		//</trajparams>
+		String s = xml1.replace("*id*", tparamID);
+		writer.append(s.replace("*m*", methodInput.get())+"\n");
+		writer.append("  integrationSteps=\""+integrationSteps+"\" ");
+		if (!fixedStepSize) {
+			s = xml3.replace("*o*",Integer.toString(order));
+			s = s.replace("*a*", Double.toString(aTol));
+			s = s.replace("*r*", Double.toString(rTol));
+			writer.append(s);
+		}
+		writer.append("t0=\""+Double.toString(this.getStartTime())+"\" ");
+		if (t1Set) {
+			writer.append("t1=\""+Double.toString(t1)+"\" ");
+		}
+		writer.append("\n  >\n");
+		for(int i=0; i < paramNames.length; i++) {
+			s = xml2.replace("*n*", paramNames[i]);
+			writer.append(s.replace("*v*", Double.toString(paramValues[i]))+"\n");
+		}
+		writer.append("</trajparams>\n");
+		return tparamID;
+	}
 	
 	
 		

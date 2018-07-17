@@ -46,7 +46,7 @@ public class MatrixEquationObj {
 		case DEATH:
 			s = "D("+this.originName+")"; break;
 		default: // non-deme
-			s = this.originName;
+			s = "dot(" + this.originName +")";
 		}
 		return s;
 	}

@@ -1,5 +1,7 @@
 package phydyn.model;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +83,20 @@ public class PopModelIsland extends PopModel implements Loggable {
 		yAll = new double[numDemes+numNonDemes]; // numNonDemes is 0
 	}
 	
+	@Override
+	public String getName() {
+		return this.getID();
+	}
+	
 	public void printModel() {
 		System.out.println("Island Model");
 	}
 
+	public String writeXML(FileWriter writer) throws IOException {
+		writer.append("-- not implemented -- ");
+		return this.getName();
+	}
+	
 	protected void updateMatrices() {
 		double xF;
 		if (xFInput.get()==null) {
@@ -161,6 +173,11 @@ public class PopModelIsland extends PopModel implements Loggable {
 	public void setEndTime(double newt1) {
 		t1 = newt1;
 		endTimeDefined = true;
+	}
+	
+	@Override
+	public void unsetEndTime() {
+		endTimeDefined = false;
 	}
 
 	@Override

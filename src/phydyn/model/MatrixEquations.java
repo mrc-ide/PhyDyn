@@ -66,7 +66,6 @@ public class MatrixEquations extends BEASTObject {
 	
 	public List<MatrixEquationObj> createMatrixEquations() {
 		List<MatrixEquationContext> eqCtxs = eqsCtx.matrixEquation();
-		System.out.println("size="+eqCtxs.size());
 		List<MatrixEquationObj> eqs = new ArrayList<>();
 		MatrixEquationObj eq;
 		for (MatrixEquationContext eqCtx: eqCtxs ) {

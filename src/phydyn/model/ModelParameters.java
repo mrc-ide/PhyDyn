@@ -1,5 +1,7 @@
 package phydyn.model;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,6 +124,34 @@ public class ModelParameters extends CalculationNode {
 			s += "};\n";
 		}
 		return s+"}";
+	}
+	
+	public String writeXML(FileWriter writer, String paramID) throws IOException {
+		String paramxml = "  <param spec=\"ParamValue\" names=\"*x*\" values=\"*v*\"/>";
+		String vectorxml = " <param spec=\"ParamValue\" vector=\"true\" names=\"*x*\" values=\"*v*\"/>";
+		writer.append("<rates spec=\"ModelParameters\" id='**'> ".replace("**",paramID));
+		// <param spec="ParamValue" names="beta0" values="0.0001"/>
+		String s;
+	    //<param spec="ParamValue" vector="true" names="KP" values="1 2 3"/>		
+		for(int i=0; i < paramNames.length; i++) {
+			s = paramxml.replace("*x*",paramNames[i]);
+			s = s.replace("*v*",Double.toString(paramValues[i]));
+			writer.append(s+"\n");
+		}
+		String vs;
+		for(int i=0; i < paramVectorNames.length; i++) {
+			s = vectorxml.replace("*x*",paramVectorNames[i]);
+			vs = Double.toString(paramVectorValues[i][0]);  // there should at least be one element
+			for(int j=1; j < paramVectorValues[i].length; j++) {
+				vs += " "+  Double.toString(paramVectorValues[i][j]);
+			}
+			s = s.replace("*v*",vs);
+			writer.append(s+"\n");
+		}
+	    //</rates>  
+	   writer.append("</rates>\n");
+
+		return paramID;
 	}
 	
 	

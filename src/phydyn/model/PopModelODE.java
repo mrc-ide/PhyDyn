@@ -1,5 +1,7 @@
 package phydyn.model;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,7 +118,6 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		for(MatrixEquation eqxml: equationsXML) {
 			equations.add(eqxml.createMatrixEquation());
 		}
-		
 		if (matrixEquationsStringInput.get() != null) {
 			MatrixEquations eqsXML = matrixEquationsStringInput.get();
 			List<MatrixEquationObj> eqs = eqsXML.createMatrixEquations();
@@ -124,7 +125,6 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 				equations.add(eq);
 			}
 		}
-
 			
 		for(MatrixEquationObj eq: equations) {
 			name = eq.originName;
@@ -134,9 +134,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 				if (!ldemes.contains(name)) ldemes.add(name);
 			}
 		}
-		
-		
-		
+			
 		// collect deme names
 		numDemes = ldemes.size();
 		demeNames = new String[numDemes];
@@ -200,7 +198,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		// Keep track of special variables and constants used.
 		SemanticChecker checker = new SemanticChecker();
 		if (checker.check(this)) {
-			throw new IllegalArgumentException("Error(s) found in model formulae\n");
+			throw new IllegalArgumentException("Error(s) found in model formulae");
 		}
 		useT = checker.useT;
 		useT0T1 = checker.useT0T1;
@@ -248,6 +246,11 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	}
 	
 	@Override
+	public String getName() {
+		return this.getID();
+	}
+	
+	@Override
 	public void printModel() {
 		System.out.println(this.toString());	
 		//printer.printModel(this);
@@ -269,13 +272,41 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			//System.out.println(printer.visit(eq.rhsExprCtx)+";");
 		}
 		s +="}\n";
-		s += (this.modelParams.toString());
+		s += (this.modelParams.toString())+"\n";
 		s += (this.trajParams.toString());
 		return s;
 	}
 	
+	public String writeXML(FileWriter writer) throws IOException {
+		String modelID = this.getName();
+		String initID = modelID+"-init";
+		String paramID = modelID+"-param";
+		//<model spec="PopModelODE" id="twodeme" evaluator="compiled"
+		//		 popParams='@initValues' modelParams='@rates'  >
+		writer.append("<model spec=\"PopModelODE\" id=\""+modelID+"\" evaluator=\"");
+		writer.append(evaluatorTypeInput.get()+"\"\n");
+		writer.append("    popParams='@"+initID+"' modelParams='@"+paramID+"'>\n");
+		PopModelODEPrinter printer = new PopModelODEPrinter();
+		writer.append("<definitions spec='Definitions'>\n");				
+		for(DefinitionObj def: this.definitions) {	
+			writer.append("  "+printer.visit(def.stm)+"\n");
+		}
+		writer.append("</definitions>\n");
+		writer.append("<matrixeqs spec=\"MatrixEquations\"> \n"); 
+		for(MatrixEquationObj eq: this.equations) {
+			writer.append("  "+eq.getLHS() + " = " + printer.visit(eq.rhsExprCtx)+";\n" );			
+		}
+		writer.append("</matrixeqs>\n");
+		writer.append("\n</model>\n");
+		this.modelParams.writeXML(writer,paramID);
+		writer.append("\n");
+		this.trajParams.writeXML(writer, initID);
+		return modelID;
+	}
 	
 	/* End CalculationNode Interface */
+	
+	@Override
 	public boolean hasEndTime() { return  trajParams.t1Input.get()!= null; }
 	public double getEndTime() { return trajParams.t1; }
 	public void setStartTime(double newT0) { 
@@ -283,11 +314,14 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		throw new IllegalArgumentException("Can't change t0 for non-constant populations");
 	}
 	public double getStartTime() { return trajParams.getStartTime(); }
-	public void setEndTime(double newt1) {
-		trajParams.t1 = newt1; 
+	public void setEndTime(double newt1)  {
+		trajParams.setEndTime(newt1); 
 	} // integrate again
 	// (below) removed until we figure out how to keep track changes of t0Input/t0
 	//public void setStartTime(double newt0) { trajParams.t0 = newt0; } // integrate again
+	public void unsetEndTime() {
+		trajParams.unsetEndTime();
+	}
 	
 	/* needed by Density class */
 	public boolean update() {

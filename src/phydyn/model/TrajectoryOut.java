@@ -16,6 +16,7 @@ public class TrajectoryOut extends Runnable {
 	// file type. Currently only option is csv (default)
 	
 	private String fileName;
+	private PopModel popModel;
 	
 	/**
 	 * initAndValidate is supposed to check validity of values of inputs, and initialise. 
@@ -29,13 +30,17 @@ public class TrajectoryOut extends Runnable {
 			fileName = "trajectory.csv";
 		else
 			fileName = fileInput.get();
+		popModel = modelInput.get();
+		
+		if (!popModel.hasEndTime()) {
+			throw new IllegalArgumentException("Trajectory End Time (t0) unspecified - quitting");
+		}
 	}
 
 	@Override
-	public void run() throws Exception {
-				
-		modelInput.get().update();
-		modelInput.get().printModel();  // print equations
+	public void run() throws Exception {	
+		popModel.update();
+		popModel.printModel();  // print equations
 		TimeSeriesFGY ts = modelInput.get().getTimeSeries();
 		ts.reverse();
 		

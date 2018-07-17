@@ -1,6 +1,9 @@
 package phydyn.model;
 
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import beast.core.CalculationNode;
 
 public abstract class PopModel extends CalculationNode {
@@ -15,8 +18,10 @@ public abstract class PopModel extends CalculationNode {
 
 	}
 	
-	/* Legacy needed by Density class -  defaultt implementation */
+	/* Legacy needed by Density class -  default implementation */
+	public abstract String getName();
 	public int getNumStates() { return numDemes; }
+	
 	
 	public abstract boolean update();
 	public abstract TimeSeriesFGY getTimeSeries();
@@ -24,6 +29,7 @@ public abstract class PopModel extends CalculationNode {
 	public abstract boolean hasEndTime();
 	public abstract double getEndTime();
 	public abstract void setEndTime(double newt1);
+	public abstract void unsetEndTime();
 	public abstract void setStartTime(double t0);
 	public abstract double getStartTime();
 	
@@ -54,5 +60,7 @@ public abstract class PopModel extends CalculationNode {
 	public void printModel() {
 		System.out.println("Population Model:");
 	}
+	
+	public abstract String writeXML(FileWriter writer)  throws IOException;
 
 }

@@ -103,7 +103,12 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			}
     		}
     	} else {
-    		//System.out.println(" Using t1 = "+popModel.getEndTime());
+    		// If date trait exists, date trait wins - comment back to test fab's xml
+    		if (tree.getDateTrait()!=null) {
+    			if (!tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
+    				popModel.setEndTime( tree.getDateTrait().getDate(0));
+    			}
+    		}
     	}
     	
        	double trajDuration = popModel.getEndTime() - popModel.getStartTime();

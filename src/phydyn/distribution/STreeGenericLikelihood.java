@@ -113,7 +113,6 @@ public abstract class STreeGenericLikelihood extends Distribution {
 			 /* assumption: node.nr < numNodes */
 			 final int nr = node.getNr();
 			 if (traitInput) { /* use type trait and extract state number */
-				 //System.out.println("Using TraitInput");
 				 if (useStateName) {
 					 sampleState = popModel.getStateFromName(typeTraitInput.get().getStringValue(node.getID()) );
 				 } else {
