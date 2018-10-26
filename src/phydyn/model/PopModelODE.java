@@ -3,7 +3,9 @@ package phydyn.model;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MaxCountExceededException;
@@ -24,6 +26,8 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import phydyn.analysis.PopModelAnalysis;
+import phydyn.analysis.XMLFileWriter;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
 
@@ -81,6 +85,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 protected List<String> defNames;
 	 List<DefinitionObj> definitions;
 	 
+	 protected Set<String> allParameters;
+	 
 	 	 
 	 // now part of modelParams
 	 //public String[] rateNames;
@@ -126,6 +132,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			}
 		}
 			
+		// todo: use Set<String>
 		for(MatrixEquationObj eq: equations) {
 			name = eq.originName;
 			if (eq.type == EquationType.NONDEME) {
@@ -221,6 +228,17 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			throw new IllegalArgumentException("Error(s) found in Trajectory Parameters");
 		}
 		
+		// collect all parameters
+		allParameters = new HashSet<String>();
+		for (i=0; i < yNames.length; i++) {
+			allParameters.add(yNames[i]);
+		}
+		for(i=0; i < modelParams.paramNames.length; i++) {
+			if (!allParameters.add(modelParams.paramNames[i])) {
+				System.out.println("Repeated model parameter name ("+modelParams.paramNames[i]+")");
+				throw new IllegalArgumentException("Error(s) found in model parameters");
+			}
+		}
 	}	
 	
 	
@@ -277,30 +295,37 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		return s;
 	}
 	
-	public String writeXML(FileWriter writer) throws IOException {
+	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis) throws IOException {
 		String modelID = this.getName();
 		String initID = modelID+"-init";
 		String paramID = modelID+"-param";
 		//<model spec="PopModelODE" id="twodeme" evaluator="compiled"
 		//		 popParams='@initValues' modelParams='@rates'  >
-		writer.append("<model spec=\"PopModelODE\" id=\""+modelID+"\" evaluator=\"");
-		writer.append(evaluatorTypeInput.get()+"\"\n");
-		writer.append("    popParams='@"+initID+"' modelParams='@"+paramID+"'>\n");
+		writer.tabAppend("<model spec=\"PopModelODE\" id=\""+modelID+"\" evaluator=\"");
+		writer.tabAppend(evaluatorTypeInput.get()+"\"\n");
+		writer.tabAppend("    popParams='@"+initID+"' modelParams='@"+paramID+"'>\n");
 		PopModelODEPrinter printer = new PopModelODEPrinter();
-		writer.append("<definitions spec='Definitions'>\n");				
+		writer.tabAppend("<definitions spec='Definitions'>\n");
+		writer.tab();
 		for(DefinitionObj def: this.definitions) {	
-			writer.append("  "+printer.visit(def.stm)+"\n");
+			writer.tabAppend(printer.visit(def.stm)+"\n");
 		}
-		writer.append("</definitions>\n");
-		writer.append("<matrixeqs spec=\"MatrixEquations\"> \n"); 
+		writer.untab();
+		writer.tabAppend("</definitions>\n");
+		writer.tabAppend("<matrixeqs spec=\"MatrixEquations\"> \n"); 
+		writer.tab();
 		for(MatrixEquationObj eq: this.equations) {
-			writer.append("  "+eq.getLHS() + " = " + printer.visit(eq.rhsExprCtx)+";\n" );			
+			writer.tabAppend(eq.getLHS() + " = " + printer.visit(eq.rhsExprCtx)+";\n" );			
 		}
-		writer.append("</matrixeqs>\n");
-		writer.append("\n</model>\n");
-		this.modelParams.writeXML(writer,paramID);
-		writer.append("\n");
-		this.trajParams.writeXML(writer, initID);
+		writer.untab();
+		writer.tabAppend("</matrixeqs>\n");
+		writer.tabAppend("\n</model>\n");
+		
+		// pass analysis
+		
+		this.modelParams.writeXML(writer,analysis,paramID);
+		writer.tabAppend("\n");
+		this.trajParams.writeXML(writer,analysis,initID);
 		return modelID;
 	}
 	
@@ -362,7 +387,26 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	//public double getEndTime() { return t1; }
 	//public void setEndTime(double newt1) { t1 = newt1; } // integrate again
 	
-
+	@Override
+	public boolean isParameter(String paramName) {
+		return allParameters.contains(paramName);
+	}
+	
+	@Override
+	public String getParameterValue(String paramName) {
+		Double r;
+		String result = "null";
+		r = trajParams.getParam(paramName);
+		if (r==null) {
+			r = modelParams.getParam(paramName);
+			if (r!=null) {
+				result = Double.toString(r);
+			}
+		} else {
+			result = Double.toString(r);
+		}
+		return result;
+	}
 
 	/*  Rates, etc  */
 	public int getParamIndex(String paramName) {
@@ -384,6 +428,9 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		IntegrationMethod method;
 		
 		/* extract arguments */
+		if (!trajParams.hasEndTime()) {
+			throw new IllegalArgumentException("PopModelODE: end-time (t1) missing.");
+		}
 		t0t1[0] = getStartTime();
 		t0t1[1] = trajParams.t1;
 		// System.out.println("t0="+t0t1[0]+"  t1="+t0t1[1]);
@@ -453,7 +500,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			nondemeYdot = new double[numNonDemes];
 			for(i=0; i < numNonDemes; i++) { nondemeYdot[i] = 0.0; }
 		}
-		//System.out.println("t0 "+t0t1[0]+" t1 "+t0t1[1]);
+		// System.out.println("t0 "+t0t1[0]+" t1 "+t0t1[1]);
 		foi.integrate(this, t0t1[0], y0, t0t1[1], y1);
 	
 		// the stephandler will generate a new TimeSeriesFGY

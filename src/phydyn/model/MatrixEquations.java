@@ -79,7 +79,7 @@ public class MatrixEquations extends BEASTObject {
 			else if (eqCtx instanceof NondemeEquationContext)
 				eq = createMatrixEquation((NondemeEquationContext) eqCtx );
 			else 
-				throw new IllegalArgumentException("Programmer errorL Invalid matrix equation type - programming error");
+				throw new IllegalArgumentException("Programmer error: Invalid matrix equation type - programming error");
 			eqs.add(eq);
 		}
 		return eqs;

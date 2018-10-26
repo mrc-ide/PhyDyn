@@ -10,6 +10,8 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
+import phydyn.analysis.PopModelAnalysis;
+import phydyn.analysis.XMLFileWriter;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
 
@@ -92,8 +94,8 @@ public class PopModelIsland extends PopModel implements Loggable {
 		System.out.println("Island Model");
 	}
 
-	public String writeXML(FileWriter writer) throws IOException {
-		writer.append("-- not implemented -- ");
+	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis) throws IOException {
+		writer.tabAppend("-- not implemented -- ");
 		return this.getName();
 	}
 	
@@ -213,6 +215,17 @@ public class PopModelIsland extends PopModel implements Loggable {
 	public boolean updateParam(String paramName, double paramValue) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	// not properly implemented
+	@Override
+	public boolean isParameter(String paramName) {
+		return false;
+	}
+	
+	@Override
+	public String getParameterValue(String paramName) {
+		return "not-implemented";
 	}
 
 	@Override

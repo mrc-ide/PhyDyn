@@ -1,18 +1,17 @@
 package phydyn.model;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import beast.core.BEASTObject;
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import phydyn.analysis.PopModelAnalysis;
+import phydyn.analysis.XMLFileWriter;
 
 public class TrajectoryParameters extends CalculationNode {
 
@@ -129,11 +128,15 @@ public class TrajectoryParameters extends CalculationNode {
 		//}		
 		t1 = t;
 		t1Set = true;
-		System.out.println("Setting t1 = "+t1);
+		//System.out.println("Setting t1 = "+t1);
 	}
 	
 	void unsetEndTime() {
 		t1Set = false;
+	}
+	
+	boolean hasEndTime() {
+		return t1Set;
 	}
 	
 	/* Sets up initial value parameters for model */
@@ -189,10 +192,11 @@ public class TrajectoryParameters extends CalculationNode {
 		return true;
 	}
 	
-	public double getParam(String paramName) throws Exception {
+	public Double getParam(String paramName){
 		Integer idx = paramsMap.get(paramName);
 		if (idx==null) {
-			throw new IllegalArgumentException("Unknow Population Parameter: "+paramName);
+			//throw new IllegalArgumentException("Unknow Population Parameter: "+paramName);
+			return null;
 		}
 		return paramValues[idx];
 	}
@@ -227,6 +231,11 @@ public class TrajectoryParameters extends CalculationNode {
 		String space2 = "  ";
 		String space4 = "    ";
 		String s = "trajectory-parameters = {\n";
+		s += "  t0 = "+ Double.toString(this.getStartTime());
+		if (t1Set) {
+			s += " t1 = "+ Double.toString(t1);
+		}
+		s += "\n";
 		s += "  method="+methodInput.get()+"; ";
 		s += "integrationSteps="+integrationSteps+";\n";
 		if (!fixedStepSize) {
@@ -240,9 +249,9 @@ public class TrajectoryParameters extends CalculationNode {
 		return s+"}";
 	}
 	
-	public String writeXML(FileWriter writer, String tparamID) throws IOException {
+	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis, String tparamID) throws IOException {
 		String xml1 = "<trajparams id=\"*id*\" spec=\"TrajectoryParameters\" method=\"*m*\" ";
-		String xml2 = "  <initialValue spec=\"ParamValue\" names=\"*n*\" values=\"*v*\"/>";
+		String xml2 = "<initialValue spec=\"ParamValue\" names=\"*n*\" values=\"*v*\"/>";
 		// order="*o* aTol="*a* rTol="*r*"
 		String xml3 = "order=\"*o*\" aTol=\"*a*\" rTol=\"*r*\" ";
 		//<trajparams id="initValues" spec="TrajectoryParameters" method="classicrk"
@@ -252,24 +261,33 @@ public class TrajectoryParameters extends CalculationNode {
 		//      <initialValue spec="ParamValue" names="S" values="12000.0"/>
 		//</trajparams>
 		String s = xml1.replace("*id*", tparamID);
-		writer.append(s.replace("*m*", methodInput.get())+"\n");
-		writer.append("  integrationSteps=\""+integrationSteps+"\" ");
+		writer.tabAppend(s.replace("*m*", methodInput.get())+"\n");
+		writer.tabAppend("  integrationSteps=\""+integrationSteps+"\" ");
 		if (!fixedStepSize) {
 			s = xml3.replace("*o*",Integer.toString(order));
 			s = s.replace("*a*", Double.toString(aTol));
 			s = s.replace("*r*", Double.toString(rTol));
-			writer.append(s);
+			writer.tabAppend(s);
 		}
-		writer.append("t0=\""+Double.toString(this.getStartTime())+"\" ");
+		writer.tabAppend("t0=\""+Double.toString(this.getStartTime())+"\" ");
 		if (t1Set) {
-			writer.append("t1=\""+Double.toString(t1)+"\" ");
+			writer.tabAppend("t1=\""+Double.toString(t1)+"\" ");
 		}
-		writer.append("\n  >\n");
+		writer.tabAppend("\n  >\n");
+		String paramName, paramID;
+		writer.tab();
 		for(int i=0; i < paramNames.length; i++) {
+			paramName = paramNames[i];
+			paramID = analysis.getParamID(paramName); // is it being sampled?
 			s = xml2.replace("*n*", paramNames[i]);
-			writer.append(s.replace("*v*", Double.toString(paramValues[i]))+"\n");
+			if (paramID==null) {
+				writer.tabAppend(s.replace("*v*", Double.toString(paramValues[i]))+"\n");
+			} else {
+				writer.tabAppend(s.replace("*v*", "@"+paramID)+"\n");
+			}
 		}
-		writer.append("</trajparams>\n");
+		writer.untab();
+		writer.tabAppend("</trajparams>\n");
 		return tparamID;
 	}
 	

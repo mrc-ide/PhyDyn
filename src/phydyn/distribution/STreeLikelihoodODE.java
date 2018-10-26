@@ -39,6 +39,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 	public double stepSize, aTol, rTol, minP;
 	public int order;
 	public EquationsType eqType;
+	private static final EquationsType defaultEquations =  EquationsType.PL2;
 	
 	public Input<Boolean> solvePLInput = new Input<>(
 			"solvePL", "Solve dP equations instead of dQ");
@@ -99,7 +100,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 		 // Equations / solver.
 		 if (equationsInput.get()!=null) {
 			 String eq = equationsInput.get();
-			 if (eq.equals("PL")) eqType = EquationsType.PL1;
+			 if (eq.equals("PL")) eqType = EquationsType.PL2;
 			 else if (eq.equals("PL1")) eqType = EquationsType.PL1;
 			 else if (eq.equals("PL2")) eqType = EquationsType.PL2;
 			 else if (eq.equals("QL")) eqType = EquationsType.QL;
@@ -114,7 +115,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 				 }
 			 } 
 		 } else { // legacy
-			 eqType = EquationsType.PL1; // default
+			 eqType = defaultEquations; // default
 			 if ( (solvePLInput.get()!=null)&& (!solvePLInput.get())) {				 
 					 eqType = EquationsType.QL;									
 			 }			 

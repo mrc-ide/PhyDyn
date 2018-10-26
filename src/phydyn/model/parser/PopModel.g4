@@ -2,12 +2,37 @@ grammar PopModel;
 
 // antlr -visitor -no-listener
 
+// This grammar was initially intended to specify the syntax of population
+// model specifications based on FGD ODE's.
+// It has been extended to capture analysis specifications that have
+// popmodels as major components.
+
 @header {
 package phydyn.model.parser;
 }
 
 // @lexer::header { blah}
 // @members { more blah }
+
+//analysisDef:
+//  'operator' '(' IDENT ',' INT ')' '=' IDENT '(' arg ( ',' arg )* ')' ';' # operatorDef  
+//  | 'prior' '(' IDENT ')' '=' IDENT '(' arg ( ',' arg )* ')' ';' # priorDef
+//  ;
+//analysisSpec : ( analysisDecl | analysisDef )+ ;
+
+//analysisSpec :  (analysisDecl | analysisDef)+ ;
+
+bound : (INT | FLOAT | '-inf' | 'inf') ;
+arg :  (INT | FLOAT | IDENT ) ;
+priorDecl : 'prior' '=' IDENT '(' arg ( ',' arg )* ')' ';' ;
+// operatorDecl : 'operator' ('(' INT ')')? '=' IDENT '(' arg ( ',' arg )* ')' ';' ;
+operatorDecl : 'operator' ('(' INT ')')? '=' IDENT '(' (arg ( ',' arg )*)? ')' ';' ;
+adeclBody : '{' priorDecl* operatorDecl* '}' ;
+
+analysisDecl :  IDENT '=' IDENT ( '(' bound  ',' bound ')' )? adeclBody ';'  ;
+
+analysisSpec : (analysisDecl)* ;
+
 
 // Extended syntax: definition and matrix equation lists
 definitions : (stm ';')+ ;
@@ -78,6 +103,7 @@ ELSE : 'else' ;
 
 
 // Lexer rules
+
 INT : DIGIT+;
 FLOAT : DIGIT+ '.' DIGIT* ([eE] '-'? DIGIT+)?
       | '.' DIGIT+ ;

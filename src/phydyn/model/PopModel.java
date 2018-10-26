@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import beast.core.CalculationNode;
+import phydyn.analysis.PopModelAnalysis;
+import phydyn.analysis.XMLFileWriter;
 
 public abstract class PopModel extends CalculationNode {
 	
@@ -56,11 +58,13 @@ public abstract class PopModel extends CalculationNode {
 	public abstract int getYindex(String yName);
 	public abstract void updateRate(String rateName, double v);
 	public abstract boolean updateParam(String paramName, double paramValue);
+	public abstract boolean isParameter(String paramName);
+	public abstract String getParameterValue(String ParamName);
 	
 	public void printModel() {
 		System.out.println("Population Model:");
 	}
 	
-	public abstract String writeXML(FileWriter writer)  throws IOException;
+	public abstract String writeXML(XMLFileWriter writer, PopModelAnalysis analysis)  throws IOException;
 
 }

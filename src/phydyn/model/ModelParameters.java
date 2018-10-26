@@ -7,6 +7,8 @@ import java.util.List;
 
 import beast.core.CalculationNode;
 import beast.core.Input;
+import phydyn.analysis.PopModelAnalysis;
+import phydyn.analysis.XMLFileWriter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -101,6 +103,14 @@ public class ModelParameters extends CalculationNode {
 		
 	}
 	
+	public Double getParam(String paramName) {
+		for(int i=0; i < paramNames.length; i++) {
+			if (paramName.equals(paramNames[i]))
+				return paramValues[i];
+		}
+		return null;
+	}
+	
 	public void print() {
 		System.out.print("rates: ");
 		for(int i =0; i < numParams; i++) {
@@ -126,17 +136,24 @@ public class ModelParameters extends CalculationNode {
 		return s+"}";
 	}
 	
-	public String writeXML(FileWriter writer, String paramID) throws IOException {
-		String paramxml = "  <param spec=\"ParamValue\" names=\"*x*\" values=\"*v*\"/>";
-		String vectorxml = " <param spec=\"ParamValue\" vector=\"true\" names=\"*x*\" values=\"*v*\"/>";
-		writer.append("<rates spec=\"ModelParameters\" id='**'> ".replace("**",paramID));
+	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis, String mparamID) throws IOException {
+		String paramxml = "<param spec=\"ParamValue\" names=\"*x*\" values=\"*v*\"/>";
+		String vectorxml = "<param spec=\"ParamValue\" vector=\"true\" names=\"*x*\" values=\"*v*\"/>";
+		writer.tabAppend("<rates spec=\"ModelParameters\" id='**'> ".replace("**",mparamID)+"\n");
+		writer.tab();
 		// <param spec="ParamValue" names="beta0" values="0.0001"/>
-		String s;
+		String s, paramName, paramID;
 	    //<param spec="ParamValue" vector="true" names="KP" values="1 2 3"/>		
 		for(int i=0; i < paramNames.length; i++) {
-			s = paramxml.replace("*x*",paramNames[i]);
-			s = s.replace("*v*",Double.toString(paramValues[i]));
-			writer.append(s+"\n");
+			paramName = paramNames[i];
+			s = paramxml.replace("*x*",paramName);
+			paramID = analysis.getParamID(paramName); // is it being sampled?
+			if (paramID==null) {	
+				s = s.replace("*v*",Double.toString(paramValues[i]));
+			} else {
+				s = s.replace("*v*","@"+paramID);
+			}
+			writer.tabAppend(s+"\n");
 		}
 		String vs;
 		for(int i=0; i < paramVectorNames.length; i++) {
@@ -146,12 +163,12 @@ public class ModelParameters extends CalculationNode {
 				vs += " "+  Double.toString(paramVectorValues[i][j]);
 			}
 			s = s.replace("*v*",vs);
-			writer.append(s+"\n");
+			writer.tabAppend(s+"\n");
 		}
 	    //</rates>  
-	   writer.append("</rates>\n");
-
-		return paramID;
+		writer.untab();
+		writer.tabAppend("</rates>\n");
+		return mparamID;
 	}
 	
 	

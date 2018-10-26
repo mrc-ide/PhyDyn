@@ -48,6 +48,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 	public Input<Boolean> forgiveYInput = new Input<>("forgiveY",
 			"Tolerates Y < 1.0 and sets Y = max(Y,1.0)",  new Boolean(true));
 	
+	public Input<Integer> gcInput = new Input<>(
+			"gc", "Number of iterations before calling the garbaga collector",
+			new Integer(0));
+	
 	/* inherits from STreeGenericLikelihood:
 	 *  public PopModelODE popModel;
 	 	public TreeInterface tree;
@@ -69,6 +73,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 	// helper variables
 	DVector[] coalProbs;
 	int[] pair = new int[2];
+	private int  gcCounter = 0; 
       
  
     @Override
@@ -82,7 +87,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		else
     			aceSolver = new Solverfwd(this);
     	}
- 
+    	gcCounter = 0;
     }
     
     public boolean initValues()   {
@@ -169,6 +174,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         }
         
         double trajDuration = popModel.getEndTime() - popModel.getStartTime();
+        
+ 
         logP = 0;  
         
         final int numIntervals = intervals.getIntervalCount();
@@ -263,6 +270,23 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         if (Double.isInfinite(logP)) logP = Double.NEGATIVE_INFINITY;
                 
         // System.out.println("LogLh is ="+logP);
+        
+        
+        //System.out.println("Traj duration: "+trajDuration+"  intervals "+intervals.getTotalDuration());
+        //System.out.println("   used: "+usedMemory);
+        
+        if (gcInput.get() > 0) {
+        	if (gcCounter >= gcInput.get()) {
+        		System.out.println("Garbage collection");
+        		System.gc();
+        		gcCounter=0;
+        	} else {
+        		gcCounter++;
+        	}
+        }
+        //Runtime runtime = Runtime.getRuntime();
+        //long usedMemory = runtime.totalMemory() - runtime.freeMemory();
+        //System.out.println("   used: "+usedMemory);
         return logP;
    	
     }

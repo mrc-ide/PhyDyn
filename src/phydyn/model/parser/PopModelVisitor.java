@@ -13,6 +13,48 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface PopModelVisitor<T> extends ParseTreeVisitor<T> {
 	/**
+	 * Visit a parse tree produced by {@link PopModelParser#bound}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBound(PopModelParser.BoundContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#arg}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArg(PopModelParser.ArgContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#priorDecl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPriorDecl(PopModelParser.PriorDeclContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#operatorDecl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOperatorDecl(PopModelParser.OperatorDeclContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#adeclBody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAdeclBody(PopModelParser.AdeclBodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#analysisDecl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnalysisDecl(PopModelParser.AnalysisDeclContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PopModelParser#analysisSpec}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnalysisSpec(PopModelParser.AnalysisSpecContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PopModelParser#definitions}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
