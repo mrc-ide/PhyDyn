@@ -11,7 +11,7 @@ This package enables simultaneous estimation of epidemiological parameters and p
 
 ## Distribution and Installation
 
-The latest version of the package (**v1.3.1**) has been compiled against BEAST v2.5.0. It will be available from the Beast repository soon.
+The latest version of the package (**v1.3.1**) has been compiled against BEAST v2.5.0. It is now be available from the Beast repository.
 
 The package (v.1.3.1) can also be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
 
