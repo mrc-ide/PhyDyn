@@ -210,6 +210,12 @@ public class DVector {
 		return r;
 	}
 	
+	public DVector divi(DVector V) {
+		for(int idx =start, idx2=V.start; idx < (start+length); idx++,idx2++)
+			this.data[idx] /=  V.data[idx2];		
+		return this;
+	}
+	
 	public DVector divi(DVector V, DVector R ) {
 		for(int idx =start, idx2=V.start, ridx=R.start; idx < (start+length); idx++,idx2++, ridx++)
 			R.data[ridx] = this.data[idx] / V.data[idx2];		

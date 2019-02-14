@@ -92,6 +92,12 @@ public class DMatrix {
 		return r;
 	}
 	
+	public void put(double v) {
+		for(int idx=start; idx < start+length; idx++) {
+			data[idx] = v;  // use buffer functions?
+		}
+	}
+	
 	public void put(int pos, double v) {
 		if (pos > this.length)
 			throw new IllegalArgumentException("Dmatrix: out if bounds indices");
@@ -204,10 +210,27 @@ public class DMatrix {
 		return R;
 	}
 	
+	public DMatrix diviRowVector(DVector V) {
+		if (V.length!=this.columns)
+			throw new IllegalArgumentException("DMatrix diviRowVector: Incorrect vector length");
+		int idx=this.start;
+		int vidx;
+		double d;
+		vidx = V.start;
+		for(int col=0;col<this.columns;col++) {
+			d = V.data[vidx];
+			for(int row=0; row<this.rows; row++) {
+				this.data[idx] /= d;
+				idx++;
+			} 		
+			vidx++;
+		}
+		return this;
+	}
+	
 	public DMatrix diviRowVector(DVector V, DMatrix R) {
 		if (V.length!=this.columns)
 			throw new IllegalArgumentException("DMatrix diviRowVector: Incorrect vector length");
-		
 		int idx=this.start;
 		int ridx = R.start;
 		int vidx;
@@ -255,23 +278,7 @@ public class DMatrix {
 		return R;
 	}
 	
-	public DMatrix diviRowVector(DVector V) {
-		if (V.length!=this.columns)
-			throw new IllegalArgumentException("DMatrix diviRowVector: Incorrect vector length");
-		int idx=this.start;
-		int vidx;
-		double d;
-		vidx = V.start;
-		for(int col=0;col<this.columns;col++) {
-			d = V.data[vidx];
-			for(int row=0; row<this.rows; row++) {
-				this.data[idx] /= d;
-				idx++;
-			} 		
-			vidx++;
-		}
-		return this;
-	}
+
 	
 	public DMatrix diviColumnVector(DVector V) {
 		if (this.rows!=V.length)
@@ -439,6 +446,28 @@ public class DMatrix {
 		DVector R = new DVector(this.rows);
 		System.arraycopy(this.data, this.start+this.rows*col, R.data, R.start, this.rows);
 		return R;
+	}
+	
+	public DVector getDiagonal() {
+		int dim = Math.min(this.rows, this.columns);
+		DVector r = new DVector(dim);
+		this.getDiagonal(r);
+		return r;
+	}
+	
+	public DVector getDiagonal(DVector r) {
+		int dim = Math.min(this.rows, this.columns);
+		if (r.length < dim) {
+			throw new IllegalArgumentException("DMatrix.getDiagonal: vector too small");
+		}
+		int idx = this.start;
+		int vidx = r.start;
+		for(int i=0; i<dim; i++) {
+			r.data[vidx] = this.data[idx];
+			idx += (this.rows+1);
+			vidx++;
+		}
+		return r;
 	}
 	
 	

@@ -83,6 +83,7 @@ public class StateProbabilitiesVectors implements StateProbabilities {
 	@Override
 	public void getExtantProbabilities(int[] lineages, int numLineages, DVector[] pVectors) {
 		for(int l=0; l < numLineages; l++) {
+			//System.out.println("lineage: "+lineages[l]+" index: "+extantIndex[lineages[l]]);
 			pVectors[l] = extantProbs[extantIndex[lineages[l]]];
 		}
 		

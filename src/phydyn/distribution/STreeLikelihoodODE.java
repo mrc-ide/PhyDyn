@@ -123,13 +123,13 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 		 switch (eqType) {
 		 case PL1:
 			 if (popModel.isConstant())
-				solver = new SolverPLConstant(this);
+				solver = new SolverPL1Constant(this);
 			 else
 			 	solver = new SolverPL1(this); 
 			 break;
 		 case PL2:
 			 if (popModel.isConstant())
-				 solver = new SolverPLConstant(this);
+				 solver = new SolverPL2Constant(this);
 			 else
 				solver = new SolverPL2(this); 
 			    //solver = new SolverPL2Slow(this); 
@@ -143,6 +143,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 		 default:
 			 solver = new SolverLogQL(this);
 		 }
+		 
 		 
 	 }
 	 

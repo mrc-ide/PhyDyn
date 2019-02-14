@@ -73,8 +73,8 @@
 			<log idref="migRate"/>
 			<log idref="posterior"/>
 		</logger>
-		<logger id="probtreelog" fileName="rootStateProbabilities_phydyn.log" logEvery="1" mode="tree">
-			<log id="logTrees" spec="STreeRootLogger" tree="@tree" density="@stlikelihood"/>
+		<logger id="probtreelog" fileName="rootStateProbabilities_phydyn.log" logEvery="1">
+			<log id="logTrees" spec="STreeRootLogger" density="@stlikelihood"/>
 		</logger>
 		<logger id="screenlog" logEvery="1">
 			<log idref="posterior"/>

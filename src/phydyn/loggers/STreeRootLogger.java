@@ -2,38 +2,45 @@ package phydyn.loggers;
 
 import java.io.PrintStream;
 
-import org.jblas.DoubleMatrix;
-
+import beast.core.CalculationNode;
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.Loggable;
-import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import phydyn.distribution.STreeGenericLikelihood;
 import phydyn.distribution.StateProbabilities;
 import phydyn.util.DVector;
 
-public class STreeRootLogger extends Tree implements Loggable {
-	
-	 public Input<Tree> treeInput = new Input<Tree>("tree", "tree to be logged", Validate.REQUIRED);
+/**
+ * @author Igor Siveroni
+ */
+
+@Description("Logs root state probabilities")
+
+public class STreeRootLogger extends CalculationNode implements Loggable {	
+	 public Input<Tree> treeInput = new Input<Tree>("tree", "deprecated: tree to be logged");
 	 public Input<STreeGenericLikelihood> densityInput = new Input<STreeGenericLikelihood>(
 				"density",
-				"density / structured tree likelihood");
+				"density / structured tree likelihood",Validate.REQUIRED);
 	 
 	 int numStates = 0;
 	 
 	public void initAndValidate() {
 		numStates = densityInput.get().numStates;
+		if (treeInput.get()!=null) {
+			System.out.println("Warning: tree option in STreeRootLogger deprecated - remove.");
+		}
 	}
 
 	
 	/**
-     * write header information, e.g. labels of a parameter,
-     * or Nexus tree preamble
+     * Header information
      *
      * @param out log stream
      * @throws Exception
      */
+	 @Override
     public void init(PrintStream out)  {
     	out.print("Sample\t");
     	for(int i=0; i < numStates; i++)
@@ -48,10 +55,9 @@ public class STreeRootLogger extends Tree implements Loggable {
      * @param nSample chain sample number
      * @param out     log stream
      */
+    @Override
     public void log(int nSample, PrintStream out) {
     	out.print(nSample+"\t");
-    	Tree tree = (Tree)treeInput.get().getCurrent();
-    	Node root = tree.getRoot();
     	StateProbabilities sp = densityInput.get().getStateProbabilities();
     	DVector probs = sp.getRootProbs();
     	if (probs != null) {

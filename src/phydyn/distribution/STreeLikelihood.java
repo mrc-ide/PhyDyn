@@ -3,8 +3,6 @@ package phydyn.distribution;
 import java.util.List;
 import java.lang.Math;
 
-import org.jblas.DoubleMatrix;
-
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
@@ -22,13 +20,21 @@ import phydyn.util.DVector;
 
 /**
  * @author Igor Siveroni
- * based on original code by David Rasmussen, Nicola Muller
+ * General structured-tree likelihood code based on sequential traversal of tree intervals. Tree
+ * intervals are defined by sample (tree tips) and coalescent events (internal nodes). 
+ * This approach is standard and used by other packages/modules such as phydynR, MASCOT and 
+ * MultiTypeTree.
+ * Likelihood calculation is split into three methods: processInterval, processSampleEvent and 
+ * processCoalEvent. These methods can be overridden by sub-classing STreeLikelihood in order to 
+ * provide different implementations e.g. STreeLikelihoodODE overrides processInterval to give
+ * access to several ODE solvers.
+ * 
  */
 
 @Description("Calculates the probability of a beast.tree  under a structured population model "
-		+ "using the framework of Volz (2012).")
-@Citation("Erik M. Volz. 2012. Complex population dynamics and the coalescent under neutrality."
-		+ "Genetics. 2013 Nov;195(3):1199. ")
+		+ "using the framework of Volz (2012) and Volz/Siveroni (2018).")
+@Citation("Volz EM, Siveroni I. 2018. Bayesian phylodynamic inference with complex models.\n"
+		+ "  PLos Computational Biology. 14(11), ISSN:1553-7358 ")
 public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 
 	public Input<Boolean> fsCorrectionsInput = new Input<>(
@@ -189,10 +195,13 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         double   lhinterval;
         numLeaves = tree.getLeafNodeCount();
         double duration;
-              
+        
+ 
         int interval;
+        
         for(interval=0; interval < numIntervals; interval++) { 
-        	duration = intervals.getInterval(interval);
+        	
+        	duration = intervals.getIntervalLength(interval);
         	   	
         	if (trajDuration < (h+duration)) break;
         	lhinterval = processInterval(interval, duration, ts);
@@ -248,7 +257,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	} else if (logP == Double.NEGATIVE_INFINITY) {
 				return logP;
     		} 
-    		       	
+    		    	
         } 
         
         int lastInterval = interval;               
@@ -259,7 +268,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	logP += lhinterval;
         	// at this point h = trajDuration
         	// process second half of interval, and remaining intervals
-        	duration = intervals.getInterval(interval)-duration;      	
+        	duration = intervals.getIntervalLength(interval)-duration;      	
         	logP += calculateLogP_root2t0(interval, duration);       	       	
         }
         
@@ -313,7 +322,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	// process remaining intervals
     	final int intervalCount = intervals.getIntervalCount();
     	while (interval < intervalCount) {
-    		duration = intervals.getInterval(interval);       		
+    		duration = intervals.getIntervalLength(interval);       		
     		numLineages = intervals.getIntervalCount();
     		coef = numLineages*(numLineages-1)/Ne;
         	lh += (Math.log(1/Ne) - coef*duration);
@@ -339,19 +348,22 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		double t0, t1, duration;
     	
     		interval--;
-    		int lineageAdded = intervals.getLineagesAdded(interval).get(0).getNr();  // root 
+    		//int lineageAdded = intervals.getLineagesAdded(interval).get(0).getNr();  // root 
+    		int lineageAdded = intervals.getEvent(interval).getNr();
+    		
     		pParent = stateProbabilities.removeLineage(lineageAdded);
     		stateProbabilities.storeAncestralProbs(lineageAdded, pParent, false);
     		t1 = tsTimes0-intervals.getIntervalTime(interval);
     		
     		while (interval > 0) {
-    			duration = intervals.getInterval(interval);
+    			duration = intervals.getIntervalLength(interval);
        			t0 = t1;
     			t1 = tsTimes0-intervals.getIntervalTime(interval-1);
     			
     			// initiliaze new lineages (children)
     			if (intervals.getIntervalType(interval)==IntervalType.COALESCENT) {
-    				List<Node> coalLineages = intervals.getLineagesRemoved(interval);
+    				List<Node> coalLineages = intervals.getEvent(interval).getChildren();
+    				//List<Node> coalLineages = intervals.getLineagesRemoved(interval);
     				if (coalLineages.size()>0) {
     					fgy = ts.getFGY(tsPoint);
     					pChild = pParent.lmul(fgy.F);
@@ -373,7 +385,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			}
     			// remove incoming lineage
     			interval--;
-    			lineageAdded = intervals.getLineagesAdded(interval).get(0).getNr();  
+    			// lineageAdded = intervals.getLineagesAdded(interval).get(0).getNr();  
+    			lineageAdded = intervals.getEvent(interval).getNr();
     			pParent = stateProbabilities.removeLineage(lineageAdded); 
     			// update incoming lineage - pParent pointing to original vector
     			pParent.muli(backwardProbs[lineageAdded]);
@@ -425,28 +438,43 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     
     /* currTreeInterval must be a SAMPLE interval i.e. the incoming lineage must be a Leaf/Tip */
     protected void processSampleEvent(int interval) {
+    	if (intervals.getIntervalType(interval) != IntervalType.SAMPLE) {
+    		throw new IllegalArgumentException("Node must be a SAMPLE event");
+    	}
     	int sampleState;
-		List<Node> incomingLines = intervals.getLineagesAdded(interval);
-		for (Node l : incomingLines) {	
+    	Node l = intervals.getEvent(interval);
+    	/* uses pre-computed nodeNrToState */
+		sampleState = nodeNrToState[l.getNr()]; /* suceeds if node is a leaf, otherwise state=-1 */	
+		//System.out.println("process sample: "+l.getNr()+" num children: "+l.getChildren().size());
+		stateProbabilities.addSample(l.getNr(), sampleState);
+		if (computeAncestral)
+			stateProbabilities.storeAncestralProbs(l.getNr());
+    	
+    	
+		//List<Node> incomingLines = intervals.getLineagesAdded(interval);
+		//for (Node l : incomingLines) {	
 			/* uses pre-computed nodeNrToState */
-			sampleState = nodeNrToState[l.getNr()]; /* suceeds if node is a leaf, otherwise state=-1 */	
-			stateProbabilities.addSample(l.getNr(), sampleState);
-			if (computeAncestral)
-				stateProbabilities.storeAncestralProbs(l.getNr());
-		}	
+			//sampleState = nodeNrToState[l.getNr()]; /* suceeds if node is a leaf, otherwise state=-1 */	
+			//System.out.println("process sample: "+l.getNr()+" num children: "+l.getChildren().size());
+			//stateProbabilities.addSample(l.getNr(), sampleState);
+			//if (computeAncestral)
+		//		stateProbabilities.storeAncestralProbs(l.getNr());
+		//}	
     }
               
     protected double processCoalEvent(int t, int interval) {
-    	
-    	//List<Node> coalLines = intervals.getLineagesRemoved(interval);
-    	int numRemoved = intervals.getLineagesRemoved(interval, pair);
+    	Node coalEvent = intervals.getEvent(interval);
+    	List<Node> coalLineages = coalEvent.getChildren();
+    	int numRemoved = coalEvent.getChildCount();   	
     	if (numRemoved!=2)
     		throw new IllegalArgumentException("Expecting two lineages removed at coalescent");
+    	pair[0] = coalLineages.get(0).getNr();
+    	pair[1] = coalLineages.get(1).getNr();
     	stateProbabilities.getExtantProbabilities(pair, 2, coalProbs);    		
     	DVector pvec1 = coalProbs[0];
    		DVector pvec2 = coalProbs[1];
 		
-		int coalNode =  intervals.getLineageAdded(interval);
+		int coalNode =  intervals.getEvent(interval).getNr();
 	
 		//Compute parent lineage state probabilities in p				
 		FGY fgy = ts.getFGY(t);
