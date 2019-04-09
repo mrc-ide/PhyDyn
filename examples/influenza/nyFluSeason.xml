@@ -133,13 +133,14 @@ name="alignment">
 <!--
 	note constant size coalescent process before 2014-15 flu season
 -->
+
+	<definition spec="Definition">
+		N = S + I + R
+	</definition>
+	
 	<definition spec='Definition' >
 		foi = if (t > 2004.75) then R0*gamma*S/N
 		else gamma 
-	</definition>
-	
-	<definition spec="Definition">
-		N = S + I + R
 	</definition>
 	
 	<matrixeq spec='MatrixEquation' type="birth"  origin="I" destination="I"> 
