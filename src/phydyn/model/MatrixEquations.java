@@ -44,6 +44,13 @@ public class MatrixEquations extends BEASTObject {
 	
 	// public ParseTree tree;
 	public PMMachineCode code;
+	
+	public MatrixEquations() { }
+	
+	public MatrixEquations(String eqs) {
+		equationsStringInput.setValue(eqs, this);
+		initAndValidate();
+	}
 
 	@Override
 	public void initAndValidate() {
@@ -60,7 +67,7 @@ public class MatrixEquations extends BEASTObject {
 			System.out.println( "Error while parsing equations: "+equationsStringInput.get());
 
 			throw new IllegalArgumentException("Parsing error");
-		}		
+		}
 		return;
 	}
 	

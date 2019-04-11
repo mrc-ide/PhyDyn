@@ -7,7 +7,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.tree.Tree;
-import phydyn.distribution.STreeIntervals;
+import beast.evolution.tree.coalescent.STreeIntervals;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.alignment.Taxon;

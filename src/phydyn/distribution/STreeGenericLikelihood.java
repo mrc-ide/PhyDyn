@@ -15,13 +15,18 @@ import beast.core.Input.Validate;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.Tree;
+import beast.evolution.tree.coalescent.STreeIntervals;
+import beast.evolution.tree.coalescent.TreeIntervals;
 import phydyn.model.PopModel;
 
 
 @Description("Distribution on a structured tree")
 public abstract class STreeGenericLikelihood extends Distribution {
 	
-	public Input<STreeIntervals> treeIntervalsInput = new Input<STreeIntervals>("treeIntervals",
+	// Igor: Important change - used to be STreeIntervals
+	// Required for Beauti template - tree prior needs a Tree or TreeIntervals object
+	// unless it's ok if a subclass is used
+	public Input<TreeIntervals> treeIntervalsInput = new Input<TreeIntervals>("treeIntervals",
 	  		 "Structured Intervals for a phylogenetic beast tree", Validate.REQUIRED);
 	
 	public Input<PopModel> popModelInput = new Input<>(
@@ -46,6 +51,7 @@ public abstract class STreeGenericLikelihood extends Distribution {
 	 
 	 public PopModel popModel;
 	 public Tree tree;
+	 
 	 public STreeIntervals intervals;
 	 	 
 	 public int numStates;
@@ -64,7 +70,12 @@ public abstract class STreeGenericLikelihood extends Distribution {
 	 @Override
 	 public void initAndValidate() {
 		 popModel = popModelInput.get();
-		 intervals = treeIntervalsInput.get();	 
+		 try {
+			 intervals = (STreeIntervals) treeIntervalsInput.get();	 
+		 } catch (Exception e) {
+			 throw new IllegalArgumentException("Trre Intervals must be of class STreeIntervals");
+		 }
+		 
 		 tree = intervals.treeInput.get();
 		 
 		 if (typeTraitInput.get() != null) traitInput = true;

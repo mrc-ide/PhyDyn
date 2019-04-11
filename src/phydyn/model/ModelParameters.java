@@ -147,7 +147,10 @@ public class ModelParameters extends CalculationNode {
 		for(int i=0; i < paramNames.length; i++) {
 			paramName = paramNames[i];
 			s = paramxml.replace("*x*",paramName);
-			paramID = analysis.getParamID(paramName); // is it being sampled?
+			// bug: analysis can be null e.g. likelihood
+			paramID = null;
+			if (analysis!=null)
+				paramID = analysis.getParamID(paramName); // is it being sampled?
 			if (paramID==null) {	
 				s = s.replace("*v*",Double.toString(paramValues[i]));
 			} else {

@@ -5,8 +5,8 @@ import beast.core.Runnable;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.tree.Tree;
+import beast.evolution.tree.coalescent.STreeIntervals;
 import phydyn.distribution.STreeGenericLikelihood;
-import phydyn.distribution.STreeIntervals;
 import phydyn.distribution.STreeLikelihood;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
@@ -30,6 +30,13 @@ public class LikelihoodOut extends Runnable {
 	protected STreeIntervals intervals;
 	
 	private STreeLikelihood stlh;
+	
+	public LikelihoodOut() {} 
+	
+	public LikelihoodOut(STreeLikelihood lh) {
+		stlikelihoodInput.setValue(lh, this);
+		initAndValidate();
+	}
 	
 	@Override
 	public void initAndValidate(){

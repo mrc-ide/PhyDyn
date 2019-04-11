@@ -55,7 +55,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 			"Tolerates Y < 1.0 and sets Y = max(Y,1.0)",  new Boolean(true));
 	
 	public Input<Integer> gcInput = new Input<>(
-			"gc", "Number of iterations before calling the garbaga collector",
+			"gc", "Number of iterations before calling the garbage collector",
 			new Integer(0));
 	
 	/* inherits from STreeGenericLikelihood:
@@ -124,6 +124,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	
        	double trajDuration = popModel.getEndTime() - popModel.getStartTime();
     	//System.out.println("T root = "+(popModel.getEndTime()-intervals.getTotalDuration() ));
+    	//System.out.println("t0= "+ popModel.getStartTime()+" t1= "+ popModel.getEndTime() );
+       	//System.out.println("traj = "+trajDuration);
     	//System.out.println("Tree height="+intervals.getTotalDuration());
     	   	
     	if (trajDuration < intervals.getTotalDuration()) {
@@ -201,7 +203,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         
         for(interval=0; interval < numIntervals; interval++) { 
         	
-        	duration = intervals.getIntervalLength(interval);
+        	duration = intervals.getInterval(interval);
         	   	
         	if (trajDuration < (h+duration)) break;
         	lhinterval = processInterval(interval, duration, ts);
@@ -268,7 +270,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	logP += lhinterval;
         	// at this point h = trajDuration
         	// process second half of interval, and remaining intervals
-        	duration = intervals.getIntervalLength(interval)-duration;      	
+        	duration = intervals.getInterval(interval)-duration;      	
         	logP += calculateLogP_root2t0(interval, duration);       	       	
         }
         
@@ -322,7 +324,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	// process remaining intervals
     	final int intervalCount = intervals.getIntervalCount();
     	while (interval < intervalCount) {
-    		duration = intervals.getIntervalLength(interval);       		
+    		duration = intervals.getInterval(interval);       		
     		numLineages = intervals.getIntervalCount();
     		coef = numLineages*(numLineages-1)/Ne;
         	lh += (Math.log(1/Ne) - coef*duration);
@@ -356,7 +358,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		t1 = tsTimes0-intervals.getIntervalTime(interval);
     		
     		while (interval > 0) {
-    			duration = intervals.getIntervalLength(interval);
+    			duration = intervals.getInterval(interval);
        			t0 = t1;
     			t1 = tsTimes0-intervals.getIntervalTime(interval-1);
     			

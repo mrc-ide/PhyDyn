@@ -17,6 +17,7 @@ import phydyn.model.parser.PopModelParser;
 import phydyn.model.parser.PopModelParser.AnalysisSpecContext;
 import phydyn.run.XMLGenerator;
 
+// TODO: Get the new Analysis treatment
 
 public class PopModelAnalysis {
 	
@@ -31,6 +32,8 @@ public class PopModelAnalysis {
 	
 	// state related
 	private int chainLength, storeEvery;
+	
+	
 	
 	public PopModelAnalysis(String aStr, PopModel popModel, XMLGenerator xmlgen) {
 		analysisStr = aStr;
@@ -136,7 +139,7 @@ public class PopModelAnalysis {
 		writer.tabAppend("<distribution id=\"posterior\" spec=\"util.CompoundDistribution\">\n");
 		writer.tab();
 		writePriors(writer);
-		xmlGenerator.writeLikelihoodODE(writer);
+		// xmlGenerator.writeLikelihoodODE(writer);
 		writer.untab();
 		writer.tabAppend("</distribution>\n");
 		return "posterior";

@@ -278,7 +278,10 @@ public class TrajectoryParameters extends CalculationNode {
 		writer.tab();
 		for(int i=0; i < paramNames.length; i++) {
 			paramName = paramNames[i];
-			paramID = analysis.getParamID(paramName); // is it being sampled?
+			paramID = null;
+			// bug: analysis can be null
+			if (analysis!=null)
+				paramID = analysis.getParamID(paramName); // is it being sampled?
 			s = xml2.replace("*n*", paramNames[i]);
 			if (paramID==null) {
 				writer.tabAppend(s.replace("*v*", Double.toString(paramValues[i]))+"\n");

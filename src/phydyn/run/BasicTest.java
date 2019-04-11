@@ -7,7 +7,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.tree.Tree;
-import phydyn.distribution.STreeIntervals;
+import beast.evolution.tree.coalescent.STreeIntervals;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.alignment.Taxon;
@@ -115,7 +115,7 @@ public class BasicTest extends Runnable {
 		double duration = intervals.getTotalDuration();
 		System.out.println("Intervals: -- duration "+duration);
 		for(interval=0; interval<numIntervals;interval++) {
-			System.out.print(intervals.getIntervalLength(interval)+" ");
+			System.out.print(intervals.getInterval(interval)+" ");
 			System.out.print(intervals.getIntervalType(interval));
 			
 			Node event = intervals.getEvent(interval);		

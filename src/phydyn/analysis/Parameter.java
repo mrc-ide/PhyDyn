@@ -16,8 +16,8 @@ public class Parameter {
 	
 	public ParamType type;
 	public String name, id, lbound, ubound;
-	Prior prior;
-	List<Operator> operators;
+	Prior prior; // if null then this parameter is not being sampled
+	List<Operator> operators; // if empty then not sampled
 	
 	public Parameter(String name, ParamType type) {
 		this.name = name;

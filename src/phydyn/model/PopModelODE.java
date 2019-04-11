@@ -117,7 +117,6 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		// Deme and NonDeme names are extracted from Matrix Equations
 		List<String> ldemes = new ArrayList<>();
 		List<String> lnondemes = new ArrayList<>();
-		String name;
 		
 		// Create/Collect equations
 		equations = new ArrayList<>();
@@ -133,16 +132,17 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		}
 			
 		// todo: use Set<String>
+		// Collect deme and non-deme names from equations
+		String eqName;
 		for(MatrixEquationObj eq: equations) {
-			name = eq.originName;
+			eqName = eq.originName;
 			if (eq.type == EquationType.NONDEME) {
-				if (!lnondemes.contains(name)) lnondemes.add(name);
+				if (!lnondemes.contains(eqName)) lnondemes.add(eqName);
 			} else {
-				if (!ldemes.contains(name)) ldemes.add(name);
+				if (!ldemes.contains(eqName)) ldemes.add(eqName);
 			}
 		}
 			
-		// collect deme names
 		numDemes = ldemes.size();
 		demeNames = new String[numDemes];
 		ldemes.toArray(demeNames);
@@ -180,7 +180,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 			}
 		} else {
 			if (definitionsInput.get().size()>0) {
-				System.out.println("PopModelODE Input Error. Definitions must be introduced by:");
+				System.out.println("PopModelODE Input Error. Definitions must be introduced by either:");
 				System.out.println("- A single Definitions object (a semi-colon separated string) XOR");
 				System.out.println("- A series of Definition objects");
 				throw new IllegalArgumentException("PopModelODE Input error");
@@ -295,6 +295,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		return s;
 	}
 	
+	
+	// Currently not used - replaced by BEAST's XML writer
 	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis) throws IOException {
 		String modelID = this.getName();
 		String initID = modelID+"-init";

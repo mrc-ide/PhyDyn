@@ -23,8 +23,10 @@ public class Definitions extends BEASTObject {
 	
 	protected DefinitionsContext defsCtx;
 
-	public Definitions() {
-		// TODO Auto-generated constructor stub
+	public Definitions() { }
+	
+	public Definitions(String defsStr) {
+		definitionStringInput.setValue(defsStr, this);
 	}
 
 	@Override

@@ -65,6 +65,7 @@ public abstract class PopModel extends CalculationNode {
 		System.out.println("Population Model:");
 	}
 	
+	
 	public abstract String writeXML(XMLFileWriter writer, PopModelAnalysis analysis)  throws IOException;
 
 }

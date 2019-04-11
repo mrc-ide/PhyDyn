@@ -1,6 +1,7 @@
 package phydyn.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import beast.core.CalculationNode;
@@ -10,8 +11,14 @@ import beast.core.parameter.RealParameter;
 
 public class ParamValue extends CalculationNode {
 	
-	public Input<List<String>> paramNamesInput = new Input<>(
-			"names", "Name(s) of Model parameter(s)", new ArrayList<>());
+	// changed List of String to string
+	public Input<String> pNameInput = new Input<>(
+				"pName", "Name(s) of Model parameter(s)");
+		
+	// changed List<String> to String - parsed at initialisation
+	// changing this to pname (to be deprecated)
+	public Input<String> paramNamesInput = new Input<>(
+			"names", "Name(s) of Model parameter(s)", Validate.XOR, pNameInput);
 	
 	public Input<RealParameter> paramValuesInput = new Input<>(
 			"values", "Values of Model parameter(s)", Validate.REQUIRED);
@@ -25,8 +32,17 @@ public class ParamValue extends CalculationNode {
 	public int dimension;
 
 	@Override
-	public void initAndValidate() {
-		names = paramNamesInput.get();
+	public void initAndValidate() {				
+		String[] pnames;
+		if (pNameInput.get()!=null) {
+			pnames = pNameInput.get().split("\\s+");	
+		} else { 
+			// look for names in paramNamesInput -- to be deprecated
+			pnames = paramNamesInput.get().split("\\s+");	
+		}
+		
+		
+		names = Arrays.asList(pnames);
 		values = paramValuesInput.get();
 		isVector = vectorInput.get();
 		dimension = values.getDimension();

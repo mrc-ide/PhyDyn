@@ -1,15 +1,12 @@
 package phydyn.distribution;
 
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.MaxCountExceededException;
-import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
-import org.apache.commons.math3.ode.FirstOrderIntegrator;
-import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-import org.jblas.DoubleMatrix;
-
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
+import beast.evolution.tree.TraitSet;
+import beast.evolution.tree.coalescent.STreeIntervals;
+import phydyn.model.PopModel;
+import phydyn.model.PopModelODE;
 import phydyn.model.TimeSeriesFGY;
 
 /**
@@ -66,6 +63,18 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 			 "minimum value of state probilities i.e. avoid zero");
 	 
 	 private SolverIntervalODE solver=null; 
+	 
+	 public STreeLikelihoodODE() {}
+	 
+	 public STreeLikelihoodODE(PopModel model, STreeIntervals intervals,TraitSet typeTrait) {
+		 // inputs.get(i++).setValue(object, this);
+		 treeIntervalsInput.setValue(intervals, this);
+		 popModelInput.setValue(model, this);
+		 equationsInput.setValue("PL2", this);
+		 if (typeTrait!=null)
+			 typeTraitInput.setValue(typeTrait, this);
+		 initAndValidate();
+	 }
 	 
 	 @Override
 	 public void initAndValidate() {
