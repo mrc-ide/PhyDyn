@@ -16,7 +16,7 @@ The latest version of the package (**v1.3.3**) has been compiled against BEAST v
 The package (v.1.3.3) can also be installed by hand or, alternatively, examples can be run using  PhyDyn's standalone version.
 
 ### Installation by-hand
-The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.3.2.zip`.
+The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.3.3.zip`.
 Instructions on how to install Beast packages by hand can be found [here](https://www.beast2.org/managing-packages/). The steps are:
 * Locate the directory where the current Beast version  keeps add-ons and packages. In Linux, it's usually `/users/<username>/.beast/2.5`. Move to that directory, create a directory for PhyDyn, and then move inside the new directory:
 ```
@@ -59,7 +59,7 @@ This software is free (as in freedom). With the exception of the libraries on wh
 
 The following libraries are bundled with PhyDyn:
 
-* [ANTLR](http://www.antlr.org/) : Another Tool for Language recorgnition
+* [ANTLR](http://www.antlr.org/) : Another Tool for Language recognition
 * Apache Commons (http://commons.apache.org/)
 * jblas (http://jblas.org) : Linear Algebra for Java
 
@@ -68,5 +68,5 @@ Work on this project is made possible by support from the MRC Centre for Outbrea
 
 ## References
 * [1] Volz EM, 2012, [Complex population dynamics and the coalescent under neutrality](http://www.genetics.org/content/190/1/187), Genetics, Vol:190, ISSN:0016-6731, Pages:187-201
-* [2] Erik Volz and Igor Siveroni, 2018, [Bayesian phylodynamic inference with complex models](https://www.biorxiv.org/content/early/2018/02/19/268052). Submitted for publication.
+* [2] Erik Volz and Igor Siveroni, 2018, [Bayesian phylodynamic inference with complex models](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006546). PLOS COMPUTATIONAL BIOLOGY, Vol: 14, ISSN: 1553-7358 .
 
