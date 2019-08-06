@@ -44,9 +44,9 @@ In order to run an example with the package's stand-alone version, `jars/phydynv
 ## Documentation and Examples
 
 * Check the PhyDyn [wiki](https://github.com/mrc-ide/PhyDyn/wiki) for detailed documentation.
-* [Ebola](https://github.com/mrc-ide/PhyDyn/wiki/Ebola-Example): A super-spreading SEIR model applied to Ebola.
 * [SIR3](examples/SIR3) : An example of a 3-deme population model and the use of the TrajectoryOut class.
-* [Influenza](https://github.com/mrc-ide/PhyDyn/wiki/Influenza-Example ): Flu model with fixed trees and sequence data.
+* [Ebola](https://github.com/mrc-ide/PhyDyn/wiki/Ebola-Example): A super-spreading SEIR model applied to Ebola (with fixed tree).
+* [Influenza](https://github.com/mrc-ide/PhyDyn/wiki/Influenza-Example ): Flu model with sequence data (tree sampling).
 
 
 ## Contact
