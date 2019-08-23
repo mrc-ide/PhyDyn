@@ -22,8 +22,8 @@ public class TrajectoryLogger extends CalculationNode implements Loggable {
 	final public Input<Integer> frequencyInput = new Input<>("pointFrequency",
 	        "Frequency between points in time series to be displayed");
 	
-	final public Input<Integer> numPoints = new Input<>("pointFrequency",
-	        "Number of points in time series to be logged");
+        //final public Input<Integer> numPoints = new Input<>("pointFrequency",
+        //	        "Number of points in time series to be logged");
 	
 	// we could also add a point distance input parameter
 
