@@ -183,7 +183,7 @@
             weight="1" parameter='@seir.Ih.t:$(n)' /> 
   <operator id='seir.R.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.5'
             weight="1" parameter='@seir.R.t:$(n)' /> 
-  <operator id='seir.S.operator.t:$(n)' spec='ScaleOperator' scaleFactor='5.0'
+  <operator id='seir.S.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="5.0"
             weight="1" parameter='@seir.S.t:$(n)' />          
   <operator id='seir.exog.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.05"
             weight="1" parameter='@seir.exog.t:$(n)' />
