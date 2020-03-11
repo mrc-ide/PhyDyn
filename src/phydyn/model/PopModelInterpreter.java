@@ -231,7 +231,7 @@ public class PopModelInterpreter extends PopModelBaseVisitor<Double> {
 		case PopModelParser.AND:
 			result = (leftb && rightb); break;
 		case PopModelParser.OR:
-			result = (leftb && rightb); break;				
+			result = (leftb || rightb); break;			
 		}
 		return (result) ? 1.0 : 0.0;
 	}

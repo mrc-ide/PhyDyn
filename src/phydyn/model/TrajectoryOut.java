@@ -14,6 +14,7 @@ public class TrajectoryOut extends Runnable {
 	public Input<PopModel> modelInput = new Input<>("model","Complex Population Model", Validate.REQUIRED);
 	public Input<String> fileInput = new Input<>("file", "output trajectory file");
 	// file type. Currently only option is csv (default)
+	public Input<String> RfileInput = new Input<>("Rfile", "output trajectory file");
 	
 	private String fileName;
 	private PopModel popModel;
@@ -71,12 +72,34 @@ public class TrajectoryOut extends Runnable {
 				writer.append(","+fgy.Yall.get(j));
 			}
 			writer.append("\n");
-		}
-		
+		}		
 		writer.flush();
 	    writer.close();
 		
-
+	    if (RfileInput.get()!= null) {
+	    	try {
+	    		generateRfile();
+	    	} catch(Exception e) {
+	    		e.printStackTrace();
+	    		System.out.println("Failed to generate R file");
+	    	}
+	    }
 	}
+	
+	private void generateRfile() throws Exception {
+		PopModelODE modelODE=null;
+		if (popModel instanceof PopModelODE)
+			modelODE = (PopModelODE) popModel;
+		else
+			throw new RuntimeException("Expecting PopModelODE");
+		PopModelODETranslator trans = new PopModelODETranslator(modelODE);		
+		FileWriter writer = new FileWriter(RfileInput.get());
+		final String strR = trans.GenerateR();
+		writer.append(strR);
+		writer.flush();
+	    writer.close();
+		System.out.println("R code generated:\n"+strR);
+	}
+	
 
 }

@@ -46,13 +46,12 @@ public class SolverPL2Constant extends SolverIntervalODE implements FirstOrderDi
 		//isDiagF = false;
 		phiDiag = new DVector(numStates);
 		y2 = new DVector(numStates);
-		System.out.println("PL2 Constant!- isDiagF"+isDiagF);
+		//System.out.println("PL2 Constant!- isDiagF"+isDiagF);
 	}
 	
 	public boolean initValues(STreeLikelihoodODE stlh) {
 		// Pre-compute constant quantities
 		// This should be done for the whole tree, not just the interval
-		System.out.println("Init Values");
 		ts = stlh.ts;
 		FGY fgy = ts.getFGY(1);
 		Y = fgy.Y;

@@ -58,6 +58,9 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 			"gc", "Number of iterations before calling the garbage collector",
 			new Integer(0));
 	
+	public Input<Boolean> isConstantLhInput = new Input<>("isConstantLh",
+			"Log-Likelihood = 1, always, if flag set to true",false);
+	
 	/* inherits from STreeGenericLikelihood:
 	 *  public PopModelODE popModel;
 	 	public TreeInterface tree;
@@ -85,7 +88,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     @Override
     public void initAndValidate() {
     	super.initAndValidate(); /* important: call first */
-    	stateProbabilities = new StateProbabilitiesVectors(); // declared in superclass    
+    	// stateProbabilities = new StateProbabilitiesVectors(); // declared in superclass    
+    	stateProbabilities = null;
     	//initValues();
     	if (ancestralInput.get()) {
     		if (popModel.isConstant())
@@ -94,6 +98,30 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			aceSolver = new Solverfwd(this);
     	}
     	gcCounter = 0;
+    	// If we are interested only on prior parameter sampling then
+    	// we only care about t0 and t1.
+    	if (isConstantLhInput.get()) {
+    		if (!popModel.hasEndTime()) {
+    			if (tree.getDateTrait()==null) {
+        			throw new IllegalArgumentException("Need value for t1, explictly or from tree date trait");
+        		} else {
+        			if (tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
+        				throw new IllegalArgumentException("t1: Can't use backward date trait");
+        			} else {  
+        				popModel.setEndTime( tree.getDateTrait().getDate(0));
+        				System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
+        			}
+        		}
+    			
+    		} else {  // if date trait exists, use date trait
+    			if (tree.getDateTrait()!=null) {
+        			if (!tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
+        				popModel.setEndTime( tree.getDateTrait().getDate(0));
+        				System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
+        			}
+        		}
+    		}
+    	}
     }
     
     public boolean initValues()   {
@@ -165,7 +193,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 		}
  
 		// Extant Lineages and state probabilities
-        stateProbabilities.init(tree.getNodeCount(), numStates);
+        stateProbabilities = new StateProbabilitiesVectors(tree.getNodeCount(), numStates);
         
         if (aceSolver!=null)
         	aceSolver.initValues(this);
@@ -175,6 +203,16 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     }
      
     public double calculateLogP() {
+    	if ( isConstantLhInput.get() ) {
+    		boolean reject = popModel.update();
+    		if (reject)
+    			logP = Double.NEGATIVE_INFINITY;
+    		else
+    			logP = 1;
+    		return logP;
+    	} 
+    	
+    	
     	boolean errorInit = initValues();
         if (errorInit) {
             logP = Double.NEGATIVE_INFINITY;
@@ -313,11 +351,14 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	double numLineages = intervals.getIntervalCount();
     	comb = numLineages*(numLineages-1)/2.0;
     	if (NeInput.get()==null) {
-    		lambda = calcTotalCoal(tsPoint);
-    		Ne = comb/lambda;  // should be user input - first trying this
+    		Ne = -1;
     	} else {
     		Ne = NeInput.get().getValue();
-    	}   	
+    	}
+    	if (Ne <= 0.0) {
+    		lambda = calcTotalCoal(tsPoint);
+    		Ne = comb/lambda;  // should be user input - first trying this
+    	}	
     	coef = comb/Ne;
     	lh += (Math.log(1/Ne) -  coef*duration);   	
     	interval++;

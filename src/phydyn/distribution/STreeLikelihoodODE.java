@@ -3,11 +3,13 @@ package phydyn.distribution;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.util.Log;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.coalescent.STreeIntervals;
 import phydyn.model.PopModel;
 import phydyn.model.PopModelODE;
 import phydyn.model.TimeSeriesFGY;
+import phydyn.util.General.IntegrationMethod;
 
 /**
  * @author Igor Siveroni
@@ -19,16 +21,13 @@ import phydyn.model.TimeSeriesFGY;
 @Citation("Erik M. Volz. 2012. Complex population dynamics and the coalescent under neutrality."
 		+ "Genetics. 2013 Nov;195(3):1199. ")
 
-enum IntegrationMethod { MIDPOINT, CLASSICRK, GILL
-	,HIGHAMHALL 
-	,ADAMSBASHFORTH 
-	,ADAMSMOULTON  
-	};
+
 	
-enum EquationsType { PL1, PL2, QL, LogQL };
+enum EquationsType { PL, PL1, PL2, QL, LogQL };
 
 
 public class STreeLikelihoodODE extends STreeLikelihood {
+
 	
 	public final static double MIN_H = 1.0e-6;
 	public IntegrationMethod method;
@@ -38,29 +37,30 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 	public EquationsType eqType;
 	private static final EquationsType defaultEquations =  EquationsType.PL2;
 	
-	public Input<Boolean> solvePLInput = new Input<>(
+	
+	public Input<Boolean> solvePLInput = new Input<>(   // legacy  - remove soon
 			"solvePL", "Solve dP equations instead of dQ");
 	
-	public Input<String> equationsInput = new Input<>(
-			"equations", "Type of likelihood and state differential equations");
-	
+	public Input<EquationsType> equationsInput = new Input<EquationsType>(
+			"equations", "Type of likelihood and state differential equations", defaultEquations, EquationsType.values());
+		
+	public Input<IntegrationMethod> methodInput = new Input<>(
+			 "method","Integration method", IntegrationMethod.CLASSICRK, IntegrationMethod.values() );
+
 	public Input<Double> stepSizeInput = new Input<>("stepSize",
-			"ODE solver stepsize", new Double(0.01));
-	
-	 public Input<String> methodInput = new Input<>(
-			 "method","Integration method");
+				"ODE solver stepsize", new Double(0.01));	 
 	 
-	 public Input<Double> rTolInput = new Input<>(
+	public Input<Double> rTolInput = new Input<>(
 			 "rTol", "relative tolerance", new Double(0.0001));
 	 
-	 public Input<Double> aTolInput = new Input<>(
+	public Input<Double> aTolInput = new Input<>(
 			 "aTol", "absolute tolerance", new Double(0.00001));
 	 
-	 public Input<Integer> orderInput = new Input<>(
+	public Input<Integer> orderInput = new Input<>(
 			 "order", "order(k) of adaptive size integration method", new Integer(3)); 
 	 
-	 public Input<Double> minPInput = new Input<>("minP",
-			 "minimum value of state probilities i.e. avoid zero");
+	public Input<Double> minPInput = new Input<>("minP",
+			 "minimum value of state probilities i.e. avoid zero", 0.0001);
 	 
 	 private SolverIntervalODE solver=null; 
 	 
@@ -70,7 +70,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 		 // inputs.get(i++).setValue(object, this);
 		 treeIntervalsInput.setValue(intervals, this);
 		 popModelInput.setValue(model, this);
-		 equationsInput.setValue("PL2", this);
+		 equationsInput.setValue(defaultEquations, this);
 		 if (typeTrait!=null)
 			 typeTraitInput.setValue(typeTrait, this);
 		 initAndValidate();
@@ -80,19 +80,11 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 	 public void initAndValidate() {
 		 super.initAndValidate(); /* important: call first */
 		 fixedStepSize = true;
-		 if (methodInput.get()==null) {  // set to default: ClassicalRungeKutta
-			 method = IntegrationMethod.CLASSICRK;
-		 } else {
-			 String strMethod = methodInput.get();
-			 if (strMethod.equals("midpoint")) method = IntegrationMethod.MIDPOINT;
-			 else if (strMethod.equals("classicrk")) method = IntegrationMethod.CLASSICRK;
-			 else if (strMethod.equals("gill")) method = IntegrationMethod.GILL;
-			 else if (strMethod.equals("adams-bashforth")) { method = IntegrationMethod.ADAMSBASHFORTH; fixedStepSize=false; }
-			 else if (strMethod.equals("adams-moulton")) { method = IntegrationMethod.ADAMSMOULTON; fixedStepSize=false; }
-			 else if (strMethod.equals("higham-hall")) { method = IntegrationMethod.HIGHAMHALL; fixedStepSize=false; }
-			 else throw new IllegalArgumentException("Unknown STreeLikelihood integration method: "+strMethod+
-						" - use: midpoint/classicrk/gill adaptive: adams-bashforth, adams-moulton, higham-hall");
-		 }
+		 
+		 method = methodInput.get();
+		 
+		 //Log.warning("Method = "+ method.toString() + " / " +method.name());
+		 
 		 // they all have defaults
 		 stepSize = stepSizeInput.get();
 		 aTol = aTolInput.get();
@@ -106,22 +98,15 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 			 }
 			 setMinP=true;
 		 }
+		 if (solvePLInput.get()!=null) {
+			 Log.warning("(phydyn) STreeLikelihood: solvePL option deprecated. Use 'equations' instead");
+		 }
 		 // Equations / solver.
 		 if (equationsInput.get()!=null) {
-			 String eq = equationsInput.get();
-			 if (eq.equals("PL")) eqType = EquationsType.PL2;
-			 else if (eq.equals("PL1")) eqType = EquationsType.PL1;
-			 else if (eq.equals("PL2")) eqType = EquationsType.PL2;
-			 else if (eq.equals("QL")) eqType = EquationsType.QL;
-			 else if (eq.equals("LogQL")) eqType = EquationsType.LogQL;
-			 else 
-				 throw new IllegalArgumentException("Invalid Equations type. Use: PL1, PL2, QL or LogQL");			 
+			 eqType = equationsInput.get();			 
 			 // if there's solverInput, even if redundant, they must agree
 			 if (solvePLInput.get()!=null) {
-				 if ((solvePLInput.get() && (eqType!=EquationsType.PL1)) ||
-					 (!solvePLInput.get() && (eqType!=EquationsType.QL))) {
-					 throw new IllegalArgumentException("Incompatible values of solverPL and equations");
-				 }
+				 throw new IllegalArgumentException("(phydyn) STreeLikelihood: Can't use solvePL and equations together. Choose one.");
 			 } 
 		 } else { // legacy
 			 eqType = defaultEquations; // default

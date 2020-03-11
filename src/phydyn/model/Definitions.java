@@ -21,7 +21,7 @@ public class Definitions extends BEASTObject {
 	public Input<String> definitionStringInput = new Input<>(
 			"value","Definitions: simi-colon separated assignment statements");
 	
-	protected DefinitionsContext defsCtx;
+	private DefinitionsContext defsCtx;
 
 	public Definitions() { }
 	
@@ -47,6 +47,32 @@ public class Definitions extends BEASTObject {
 	}
 	
 	public List<DefinitionObj> createDefinitions() {	
+		List<StmContext> stmCtxs = defsCtx.stm();
+		List<DefinitionObj> defs = new ArrayList<>();
+		for (StmContext def: stmCtxs ) {
+			defs.add(new DefinitionObj(def.IDENT().getText(),  def  ));
+		}
+		return defs;
+	}
+	
+	
+	// added to allow re-definition of Definitions as a String - remove the above soon.
+	public static List<DefinitionObj> createDefinitions(String defsString) {	
+		DefinitionsContext defsCtx;
+
+		/* parse equation string */
+		CodePointCharStream  input = CharStreams.fromString( defsString  );
+		//ANTLRInputStream input = new ANTLRInputStream(definitionStringInput.get());
+		try {
+			PopModelLexer lexer = new PopModelLexer(input);		
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			PopModelParser parser = new PopModelParser(tokens);
+			defsCtx =  parser.definitions();
+		} catch (Exception e) {
+			System.out.println( "Error while parsing definitions: "+defsString);
+			throw new IllegalArgumentException("Parsing error");
+		}		
+				
 		List<StmContext> stmCtxs = defsCtx.stm();
 		List<DefinitionObj> defs = new ArrayList<>();
 		for (StmContext def: stmCtxs ) {

@@ -37,13 +37,12 @@ public class SolverPL1Constant extends SolverIntervalODE implements FirstOrderDi
 		dimensionP = numStates; // temporary value		
 		isDiagF = stlh.popModel.isDiagF();
 		// we could set tsTimes0 and setMinP HERE
-		System.out.println("PL1 Constant!");
+		//System.out.println("PL1 Constant!");
 	}
 	
 	public boolean initValues(STreeLikelihoodODE stlh) {
 		// Pre-compute constant quantities
 		// This should be done for the whole tree, not just the interval
-		System.out.println("Init Values");
 		ts = stlh.ts;
 		FGY fgy = ts.getFGY(1);
 		Y = fgy.Y; 

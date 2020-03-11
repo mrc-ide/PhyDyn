@@ -7,10 +7,9 @@ import phydyn.util.DVector;
  * Under development.
  */
 
-public class StateProbabilitiesMatrix implements StateProbabilities {
-	protected int numNodes; // total number of Tree Nodes
-	protected int numStates;  // number of demes
+public class StateProbabilitiesMatrix extends StateProbabilities {
 	protected int numTips;
+	
 	protected DMatrix probsMatrix;
 	protected DVector[] probsArray;
 	protected int numExtant;
@@ -18,11 +17,18 @@ public class StateProbabilitiesMatrix implements StateProbabilities {
 	protected int[] extantIndex; // position in extantLineages array
 	protected DVector[] extantProbs;  // keep for efficient external access
 	
+	@Override
+	public void check() {}
 	
-	public StateProbabilitiesMatrix() {
-		numNodes = numStates = numTips = 0;
+	@Override
+	public void clear() {
+		for(int col=0, idx=probsMatrix.start; col<numNodes; col++) {
+			probsArray[idx] = new DVector(numStates,probsMatrix.data,idx);
+			idx += numStates;
+		}
+		initExtantLineages();
 	}
-
+	
 	@Override
 	public StateProbabilities copy() {
 		// TODO Auto-generated method stub
@@ -30,10 +36,9 @@ public class StateProbabilitiesMatrix implements StateProbabilities {
 		return null;
 	}
 
-	@Override
-	public void init(int numNodes, int numStates) {
-		this.numNodes = numNodes;
-		this.numStates= numStates;
+	public StateProbabilitiesMatrix(int numNodes, int numStates) {
+		super(numNodes,numStates);
+					
 		this.numTips = (numNodes+1)/2; 
 		probsMatrix = new DMatrix(numStates,numNodes);
 		probsArray = new DVector[numNodes];
@@ -45,6 +50,9 @@ public class StateProbabilitiesMatrix implements StateProbabilities {
 		}
 		initExtantLineages();
 	}
+	
+	public int getNumStates() { return numStates; }
+	
 
 	// do we need to set them to -1??
 	private void initExtantLineages() {
@@ -56,6 +64,16 @@ public class StateProbabilitiesMatrix implements StateProbabilities {
 	@Override
 	public int getNumExtant() {
 		return numExtant;	
+	}
+	
+	@Override
+	protected int getLineageNr(int idx) {
+		return extantLineages[idx];
+	}
+	
+	@Override
+	protected int getLineageIdx(int linNr) {
+		return extantIndex[linNr];
 	}
 
 	@Override

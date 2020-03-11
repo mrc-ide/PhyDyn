@@ -2,6 +2,19 @@ package phydyn.util;
 
 public class General {
 
+	public enum IntegrationMethod { 
+		EULER("euler"), MIDPOINT("midpoint"), CLASSICRK("classicrk"), GILL("gill"),
+		HIGHAMHALL("higham-hall"), ADAMSBASHFORTH("adams-bashforth"), ADAMSMOULTON("adams-moulton");
+	
+	private final String name;       
+
+    private IntegrationMethod(String s) { name = s; }
+    
+    public String toString() { return this.name; }
+    
+	};
+	
+	
 	public static <T> int indexOf(T ele, T[] array)
 	{
 	    for (int i=0; i<array.length; i++)

@@ -140,7 +140,7 @@ public class PopModelODEPrinter extends PopModelBaseVisitor<String> {
 	public String visitCallBinaryExpr(CallBinaryExprContext ctx) {
 		String val1 = visit(ctx.expr(0));
 		String val2 = visit(ctx.expr(1));
-		return val1 + ctx.op.getText()+val2;
+		return ctx.op.getText()+"("+val1+","+val2+")";
 	}
 	
 

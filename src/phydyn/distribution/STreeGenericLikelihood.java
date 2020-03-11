@@ -15,19 +15,22 @@ import beast.core.Input.Validate;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeDistribution;
 import beast.evolution.tree.coalescent.STreeIntervals;
 import beast.evolution.tree.coalescent.TreeIntervals;
 import phydyn.model.PopModel;
 
 
 @Description("Distribution on a structured tree")
-public abstract class STreeGenericLikelihood extends Distribution {
+public abstract class STreeGenericLikelihood extends TreeDistribution {
 	
 	// Igor: Important change - used to be STreeIntervals
 	// Required for Beauti template - tree prior needs a Tree or TreeIntervals object
 	// unless it's ok if a subclass is used
-	public Input<TreeIntervals> treeIntervalsInput = new Input<TreeIntervals>("treeIntervals",
-	  		 "Structured Intervals for a phylogenetic beast tree", Validate.REQUIRED);
+	
+	// already part of TreeDistribution
+	//public Input<TreeIntervals> treeIntervalsInput = new Input<TreeIntervals>("treeIntervals",
+	//  		 "Structured Intervals for a phylogenetic beast tree", Validate.REQUIRED);
 	
 	public Input<PopModel> popModelInput = new Input<>(
 			 "popmodel","Population Model",Validate.REQUIRED);
@@ -42,7 +45,8 @@ public abstract class STreeGenericLikelihood extends Distribution {
 	/* TODO: It is also possible the tree contains a typeTrait TraitSet */
 	 public Input<TraitSet> typeTraitInput = new Input<>(
 	            "typeTrait", "Type trait set maps taxa to state number.");
-	 public Input<BooleanParameter> useStateNameInput = new Input<>(
+	 
+	 public Input<Boolean> useStateNameInput = new Input<>(
 	    		"useStateName",
 	            "whether to use a state's name or number when extracting type annotation or reading trait value (default true)");
 	 
@@ -80,7 +84,7 @@ public abstract class STreeGenericLikelihood extends Distribution {
 		 
 		 if (typeTraitInput.get() != null) traitInput = true;
 		 if (useStateNameInput.get() != null) {
-			 useStateName = useStateNameInput.get().getValue();
+			 useStateName = useStateNameInput.get();
 		 }	
 		 computeAncestral = ancestralInput.get();
 		 numStates = popModel.getNumStates(); 

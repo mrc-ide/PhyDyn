@@ -66,6 +66,4 @@ public abstract class PopModel extends CalculationNode {
 	}
 	
 	
-	public abstract String writeXML(XMLFileWriter writer, PopModelAnalysis analysis)  throws IOException;
-
 }

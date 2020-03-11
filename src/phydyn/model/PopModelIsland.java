@@ -17,11 +17,13 @@ import phydyn.util.DVector;
 
 public class PopModelIsland extends PopModel implements Loggable {
 
-	public Input<List<String>> demeNamesInput = new Input<>(
-            "demes",
-            "Deme names",
-            new ArrayList<>());
+	//public Input<List<String>> demeNamesInput = new Input<>(
+    //        "demes",
+    //        "Deme names",
+    //        new ArrayList<>());
 	
+	public Input<String> demeNamesInput = new Input<>("demes", "DemeNames","");
+		
 	public Input<RealParameter> NeInput = new Input<>(
 			"Ne","Ne values",Validate.REQUIRED);
 	
@@ -49,13 +51,17 @@ public class PopModelIsland extends PopModel implements Loggable {
 
 	@Override
 	public void initAndValidate() {
-		numDemes = demeNamesInput.get().size();
+		String demesTrimmed = demeNamesInput.get().trim();
+		demeNames = demesTrimmed.split("\\s+");
+		numDemes = demeNames.length;
+		
+		// numDemes = demeNamesInput.get().size();
 		if (numDemes<1) {
 			System.out.println("Deme Names Missing");
 			throw new IllegalArgumentException("Deme names missing");
 		}
-		demeNames = new String[numDemes];
-		demeNamesInput.get().toArray(demeNames);
+		//demeNames = new String[numDemes];
+		//demeNamesInput.get().toArray(demeNames);
 		nonDemeNames = new String[0];
 		numNonDemes = 0;
 		if (NeInput.get().getDimension()!=numDemes) {

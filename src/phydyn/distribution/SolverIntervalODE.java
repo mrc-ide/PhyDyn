@@ -4,6 +4,7 @@ import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.AdamsBashforthIntegrator;
 import org.apache.commons.math3.ode.nonstiff.AdamsMoultonIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
+import org.apache.commons.math3.ode.nonstiff.EulerIntegrator;
 import org.apache.commons.math3.ode.nonstiff.GillIntegrator;
 import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 import org.apache.commons.math3.ode.nonstiff.MidpointIntegrator;
@@ -27,6 +28,7 @@ public abstract class SolverIntervalODE {
 		double minStep = 0.0;
 		double maxStep = 0.5;
 		switch(stlh.method) {
+		case EULER: foi = new EulerIntegrator(stlh.stepSize);
 		case MIDPOINT: foi = new MidpointIntegrator(stlh.stepSize); break;
 		case CLASSICRK: foi = new ClassicalRungeKuttaIntegrator(stlh.stepSize); break;
 		case GILL: foi = new GillIntegrator(stlh.stepSize); break;

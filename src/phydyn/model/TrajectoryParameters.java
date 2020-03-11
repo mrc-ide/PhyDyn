@@ -12,11 +12,12 @@ import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 import phydyn.analysis.PopModelAnalysis;
 import phydyn.analysis.XMLFileWriter;
+import phydyn.util.General.IntegrationMethod;
 
 public class TrajectoryParameters extends CalculationNode {
 
-	 public Input<String> methodInput = new Input<>(
-			 "method","Integration method",Validate.REQUIRED);
+	 public Input<IntegrationMethod> methodInput = new Input<>(
+			 "method","Integration method",IntegrationMethod.CLASSICRK, IntegrationMethod.values());
 	 
 	 public Input<Double> rTolInput = new Input<>(
 			 "rTol", "relative tolerance");
@@ -46,21 +47,21 @@ public class TrajectoryParameters extends CalculationNode {
 	            + "match a variable",
 	            new ArrayList<>());
 	 
-	 protected double rTol, aTol;
-	 protected int integrationSteps, timeseriesSteps, order;
-	 protected IntegrationMethod method;
-	 protected boolean fixedStepSize;
-	 protected double t1;
-	 protected boolean t1Set;
+	 public double rTol, aTol;
+	 public  int integrationSteps, timeseriesSteps, order;
+	 public IntegrationMethod method;
+	 public boolean fixedStepSize;
+	 public double t1;
+	 public boolean t1Set;
 	 	 
 	 Map<String, Integer> paramsMap;
-	 protected int numParams;
-	 protected String[] paramNames;
+	 public int numParams;
+	 public String[] paramNames;
 	 protected boolean modifiedValues;
 	 // Parameters
 	 //protected double t0; // sampled - best take value from input
 	 //protected double storedT0;
-	 protected double[] paramValues;
+	 public double[] paramValues;
 	 protected double[] storedParamValues;
 	 
 
@@ -93,17 +94,9 @@ public class TrajectoryParameters extends CalculationNode {
 			t1Set = true;
 		}
 		/* Integration Method */
-		String strMethod = methodInput.get();
+		method = methodInput.get();
 		fixedStepSize = true;
-		if (strMethod.equals("euler")) method = IntegrationMethod.EULER;
-		else if (strMethod.equals("midpoint")) method = IntegrationMethod.MIDPOINT;
-		else if (strMethod.equals("classicrk")) method = IntegrationMethod.CLASSICRK;
-		else if (strMethod.equals("gill")) method = IntegrationMethod.GILL;
-		else if (strMethod.equals("adams-bashforth")) { method = IntegrationMethod.ADAMSBASHFORTH; fixedStepSize=false; }
-		else if (strMethod.equals("adams-moulton")) { method = IntegrationMethod.ADAMSMOULTON; fixedStepSize=false; }
-		else if (strMethod.equals("higham-hall")) { method = IntegrationMethod.HIGHAMHALL; fixedStepSize=false; }
-		else throw new IllegalArgumentException("Unknown integration method: "+strMethod+
-				" - use: euler/midpoint/classicrk/gill adaptive: adams-bashforth, adams-moulton, higham-hall");
+		
 		if (!fixedStepSize) { // defaults: 0.001, 0.000001;
 			if (rTolInput.get()==null) rTol=0.001; else rTol = rTolInput.get();
 			if (aTolInput.get()==null) aTol=0.000001; else aTol = aTolInput.get();
@@ -115,7 +108,7 @@ public class TrajectoryParameters extends CalculationNode {
 		paramsMap = new HashMap<>();
 	}
 	
-	double getStartTime() {
+	public double getStartTime() {
 		return t0Input.get().getValue();
 	}
 	
@@ -247,51 +240,6 @@ public class TrajectoryParameters extends CalculationNode {
 		}
 		s += space2+"}; \n";
 		return s+"}";
-	}
-	
-	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis, String tparamID) throws IOException {
-		String xml1 = "<trajparams id=\"*id*\" spec=\"TrajectoryParameters\" method=\"*m*\" ";
-		String xml2 = "<initialValue spec=\"ParamValue\" names=\"*n*\" values=\"*v*\"/>";
-		// order="*o* aTol="*a* rTol="*r*"
-		String xml3 = "order=\"*o*\" aTol=\"*a*\" rTol=\"*r*\" ";
-		//<trajparams id="initValues" spec="TrajectoryParameters" method="classicrk"
-		//	    integrationSteps="1001"  order="3" t0="-0.01" t1="10">
-		//      <initialValue spec="ParamValue" names="I0" values="1"/>
-		//      <initialValue spec="ParamValue" names="I1" values="1"/>
-		//      <initialValue spec="ParamValue" names="S" values="12000.0"/>
-		//</trajparams>
-		String s = xml1.replace("*id*", tparamID);
-		writer.tabAppend(s.replace("*m*", methodInput.get())+"\n");
-		writer.tabAppend("  integrationSteps=\""+integrationSteps+"\" ");
-		if (!fixedStepSize) {
-			s = xml3.replace("*o*",Integer.toString(order));
-			s = s.replace("*a*", Double.toString(aTol));
-			s = s.replace("*r*", Double.toString(rTol));
-			writer.tabAppend(s);
-		}
-		writer.tabAppend("t0=\""+Double.toString(this.getStartTime())+"\" ");
-		if (t1Set) {
-			writer.tabAppend("t1=\""+Double.toString(t1)+"\" ");
-		}
-		writer.tabAppend("\n  >\n");
-		String paramName, paramID;
-		writer.tab();
-		for(int i=0; i < paramNames.length; i++) {
-			paramName = paramNames[i];
-			paramID = null;
-			// bug: analysis can be null
-			if (analysis!=null)
-				paramID = analysis.getParamID(paramName); // is it being sampled?
-			s = xml2.replace("*n*", paramNames[i]);
-			if (paramID==null) {
-				writer.tabAppend(s.replace("*v*", Double.toString(paramValues[i]))+"\n");
-			} else {
-				writer.tabAppend(s.replace("*v*", "@"+paramID)+"\n");
-			}
-		}
-		writer.untab();
-		writer.tabAppend("</trajparams>\n");
-		return tparamID;
 	}
 	
 	

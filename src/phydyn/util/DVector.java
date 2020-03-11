@@ -50,6 +50,7 @@ public class DVector {
 		System.arraycopy(V.data, V.start, this.data, this.start, V.length);
 	}
 	
+	@Override
 	public String toString() {
 		String r = "[ ";
 		for(int idx =start; idx < (start+length); idx++)
@@ -338,6 +339,8 @@ public class DVector {
 			data[idx] = buffer[bidx];
 		return bidx;
 	}
+	
+	
 
 	
 	

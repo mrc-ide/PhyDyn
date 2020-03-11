@@ -10,41 +10,53 @@ import phydyn.util.DVector;
  * @author Igor Siveroni
  */
 
-public class StateProbabilitiesVectors implements StateProbabilities {
+public class StateProbabilitiesVectors extends StateProbabilities {
 	
 	 /* Lineage and state probabilities management  */
 	 // Extant Lineages
-	protected int numNodes; // total number of Tree Nodes
+
 	protected int[] extantLineages;
 	protected int[] extantIndex; // maps lineage to position in extant arrays
-	protected int numExtant, numStates;
+	protected int numExtant;
 	protected DVector[] extantProbs, ancestralProbs; // now column vectors
 	
 	// auxiliary
 	int[] pair = new int[2];
-
-	public StateProbabilitiesVectors() {
-		numNodes = 0;
-		numStates = 0;
+	
+	public void clear() {
+		ancestralProbs=null;
+		initExtantLineages();
 	}
 	
 	public StateProbabilities copy() {
 		return null;
 	}
 	
-
-
-	@Override
-	public void init(int numNodes, int numStates) {
+	
+	public StateProbabilitiesVectors(int numNodes, int numStates) {
 		// default first
-		this.numNodes = numNodes;
-		this.numStates= numStates;
+		super(numNodes,numStates);
 		extantLineages = new int[numNodes];
 		extantIndex = new int[numNodes];
 		extantProbs = new DVector[numNodes];
 		ancestralProbs=null;
         initExtantLineages();
 	}
+	
+	public void check() {
+		System.out.println("--- num extant = "+numExtant);
+		System.out.print("lineages: ");
+		for(int i=0; i < numExtant; i++) {
+			System.out.print(extantLineages[i]+" ");
+			if (i != extantIndex[extantLineages[i]]) {
+				System.out.print("Error: index = "+extantIndex[extantLineages[i]]);
+				break;
+			}
+		}
+		System.out.println(" ");
+	}
+	
+	public int getNumStates() { return numStates; }
 	
 	// local 
 	private void initExtantLineages() {
@@ -56,6 +68,16 @@ public class StateProbabilitiesVectors implements StateProbabilities {
 	public int getNumExtant() {
 		return numExtant;
 	}
+	
+	@Override
+	protected int getLineageNr(int idx) {
+		return extantLineages[idx];
+	}
+	
+	protected int getLineageIdx(int linNr) {
+		return extantIndex[linNr];
+	}
+	
 	
 	public int[] getExtantLineages() { 
 		int[] result;

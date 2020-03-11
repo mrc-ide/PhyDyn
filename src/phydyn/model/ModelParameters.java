@@ -136,45 +136,6 @@ public class ModelParameters extends CalculationNode {
 		return s+"}";
 	}
 	
-	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis, String mparamID) throws IOException {
-		String paramxml = "<param spec=\"ParamValue\" names=\"*x*\" values=\"*v*\"/>";
-		String vectorxml = "<param spec=\"ParamValue\" vector=\"true\" names=\"*x*\" values=\"*v*\"/>";
-		writer.tabAppend("<rates spec=\"ModelParameters\" id='**'> ".replace("**",mparamID)+"\n");
-		writer.tab();
-		// <param spec="ParamValue" names="beta0" values="0.0001"/>
-		String s, paramName, paramID;
-	    //<param spec="ParamValue" vector="true" names="KP" values="1 2 3"/>		
-		for(int i=0; i < paramNames.length; i++) {
-			paramName = paramNames[i];
-			s = paramxml.replace("*x*",paramName);
-			// bug: analysis can be null e.g. likelihood
-			paramID = null;
-			if (analysis!=null)
-				paramID = analysis.getParamID(paramName); // is it being sampled?
-			if (paramID==null) {	
-				s = s.replace("*v*",Double.toString(paramValues[i]));
-			} else {
-				s = s.replace("*v*","@"+paramID);
-			}
-			writer.tabAppend(s+"\n");
-		}
-		String vs;
-		for(int i=0; i < paramVectorNames.length; i++) {
-			s = vectorxml.replace("*x*",paramVectorNames[i]);
-			vs = Double.toString(paramVectorValues[i][0]);  // there should at least be one element
-			for(int j=1; j < paramVectorValues[i].length; j++) {
-				vs += " "+  Double.toString(paramVectorValues[i][j]);
-			}
-			s = s.replace("*v*",vs);
-			writer.tabAppend(s+"\n");
-		}
-	    //</rates>  
-		writer.untab();
-		writer.tabAppend("</rates>\n");
-		return mparamID;
-	}
-	
-	
 	
 	
 	/*

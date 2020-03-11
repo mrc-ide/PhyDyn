@@ -44,6 +44,14 @@ public class DMatrix {
 		System.arraycopy(M.data, M.start, this.data, this.start, M.length);
 	}
 	
+	public void reshape(int newRows, int newCols) {
+		if ((this.start + newRows*newCols) > this.data.length) {
+			throw new IllegalArgumentException("DMatrix: buffer too small for resize");
+		}
+		rows = newRows;
+		columns = newCols;
+	}
+	
 	public DMatrix transpose() {
 		DMatrix R = new DMatrix(this.columns,this.rows);
 		int idx, ridx;
@@ -296,6 +304,17 @@ public class DMatrix {
 		return this;
 	}
 	
+	public void muli(double v) {
+		int idx;
+		idx = this.start; 
+		for(int col=0; col < this.columns; col++) {  // could do rows*columns
+			for(int row=0; row < this.rows; row++) {
+				this.data[idx] *= v;
+				idx++; 
+			}
+		}
+	}
+	
 	// Multiplication by a vector
 	
 	public DMatrix mulColumnVector(DVector V) {
@@ -344,6 +363,16 @@ public class DMatrix {
 		return R;
 	}
 	
+	public void addi(double v) {
+		int idx;
+		idx = this.start; 
+		for(int col=0; col < this.columns; col++) {  // could do rows*columns
+			for(int row=0; row < this.rows; row++) {
+				this.data[idx] += v;
+				idx++; 
+			}
+		}
+	}
 	
 	
 	public DMatrix add(DMatrix M) {
@@ -374,6 +403,9 @@ public class DMatrix {
 		}
 		return this;		
 	}
+	
+	
+	
 	
 	/* slow textbook version - start from here 
 	 * then try matrix by vector version 
@@ -468,6 +500,15 @@ public class DMatrix {
 			vidx++;
 		}
 		return r;
+	}
+	
+	public void setDiagonal(double v) {
+		int dim = Math.min(this.rows, this.columns);
+		int idx = this.start;		
+		for(int i=0; i<dim; i++) {
+			this.data[idx]=v;
+			idx += (this.rows+1);
+		}
 	}
 	
 	
