@@ -154,7 +154,6 @@
 	  <pvalue spec='parameter.RealParameter' id='seir.infections.t:$(n)' dimension='1' lower='0' value='0.0' estimate='false' />
 	</initialValue>	
   </trajparams>
-
         
   <operator id='seir.gamma0.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.75'
             weight="1" parameter='@seir.gamma0.t:$(n)' /> 
@@ -245,7 +244,9 @@
    </logger>
      
       ]]>
-	  <!--   <plate fragment="TreeOperators" var="m" range="PhydynIsland"/>	  --> 
+      
+      
+	   <plate fragment="TreeOperators" var="m" range="PhydynSEIR"  />  
 	  
 	  <connect srcID='PhydynSEIR.t:$(n)' targetID='prior' inputName='distribution' id="connect:PHYDYNSEIR"
                if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>
@@ -284,8 +285,8 @@
       <connect srcID='seir.exog.t:$(n)' targetID='state' inputName='stateNode' 
          if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exog.t:$(n)/estimate=true' />     
       <connect srcID='seir.infections.t:$(n)' targetID='state' inputName='stateNode' 
-         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' />     
-                 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' />              
+       
 
      <connect srcID='seir.gamma0.operator.t:$(n)' targetID='mcmc' inputName='operator'
             if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma0.t:$(n)/estimate=true' >
