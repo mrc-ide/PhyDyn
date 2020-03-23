@@ -133,6 +133,16 @@ public class StateProbabilitiesVectors extends StateProbabilities {
 		this.addLineage(nodeNr,p);
 		return p;
 	}
+	
+	public DVector addSample(int nodeNr, int sampleState, double minP) {
+		DVector p = new DVector(numStates); // row-vector
+		p.put(minP);
+		p.put(sampleState, 1.0 - (numStates-1)*minP);		
+		p.divi(p.sum());
+		// p.put(sampleState, 1.0);
+		this.addLineage(nodeNr,p);
+		return p;
+	}
 
 	@Override
 	public DVector removeLineage(int nodeNr) {

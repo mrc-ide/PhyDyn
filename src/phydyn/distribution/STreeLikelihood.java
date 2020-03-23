@@ -54,6 +54,9 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 	public Input<Boolean> forgiveYInput = new Input<>("forgiveY",
 			"Tolerates Y < 1.0 and sets Y = max(Y,1.0)",  new Boolean(true));
 	
+	public Input<Double> minPInput = new Input<>("minP",
+			 "minimum value of state probilities i.e. avoid zero", 0.0001);
+	
 	public Input<Integer> gcInput = new Input<>(
 			"gc", "Number of iterations before calling the garbage collector",
 			new Integer(0));
@@ -68,6 +71,9 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 	 	public int numStates; 	 
 	 	protected int[] nodeNrToState; 
 	 */
+	
+	public boolean setMinP;
+	public double minP;
 		   
     public TimeSeriesFGY ts;
 	public int samples;
@@ -88,7 +94,15 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     @Override
     public void initAndValidate() {
     	super.initAndValidate(); /* important: call first */
-    	// stateProbabilities = new StateProbabilitiesVectors(); // declared in superclass    
+    	// stateProbabilities = new StateProbabilitiesVectors(); // declared in superclass   
+    	setMinP=false;
+		 if (minPInput.get()!=null) {
+			 minP = minPInput.get();
+			 if (minP > 0.1) {
+				 throw new IllegalArgumentException("Minimum state probability value must be less than 0.1");
+			 }
+			 setMinP=true;
+		 }
     	stateProbabilities = null;
     	//initValues();
     	if (ancestralInput.get()) {
@@ -274,6 +288,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	}      	
         	logP += lhinterval;
         	
+        	if (logP == Double.NEGATIVE_INFINITY) {
+        		System.out.println("logP -Infinity - quitting before event"); 
+        	}
+        	
         	// Make sure times and heights are in sync
         	// assert(h==hEvent) and assert(t = tsTimes[0] - h)
         	
@@ -281,7 +299,12 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	case SAMPLE:
         		processSampleEvent(interval); break;
         	case COALESCENT:
-        		logP += processCoalEvent(tsPoint, interval); break;
+        		logP += processCoalEvent(tsPoint, interval); // break;
+        		if (logP == Double.NEGATIVE_INFINITY) {
+            		System.out.println("logP -Infinity - after coal event"); 
+            		throw new IllegalArgumentException("Problem with coal event");
+            	}
+        		break;
         	default:
         		throw new IllegalArgumentException("Unknown Interval Type");      		
         	}
@@ -295,6 +318,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         		logP = Double.NEGATIVE_INFINITY;
 				return logP;
         	} else if (logP == Double.NEGATIVE_INFINITY) {
+        		System.out.println("logP -Infinity - quitting likelihood");  // new
 				return logP;
     		} 
     		    	
@@ -317,6 +341,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         }              
         ts = null;
         if (Double.isInfinite(logP)) logP = Double.NEGATIVE_INFINITY;
+        
+        if (logP == Double.NEGATIVE_INFINITY) { // new
+        	System.out.println("Double infinity - constant coalescent");
+        }
                 
         // System.out.println("LogLh is ="+logP);
         
@@ -489,7 +517,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	/* uses pre-computed nodeNrToState */
 		sampleState = nodeNrToState[l.getNr()]; /* suceeds if node is a leaf, otherwise state=-1 */	
 		//System.out.println("process sample: "+l.getNr()+" num children: "+l.getChildren().size());
-		stateProbabilities.addSample(l.getNr(), sampleState);
+		if (setMinP)
+			stateProbabilities.addSample(l.getNr(), sampleState,minP);
+		else
+			stateProbabilities.addSample(l.getNr(), sampleState);
 		if (computeAncestral)
 			stateProbabilities.storeAncestralProbs(l.getNr());
     	
@@ -515,8 +546,9 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	pair[1] = coalLineages.get(1).getNr();
     	stateProbabilities.getExtantProbabilities(pair, 2, coalProbs);    		
     	DVector pvec1 = coalProbs[0];
-   		DVector pvec2 = coalProbs[1];
-		
+   		DVector pvec2 = coalProbs[1];	
+   		
+   		
 		int coalNode =  intervals.getEvent(interval).getNr();
 	
 		//Compute parent lineage state probabilities in p				
@@ -545,10 +577,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			}
     		}
     		pa = new DVector(numStates,pa_data);
-    	} else {  		
+    	} else { 
     		DVector pi_Y = pvec1.div(Y);
     		DVector pj_Y = pvec2.div(Y);	
-    		pa = pi_Y.mul(pj_Y.rmul(F));      // pj_Y * F	
+    		pa = pi_Y.mul(pj_Y.rmul(F));      // pj_Y * F
     		pa.addi(pj_Y.mul(pi_Y.rmul(F)));   // pi_Y * F
     	}
     	pairCoal = pa.sum(); 

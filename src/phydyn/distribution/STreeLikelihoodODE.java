@@ -31,8 +31,8 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 	
 	public final static double MIN_H = 1.0e-6;
 	public IntegrationMethod method;
-	public boolean fixedStepSize, setMinP;
-	public double stepSize, aTol, rTol, minP;
+	public boolean fixedStepSize;
+	public double stepSize, aTol, rTol;
 	public int order;
 	public EquationsType eqType;
 	private static final EquationsType defaultEquations =  EquationsType.PL2;
@@ -59,8 +59,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 	public Input<Integer> orderInput = new Input<>(
 			 "order", "order(k) of adaptive size integration method", new Integer(3)); 
 	 
-	public Input<Double> minPInput = new Input<>("minP",
-			 "minimum value of state probilities i.e. avoid zero", 0.0001);
+	
 	 
 	 private SolverIntervalODE solver=null; 
 	 
@@ -90,14 +89,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 		 aTol = aTolInput.get();
 		 rTol = rTolInput.get();
 		 order = orderInput.get();
-		 setMinP=false;
-		 if (minPInput.get()!=null) {
-			 minP = minPInput.get();
-			 if (minP > 0.1) {
-				 throw new IllegalArgumentException("Minimum state probability value must be less than 0.1");
-			 }
-			 setMinP=true;
-		 }
+		 
 		 if (solvePLInput.get()!=null) {
 			 Log.warning("(phydyn) STreeLikelihood: solvePL option deprecated. Use 'equations' instead");
 		 }

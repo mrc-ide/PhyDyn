@@ -22,6 +22,7 @@ public interface StateProbabilitiesI {
 	public DVector addLineage(int nodeNr);
 	public DVector addLineage(int nodeNr, DVector pvec);
 	public DVector addSample(int nodeNr, int sampleState);	
+	public DVector addSample(int nodeNr, int sampleState,double minP);
 	public DVector removeLineage(int nodeNr);
 	
 	public DVector getRootProbs();

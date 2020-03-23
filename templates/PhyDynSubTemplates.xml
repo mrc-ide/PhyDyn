@@ -35,7 +35,7 @@
                phydyn.model.TrajectoryParameters.t1'>
      <![CDATA[
         <plugin spec='phydyn.distribution.STreeLikelihoodODE' id='PhydynSEIR.t:$(n)'
-          equations="QL" useStateName='true' forgiveAgtY='1.0' minP="0.0001" 
+          equations="QL" useStateName='true' forgiveAgtY='1.0' penaltyAgtY='0.0' minP="0.01" stepSize="0.01" 
           approxLambda='false' finiteSizeCorrections='false'  popmodel="@pdseirmodel.t:$(n)"   >
           <treeIntervals spec='STreeIntervals' id='STreeIntervals.t:$(n)' tree='@Tree.t:$(n)'/>
           <Ne spec='parameter.RealParameter' id='seir.Ne.t:$(n)' dimension='1' value='0.1' estimate='false'  />
@@ -44,6 +44,7 @@
        
   <popmodel spec='phydyn.model.PopModelODE' id='pdseirmodel.t:$(n)' evaluator="compiled"
 	 popParams='@initValues' modelParams='@rates'>
+	<definition spec='phydyn.model.Definition'>	N = S + Il + Ih + E + R  </definition>
 	<definition spec='phydyn.model.Definition'>	beta = if (t > 2020.025) then max(0.0, b) else 0.0 </definition>
 	<definition spec='phydyn.model.Definition'> betaExog =  gammaExog + exogGrowthRate </definition>	 
 	<matrixeq spec='phydyn.model.MatrixEquation' type="migration" origin="E" destination="Il">
@@ -53,10 +54,10 @@
 		if ( t > 2020.025 ) then gamma0*E*p_h else 0.0 
 	</matrixeq> 			
 	<matrixeq spec='phydyn.model.MatrixEquation' type="birth"  origin="Il" destination="E"> 				
-	    beta*Il*S / ( S + Il + Ih +R )
+	    beta*Il*S / N
 	</matrixeq> 			
 	<matrixeq spec='phydyn.model.MatrixEquation' type="birth"  origin="Ih" destination="E"> 
-		beta*Ih*tau * S / (S + Il + Ih +R)
+		beta*Ih*tau * S / N
 	</matrixeq> 			
 	<matrixeq spec='phydyn.model.MatrixEquation' type="death" origin="Il">
 		gamma1*Il
@@ -68,10 +69,10 @@
 		gamma1*(Il + Ih)
 	</matrixeq>
 	<matrixeq spec='phydyn.model.MatrixEquation' type="nondeme" origin="S"> 
-		-beta*(Ih*tau+Il) * S / (S + Il + Ih + R)
+		-beta*(Ih*tau+Il) * S / N
 	</matrixeq>
 	<matrixeq spec='phydyn.model.MatrixEquation' type="nondeme" origin="infections"> 
-		beta*(Ih*tau+Il) * S / (S + Il + Ih + R)
+		beta*(Ih*tau+Il) * S / N
 	</matrixeq>
 	<!-- migration -->				 
 	 <matrixeq spec='phydyn.model.MatrixEquation' type="migration"  origin="exog" destination="Il"> 
@@ -103,35 +104,35 @@
 	 
 
   <rates spec="phydyn.model.ModelParameters" id='rates'>	
-	<param spec='phydyn.model.ParamValue' id='seir.gamma0.pv.t:$(n)' pname='gamma0'>
-	  <pvalue spec='parameter.RealParameter' id='seir.gamma0.t:$(n)' dimension='1' value='89.042' estimate='false' />
+	<param spec='phydyn.model.ParamValue' id='seir.gamma0.pv.t:$(n)' pname='gamma0' >
+	  <pvalue spec='parameter.RealParameter' id='seir.gamma0.t:$(n)' dimension='1' value='73.0' estimate='false' />
 	</param>
 	<param spec='phydyn.model.ParamValue' id='seir.gamma1.pv.t:$(n)' pname='gamma1' >
-	  <pvalue spec='parameter.RealParameter' id='seir.gamma1.t:$(n)' dimension='1' value='96.05' estimate='false' />
+	  <pvalue spec='parameter.RealParameter' id='seir.gamma1.t:$(n)' dimension='1' value='121.667' estimate='false' />
 	</param>
 	<param spec="phydyn.model.ParamValue" id="seir.gammaExog.pv.t:$(n)"  pname="gammaExog">
       <pvalue spec="parameter.RealParameter" id="seir.gammaExog.t:$(n)" dimension='1' value='44.0' estimate="false" />
     </param>
 	<param spec='phydyn.model.ParamValue' id='seir.p_h.pv.t:$(n)' pname='p_h' >
-	  <pvalue spec='parameter.RealParameter' id='seir.p_h.t:$(n)' dimension='1' lower="0" upper="1" value='0.20' estimate='false' />
+	  <pvalue spec='parameter.RealParameter' id='seir.p_h.t:$(n)' dimension='1' lower="0" upper="1" value='0.20' estimate='true' />
 	</param>
 	<param spec='phydyn.model.ParamValue' id='seir.b.pv.t:$(n)' pname='b' >
-	  <pvalue spec='parameter.RealParameter' id='seir.b.t:$(n)' dimension='1' lower='9' value='25.0' estimate='true' />
+	  <pvalue spec='parameter.RealParameter' id='seir.b.t:$(n)' dimension='1' lower='9' value='15.0' estimate='true' />
 	</param>
 	<param spec='phydyn.model.ParamValue' id='seir.tau.pv.t:$(n)' pname='tau' >
-	  <pvalue spec='parameter.RealParameter' id='seir.tau.t:$(n)' dimension='1' value='73.98393' estimate='false' />
+	  <pvalue spec='parameter.RealParameter' id='seir.tau.t:$(n)' dimension='1' value='73.98393' estimate='true' />
 	</param>
 	<param spec='phydyn.model.ParamValue' id='seir.exogGrowthRate.pv.t:$(n)' pname='exogGrowthRate' >
 	  <pvalue spec='parameter.RealParameter' id='seir.exogGrowthRate.t:$(n)' dimension='1' value='36.5' estimate='true' />
 	</param>
 	<param spec='phydyn.model.ParamValue' id='seir.importRate.pv.t:$(n)' pname='importRate' >
-	  <pvalue spec='parameter.RealParameter' id='seir.importRate.t:$(n)' dimension='1' lower='0' upper='2.0' value='1.0' estimate='true' />
+	  <pvalue spec='parameter.RealParameter' id='seir.importRate.t:$(n)' dimension='1' lower='0' upper='10.0' value='7.0' estimate='true' />
 	</param>
   </rates>
 
   <trajparams id='initValues' spec='phydyn.model.TrajectoryParameters' method="classicrk"
 			integrationSteps="200"  >
-	<t0 spec="parameter.RealParameter" id="seir.t0.t:$(n)"  name="t0"  value="2019.86" estimate='false' />
+	<t0 spec="parameter.RealParameter" id="seir.t0.t:$(n)"  name="t0"  value="2019.7" estimate='false' />
     <initialValue spec="phydyn.model.ParamValue" id='seir.E.pv.t:$(n)' pname='E'  >
       <pvalue spec='parameter.RealParameter' id='seir.E.t:$(n)' dimension='1' lower='0' value='1.0' estimate='true' />
     </initialValue>
@@ -145,15 +146,16 @@
 	  <pvalue spec='parameter.RealParameter' id='seir.R.t:$(n)' dimension='1' lower='0' value='0.0' estimate='false' />
 	</initialValue>
 	<initialValue spec="phydyn.model.ParamValue" id='seir.S.pv.t:$(n)' pname='S'  >
-	  <pvalue spec='parameter.RealParameter' id='seir.S.t:$(n)' dimension='1' lower='0' value='500.0' estimate='true' />
+	  <pvalue spec='parameter.RealParameter' id='seir.S.t:$(n)' dimension='1' lower='2.0E7' upper='2.1E7' value='2.05E7' estimate='true' />
 	</initialValue>
 	<initialValue spec="phydyn.model.ParamValue" id='seir.exog.pv.t:$(n)' pname='exog'  >
-	  <pvalue spec='parameter.RealParameter' id='seir.exog.t:$(n)' dimension='1' lower='0' value='10.0' estimate='true' />
+	  <pvalue spec='parameter.RealParameter' id='seir.exog.t:$(n)' dimension='1' lower='0' value='0.01' estimate='true' />
 	</initialValue>
 	<initialValue spec="phydyn.model.ParamValue" id='seir.infections.pv.t:$(n)' pname='infections'  >
 	  <pvalue spec='parameter.RealParameter' id='seir.infections.t:$(n)' dimension='1' lower='0' value='0.0' estimate='false' />
 	</initialValue>	
   </trajparams>
+
         
   <operator id='seir.gamma0.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.75'
             weight="1" parameter='@seir.gamma0.t:$(n)' /> 
@@ -199,13 +201,13 @@
 	<LogNormal  M="3.78" S="0.5" name="distr" />
   </prior>
   <prior id="seir.p_h.prior.t:$(n)" name="distribution" x="@seir.p_h.t:$(n)">
-	<Beta alpha="2" beta="5" name="distr" />
+	<Beta alpha="50" beta="200" name="distr" />
   </prior>
    <prior id="seir.b.prior.t:$(n)" name="distribution" x="@seir.b.t:$(n)">
-	<LogNormal M="3.21" S="0.5" name="distr" />
+	<LogNormal M="2.7" S="0.5" name="distr" />
   </prior>
    <prior id="seir.tau.prior.t:$(n)" name="distribution" x="@seir.tau.t:$(n)">
-	<LogNormal  M="4.3" S="0.5" name="distr" />
+	<LogNormal  M="4.3" S="0.1" name="distr" />
   </prior>
   <prior id="seir.exogGrowthRate.prior.t:$(n)" name="distribution" x="@seir.exogGrowthRate.t:$(n)">
 	<LogNormal  M="3.6" S="0.25" name="distr" />
@@ -230,7 +232,7 @@
 	<Exponential mean="1.0" name="distr" />
   </prior>
   <prior id="seir.S.prior.t:$(n)" name="distribution" x="@seir.S.t:$(n)">
-	<LogNormal M="6" S="1.0" name="distr" />
+	<Uniform  name="distr" upper="Infinity"/>
   </prior>
   <prior id="seir.exog.prior.t:$(n)" name="distribution" x="@seir.exog.t:$(n)">
     <Exponential mean="1.0" name="distr" />
@@ -244,9 +246,7 @@
    </logger>
      
       ]]>
-      
-      
-	   <plate fragment="TreeOperators" var="m" range="PhydynSEIR"  />  
+      <plate fragment="TreeOperators" var="m" range="PhydynSEIR"  />  
 	  
 	  <connect srcID='PhydynSEIR.t:$(n)' targetID='prior' inputName='distribution' id="connect:PHYDYNSEIR"
                if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>
@@ -285,8 +285,8 @@
       <connect srcID='seir.exog.t:$(n)' targetID='state' inputName='stateNode' 
          if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exog.t:$(n)/estimate=true' />     
       <connect srcID='seir.infections.t:$(n)' targetID='state' inputName='stateNode' 
-         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' />              
-       
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' />     
+                 
 
      <connect srcID='seir.gamma0.operator.t:$(n)' targetID='mcmc' inputName='operator'
             if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma0.t:$(n)/estimate=true' >

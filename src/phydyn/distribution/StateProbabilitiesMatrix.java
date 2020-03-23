@@ -131,6 +131,17 @@ public class StateProbabilitiesMatrix extends StateProbabilities {
 		probsArray[nodeNr].put(sampleState, 1);
 		return addLineage(nodeNr);
 	}
+	
+	@Override
+	public DVector addSample(int nodeNr, int sampleState, double  minP) {
+		// assumption: zeroed pvec
+		// probsArray[nodeNr].put(sampleState, 1);
+		DVector probs = extantProbs[nodeNr];
+		probs.put(minP);
+		probs.put(sampleState, 1.0 - (numStates-1)*minP);		
+		probs.divi(probs.sum());  // normalise
+		return addLineage(nodeNr);
+	}
 
 	@Override
 	// igor: verify this. optimise
