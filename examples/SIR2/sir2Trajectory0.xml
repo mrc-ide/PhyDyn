@@ -4,10 +4,10 @@
   
 <model spec="PopModelODE" id="twodeme"
        popParams='@initValues' modelParams='@rates'  >
-   <definitions spec='Definitions' > 
+   <definitions  > 
   	k0 = beta0*S; k1 = beta1*S;
    </definitions> 
-   <matrixeqs spec="MatrixEquations">
+   <matrixeqs>
      F(I0,I0) = k0*I0;
      F(I1,I0) = k1*I1;
      G(I0,I1) = gamma0*I0;
