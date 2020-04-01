@@ -59,6 +59,7 @@ public class STreeRootLogger extends CalculationNode implements Loggable {
     public void log(int nSample, PrintStream out) {
     	out.print(nSample+"\t");
     	StateProbabilities sp = densityInput.get().getStateProbabilities();
+    	// investigate: use tree.getRoot() instead
     	DVector probs = sp.getRootProbs();
     	if (probs != null) {
     		for(int i=0; i < numStates; i++)

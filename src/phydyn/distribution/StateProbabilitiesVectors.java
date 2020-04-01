@@ -168,14 +168,15 @@ public class StateProbabilitiesVectors extends StateProbabilities {
 		return result;
 	}
 	
+	// used only by rootlogger
 	public DVector getRootProbs() {
-		// rootNr = numNodes
+		// rootNr = numNodes-1  --> check this, an operator may change this. use tree.getRoot()
 		if (this.ancestralProbs!=null) {
 			return ancestralProbs[numNodes-1];
 		}
 		if (numExtant>0) {
-			if (this.extantIndex[numNodes]!=-1)
-				return extantProbs[extantIndex[numNodes]];
+			if (this.extantIndex[numNodes-1]!=-1)
+				return extantProbs[extantIndex[numNodes-1]];
 		}
 		return null;
 	}

@@ -91,20 +91,16 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 		 order = orderInput.get();
 		 
 		 if (solvePLInput.get()!=null) {
-			 Log.warning("(phydyn) STreeLikelihood: solvePL option deprecated. Use 'equations' instead");
+			 Log.warning("(phydyn) STreeLikelihood: solvePL option deprecated.\nUse equations = 'PL | PL1 | PL2 | QL' instead.\n"
+			 		+ "Ignoring solvePL. Using default value of equations (equations='PL2') if equations parameter is not set.");
 		 }
 		 // Equations / solver.
 		 if (equationsInput.get()!=null) {
 			 eqType = equationsInput.get();			 
 			 // if there's solverInput, even if redundant, they must agree
-			 if (solvePLInput.get()!=null) {
-				 throw new IllegalArgumentException("(phydyn) STreeLikelihood: Can't use solvePL and equations together. Choose one.");
-			 } 
+			 
 		 } else { // legacy
-			 eqType = defaultEquations; // default
-			 if ( (solvePLInput.get()!=null)&& (!solvePLInput.get())) {				 
-					 eqType = EquationsType.QL;									
-			 }			 
+			throw new IllegalArgumentException("Unexpected behaviour - equations paramter must have a default");
 		 }
 		 switch (eqType) {
 		 case PL1:
