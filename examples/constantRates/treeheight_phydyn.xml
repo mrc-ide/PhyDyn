@@ -33,23 +33,23 @@ beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:beast
 	</model>
 	
 	<params spec="ModelParameters" id='simplerates'>
-		<param spec='ParamValue' names='beta0' values='0.25'></param>
-		<param spec='ParamValue' names='beta1' values='0.5'></param>
-		<param spec='ParamValue' names='beta2' values='1.0'></param>
-		<param spec='ParamValue' names='gamma01' values='0.001'></param>
-		<param spec='ParamValue' names='gamma02' values='0.01'></param>
-		<param spec='ParamValue' names='gamma10' values='0.01'></param>
-		<param spec='ParamValue' names='gamma12' values='0.01'></param>
-		<param spec='ParamValue' names='gamma20' values='0.02'></param>
-		<param spec='ParamValue' names='gamma21' values='0.003'></param>
+		<param spec='ParamValue' pname='beta0' pvalue='0.25'></param>
+		<param spec='ParamValue' pname='beta1' pvalue='0.5'></param>
+		<param spec='ParamValue' pname='beta2' pvalue='1.0'></param>
+		<param spec='ParamValue' pname='gamma01' pvalue='0.001'></param>
+		<param spec='ParamValue' pname='gamma02' pvalue='0.01'></param>
+		<param spec='ParamValue' pname='gamma10' pvalue='0.01'></param>
+		<param spec='ParamValue' pname='gamma12' pvalue='0.01'></param>
+		<param spec='ParamValue' pname='gamma20' pvalue='0.02'></param>
+		<param spec='ParamValue' pname='gamma21' pvalue='0.003'></param>
 	</params>
 	
 	<params id="simpleparams" spec='TrajectoryParameters' method="classicrk" 
 		integrationSteps="1001" rTol="0.01" aTol="1.0e-4" order="3" t0="-0.1">
-			<initialValue spec="ParamValue" names='I0' values='100.0'  />
-			<initialValue spec="ParamValue" names='I1' values='100.0'  />
-			<initialValue spec="ParamValue" names='I2' values='100.0'  />
-			<initialValue spec="ParamValue" names='S'  values='200.0' />
+			<initialValue spec="ParamValue" pname='I0' pvalue='100.0'  />
+			<initialValue spec="ParamValue" pname='I1' pvalue='100.0'  />
+			<initialValue spec="ParamValue" pname='I2' pvalue='100.0'  />
+			<initialValue spec="ParamValue" pname='S'  pvalue='200.0' />
 	</params>
 	  
     <run id="mcmc" spec="MCMC" chainLength="300">

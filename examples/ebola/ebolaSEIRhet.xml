@@ -462,29 +462,25 @@ force of infection: max(0, a*t + b )
 		11.4 day incubation
 		5 day infectiousness 
 -->
-		<param spec='ParamValue' names='gamma0' values='32.01754'/>
-		<param spec='ParamValue' names='gamma1' values='73.0'/>
-		<param spec='ParamValue' names='p_h' values='0.20'/>
-		<param spec='ParamValue' names='a' values='@a'/>
-		<param spec='ParamValue' names='b' values='@b'/>
-		<param spec='ParamValue' names='tau' values='@tau'/>
+		<param spec='ParamValue' pname='gamma0' pvalue='32.01754'/>
+		<param spec='ParamValue' pname='gamma1' pvalue='73.0'/>
+		<param spec='ParamValue' pname='p_h' pvalue='0.20'/>
+		<param spec='ParamValue' pname='a' pvalue='@a'/>
+		<param spec='ParamValue' pname='b' pvalue='@b'/>
+		<param spec='ParamValue' pname='tau' pvalue='@tau'/>
 	</rates>
 	
 <!--
 t1="1.8000765516"
--->
-<!--
-	<trajparams id='initValues' spec='TrajectoryParameters' method="classicrk" 
-	            integrationSteps="1000" rTol="0.001" aTol="1.0e-6" order="3" t0="0.0" t1="1.95" >
--->	            
+-->          
 
 	<trajparams id='initValues' spec='TrajectoryParameters' method="classicrk" 
 	            integrationSteps="1000" t0="-0.001" >
 
-	        <initialValue spec="ParamValue" names='E' values='@initI0'  />
-			<initialValue spec="ParamValue" names='Il' values='1.0'  />
-			<initialValue spec="ParamValue" names='Ih' values='1.0'  />
-			<initialValue spec="ParamValue" names='R' values='0.0'  />
+	        <initialValue spec="ParamValue" pname='E' pvalue='@initI0'  />
+			<initialValue spec="ParamValue" pname='Il' pvalue='1.0'  />
+			<initialValue spec="ParamValue" pname='Ih' pvalue='1.0'  />
+			<initialValue spec="ParamValue" pname='R' pvalue='0.0'  />
 	</trajparams>
 	
 	<!-- Define tree outside state -->
@@ -523,7 +519,7 @@ t1="1.8000765516"
 				 <distribution spec='STreeLikelihoodODE' id = 'stlikelihood'
              	 useStateName='true' 
              	 approxLambda='false' finiteSizeCorrections='false'
-             	 solvePL='false'
+             	 equations='QL'
              	 forgiveY='true'
              	 forgiveAgtY='1.0'
              	 stepSize='.0001'

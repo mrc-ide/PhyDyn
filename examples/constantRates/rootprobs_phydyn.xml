@@ -24,16 +24,16 @@
 	</model>
 	
 	<rates spec="ModelParameters" id='simplerates'>
-		<param spec='ParamValue' names='m10' values='0.01'></param>
-		<param spec='ParamValue' names='m01' values='@migRate'></param>
+		<param spec='ParamValue' pname='m10' pvalue='0.01'></param>
+		<param spec='ParamValue' pname='m01' pvalue='@migRate'></param>
 	</rates>
 	
 	
 	<params spec='TrajectoryParameters' id="simpleparams"  method="classicrk" 
 		integrationSteps="1001" rTol="0.01" aTol="1.0e-4" order="3" t0="-0.1">
-			<initialValue spec="ParamValue" names='I0'  values='@initI0' />
-			<initialValue spec="ParamValue" names='I1' values='25.0'/>
-			<initialValue spec="ParamValue" names='S'  values='100.0' />
+			<initialValue spec="ParamValue" pname='I0'  pvalue='@initI0' />
+			<initialValue spec="ParamValue" pname='I1' pvalue='25.0'/>
+			<initialValue spec="ParamValue" pname='S'  pvalue='100.0' />
 	</params>
 	
 	<!-- Define tree outside state -->

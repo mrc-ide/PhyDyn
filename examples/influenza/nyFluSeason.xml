@@ -185,17 +185,17 @@ name="alignment">
 </model>
 
 <rates spec="ModelParameters" id='rates'>	
-	<param spec='ParamValue' names='gamma' values='@gamma'/>
-	<param spec='ParamValue' names='R0' values='@R0'/>
-	<param spec='ParamValue' names='eta' values='@eta'/>
+	<param spec='ParamValue' pname='gamma' pvalue='@gamma'/>
+	<param spec='ParamValue' pname='R0' pvalue='@R0'/>
+	<param spec='ParamValue' pname='eta' pvalue='@eta'/>
 </rates>
 
 <trajparams id='initValues' spec='TrajectoryParameters' method="classicrk" 
 			integrationSteps="500" rTol="0.01" aTol="1.0e-4" order="3" t0="2000.0"  >
-		<initialValue spec="ParamValue" names='R' values='0.0'  />
-		<initialValue spec="ParamValue" names='I' values='@initI0'  />
-		<initialValue spec="ParamValue" names='S' values='@initS0'  />
-		<initialValue spec="ParamValue" names='src' values='@srcSize'  />
+		<initialValue spec="ParamValue" pname='R' pvalue='0.0'  />
+		<initialValue spec="ParamValue" pname='I' pvalue='@initI0'  />
+		<initialValue spec="ParamValue" pname='S' pvalue='@initS0'  />
+		<initialValue spec="ParamValue" pname='src' pvalue='@srcSize'  />
 </trajparams>
 
 
@@ -356,7 +356,7 @@ CY021989_2004.98954162278_I=2004.98954162278                <taxa id="TaxonSet.l
 				<LogNormal id="LogNormal:gamma" M="4.8" S="0.25" name="distr" />
 			</prior>
 			<distribution spec='STreeLikelihoodODE' id = 'stlikelihood'
-			  useStateName='true' solvePL='false'
+			  useStateName='true' equations='QL'
 			  forgiveY='false' forgiveAgtY='0.0' penaltyAgtY='0.0'
 			  popmodel='@flumodel'  
 			  stepSize='0.001' 

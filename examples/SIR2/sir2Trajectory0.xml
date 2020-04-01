@@ -18,18 +18,18 @@
 </model>
 
 <rates spec="ModelParameters" id='rates'>
-    <param spec="ParamValue" names="beta0" values="0.001"/>
-    <param spec="ParamValue" names="beta1" values="0.0001"/>
-    <param spec="ParamValue" names="gamma0" values="1.0"/>
-    <param spec="ParamValue" names="gamma1" values="0.1111"/>
-    <param spec="ParamValue" names="b" values="0.01"/>
+    <param spec="ParamValue" pname="beta0" pvalue="0.001"/>
+    <param spec="ParamValue" pname="beta1" pvalue="0.0001"/>
+    <param spec="ParamValue" pname="gamma0" pvalue="1.0"/>
+    <param spec="ParamValue" pname="gamma1" pvalue="0.1111"/>
+    <param spec="ParamValue" pname="b" pvalue="0.01"/>
 </rates>  
 
 <trajparams id="initValues" spec="TrajectoryParameters" method="classicrk"
 	    integrationSteps="1001"  t0="0" t1="20">
-      <initialValue spec="ParamValue" names="I0" values="1"/>
-      <initialValue spec="ParamValue" names="I1" values="0"/>
-      <initialValue spec="ParamValue" names="S" values="999"/>
+      <initialValue spec="ParamValue" pname="I0" pvalue="1"/>
+      <initialValue spec="ParamValue" pname="I1" pvalue="0"/>
+      <initialValue spec="ParamValue" pname="S" pvalue="999"/>
 </trajparams>
   
   <run spec="TrajectoryOut" model='@twodeme' file="sir2Final.csv" />

@@ -19,23 +19,23 @@
 	</model>
 	
 	<rates spec="ModelParameters" id='rates'>	
-	  <param spec='ParamValue' names='b' values='0.036'></param>
-	  <param spec='ParamValue' names='mu' values='0.0333'></param>
-	  <param spec='ParamValue' names='beta0' values='1.2'></param>
-	  <param spec='ParamValue' names='beta1' values='0.03'></param>
-	  <param spec='ParamValue' names='beta2' values='0.09'></param>
-	  <param spec='ParamValue' names='gamma0' values='1'></param>
-	  <param spec='ParamValue' names='gamma1' values='0.1428'></param>
-	  <param spec='ParamValue' names='gamma2' values='0.64'></param>
+	  <param spec='ParamValue' pname='b' pvalue='0.036'></param>
+	  <param spec='ParamValue' pname='mu' pvalue='0.0333'></param>
+	  <param spec='ParamValue' pname='beta0' pvalue='1.2'></param>
+	  <param spec='ParamValue' pname='beta1' pvalue='0.03'></param>
+	  <param spec='ParamValue' pname='beta2' pvalue='0.09'></param>
+	  <param spec='ParamValue' pname='gamma0' pvalue='1'></param>
+	  <param spec='ParamValue' pname='gamma1' pvalue='0.1428'></param>
+	  <param spec='ParamValue' pname='gamma2' pvalue='0.64'></param>
 	</rates>	
 
 			
 	<trajparams id='initValues' spec='TrajectoryParameters' method="classicrk" 
 	            integrationSteps="1001"  t0="0" t1="50">
-	  <initialValue spec="ParamValue" names='I0' values='1'  />
-	  <initialValue spec="ParamValue" names='I1' values='0.01'  />
-	  <initialValue spec="ParamValue" names='I2' values='0.01' />
-	  <initialValue spec="ParamValue" names='S' values='3000.0' />
+	  <initialValue spec="ParamValue" pname='I0' pvalue='1'  />
+	  <initialValue spec="ParamValue" pname='I1' pvalue='0.01'  />
+	  <initialValue spec="ParamValue" pname='I2' pvalue='0.01' />
+	  <initialValue spec="ParamValue" pname='S' pvalue='3000.0' />
 	</trajparams>
 	
 	
