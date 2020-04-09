@@ -18,7 +18,6 @@ import beast.util.TreeParser;
 // Valid from JUnit 4.11 onwards
 
 
-
 public class TestSTreeIntervals {
 	
 	private static String[] zeroNewick = { 
