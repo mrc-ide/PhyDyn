@@ -201,10 +201,12 @@ public class TrajectoryParameters extends CalculationNode {
 			if (true) {  // (pValue.isDirtyCalculation())  --- came back and fix this
 				for(int i=0; i < pValue.names.size(); i++) {
 					idx = paramsMap.get(pValue.names.get(i));
-					if (idx!=null) {
+					if (idx!=null) {						
 						//System.out.println("update "+pValue.names.get(i)+" = "+pValue.values.getValue(i));
 						paramValues[idx] = pValue.values.getValue(i);
-					} 
+					} else {
+						throw new IllegalArgumentException("-- Programming error. Please report");
+					}
 				}
 			}
 		}

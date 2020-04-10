@@ -344,6 +344,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         
         if (logP == Double.NEGATIVE_INFINITY) { // new
         	System.out.println("Double infinity - constant coalescent");
+        	return logP;
         }
                 
         // System.out.println("LogLh is ="+logP);
@@ -364,6 +365,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         //Runtime runtime = Runtime.getRuntime();
         //long usedMemory = runtime.totalMemory() - runtime.freeMemory();
         //System.out.println("   used: "+usedMemory);
+        
         return logP;
    	
     }

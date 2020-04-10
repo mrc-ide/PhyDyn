@@ -59,6 +59,8 @@ public class STreeIntervals extends TreeIntervals {
 		 events= null;
 		 
 		 super.restore();
+		 // added to fix problems with MCMC check - state.robustlyCalcPosterior(posterior);
+		 intervalsKnown = false;
 	   	        	
 	 } 
 	    

@@ -53,6 +53,7 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 	 public Input<Boolean> ancestralInput = new Input<>("ancestral",
 				"Compute ancestral states",new Boolean(false));
 	 
+	 
 	 public PopModel popModel;
 	 public Tree tree;
 	 
@@ -88,7 +89,7 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 		 }	
 		 computeAncestral = ancestralInput.get();
 		 numStates = popModel.getNumStates(); 
-
+		 
 		 popModel.printModel();
 	 }
 	 
