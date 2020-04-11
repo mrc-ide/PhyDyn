@@ -43,7 +43,7 @@ public class STreeIntervals extends TreeIntervals {
 	 
 	 @Override
 	 protected void restore() {
-	        
+	     
 		 int[] tmp1 = storedIndices;
 		 storedIndices = indices;
 		 indices = tmp1;
@@ -71,6 +71,11 @@ public class STreeIntervals extends TreeIntervals {
 		 System.arraycopy(times, 0, storedTimes, 0, intervals.length);
 		 super.store();
 	 }    
+	 
+	 // patch6
+	 public void forceRecalculation() {
+		 intervalsKnown = false;
+	 }
 	    
 	 @Override
 	 public double getIntervalTime(int i) {

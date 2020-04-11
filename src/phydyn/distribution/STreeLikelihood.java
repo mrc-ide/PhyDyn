@@ -139,7 +139,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     }
     
     public boolean initValues()   {
-    	
+    	intervals.forceRecalculation(); // patch6
     	super.initValues();
     	// if t1 has t1 Input, do nothing, else t1 to Tree's height
     	if (!popModel.hasEndTime()) {

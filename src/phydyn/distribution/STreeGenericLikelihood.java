@@ -90,6 +90,7 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 		 computeAncestral = ancestralInput.get();
 		 numStates = popModel.getNumStates(); 
 		 
+		 System.out.println("PhyDyn v1.3.6 - patch 6 - forceRecalculation");
 		 popModel.printModel();
 	 }
 	 
