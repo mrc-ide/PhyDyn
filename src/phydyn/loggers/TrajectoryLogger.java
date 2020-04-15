@@ -128,10 +128,22 @@ public class TrajectoryLogger extends CalculationNode implements Loggable {
 			out.println("");
 			idx -= frequency;
 		}
+		// last line - idx = 0
+		fgy = timeseries.getFGY(0);
 		y = timeseries.getFGY(0).Yall;
 		out.print(sample+"\t"+timeseries.getTime(0));
 		for(int j = 0; j < popModel.yLength; j++) {
 			out.print("\t"+y.get(j));
+		}
+		if (numLogRates>0) {
+			F = fgy.F; G = fgy.G;
+			for(int j = 0; j < numLogRates; j++) {
+				if (matrixName[j]== 'F') {
+					out.print("\t"+F.get(demeRow[j], demeColumn[j]));
+				} else {
+					out.print("\t"+G.get(demeRow[j], demeColumn[j]));
+				}
+			}
 		}
 		out.println("");
 	}
