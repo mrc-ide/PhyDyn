@@ -100,11 +100,7 @@ public class PopModelIsland extends PopModel implements Loggable {
 		System.out.println("Island Model");
 	}
 
-	public String writeXML(XMLFileWriter writer, PopModelAnalysis analysis) throws IOException {
-		writer.tabAppend("-- not implemented -- ");
-		return this.getName();
-	}
-	
+
 	protected void updateMatrices() {
 		double xF;
 		if (xFInput.get()==null) {
@@ -198,36 +194,14 @@ public class PopModelIsland extends PopModel implements Loggable {
 	public double getStartTime() {
 		return t0;
 	}
-
-	@Override
-	public int getParamIndex(String paramName) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getYindex(String yName) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void updateRate(String rateName, double v) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean updateParam(String paramName, double paramValue) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	
 	// not properly implemented
 	@Override
 	public boolean isParameter(String paramName) {
 		return false;
 	}
+	
+	// Methods inherited from Logger 
 	
 	@Override
 	public String getParameterValue(String paramName) {

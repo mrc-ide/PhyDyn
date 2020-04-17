@@ -267,6 +267,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         		logP = Double.NEGATIVE_INFINITY;
 				return logP;
         	} else if (lhinterval == Double.NEGATIVE_INFINITY) {
+        		System.out.println("logP -Infinity (interval) - quitting likelihood");
     			logP = Double.NEGATIVE_INFINITY;
 				return logP;
     		} 	
@@ -278,7 +279,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	if (YmA < 0) {
         		//System.out.println("Y-A < 0");
         		if ((numExtant/numLeaves) > forgiveAgtYInput.get()) {
-        			System.out.println("Minus Infinity: A > Y");
+        			System.out.println("logP -Infinity : A > Y");
         			lhinterval = Double.NEGATIVE_INFINITY;
         			logP = Double.NEGATIVE_INFINITY;
         			return logP;
@@ -289,7 +290,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	logP += lhinterval;
         	
         	if (logP == Double.NEGATIVE_INFINITY) {
-        		System.out.println("logP -Infinity - quitting before event"); 
+        		System.out.println("logP -Infinity - quitting before processing event"); 
         	}
         	
         	// Make sure times and heights are in sync
@@ -302,7 +303,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         		logP += processCoalEvent(tsPoint, interval); // break;
         		if (logP == Double.NEGATIVE_INFINITY) {
             		System.out.println("logP -Infinity - after coal event"); 
-            		throw new IllegalArgumentException("Problem with coal event");
+            		return logP;
+            		//throw new IllegalArgumentException("Problem with coal event");
             	}
         		break;
         	default:
@@ -312,13 +314,13 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	
         	// Check value of logLh is sound
         	if (Double.isNaN(logP)) {
-        		System.out.println("logP NaN (point) - quitting likelihood");
+        		System.out.println("logP NaN (after event) - quitting likelihood");
         		//System.out.println("model parameters: "+popModel.toString());
         		//throw new IllegalArgumentException("NAN");
         		logP = Double.NEGATIVE_INFINITY;
 				return logP;
         	} else if (logP == Double.NEGATIVE_INFINITY) {
-        		System.out.println("logP -Infinity - quitting likelihood");  // new
+        		System.out.println("logP -Infinity (after event) - quitting likelihood");  // new
 				return logP;
     		} 
     		    	

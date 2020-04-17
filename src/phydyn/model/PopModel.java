@@ -1,12 +1,6 @@
 package phydyn.model;
 
-
-import java.io.FileWriter;
-import java.io.IOException;
-
 import beast.core.CalculationNode;
-import phydyn.analysis.PopModelAnalysis;
-import phydyn.analysis.XMLFileWriter;
 
 public abstract class PopModel extends CalculationNode {
 	
@@ -53,13 +47,9 @@ public abstract class PopModel extends CalculationNode {
 		return this.indexOf(demeNames,name);
 	}
 	
-	/* Mostly (all?) used for MLE */
-	public abstract int getParamIndex(String paramName);
-	public abstract int getYindex(String yName);
-	public abstract void updateRate(String rateName, double v);
-	public abstract boolean updateParam(String paramName, double paramValue);
+	
 	public abstract boolean isParameter(String paramName);
-	public abstract String getParameterValue(String ParamName);
+	public abstract String getParameterValue(String paramName);
 	
 	public void printModel() {
 		System.out.println("Population Model:");

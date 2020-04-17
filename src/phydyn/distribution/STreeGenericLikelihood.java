@@ -136,7 +136,7 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 					 // important: if trait values are, by mistake, deme names, then
 					 // the sampleState will be zero (parseDouble)
 					 // may want to check for valid state strings
-					 sampleState = (int) typeTraitInput.get().getValue(node.getID());  // should be a number
+					 sampleState = (int) typeTraitInput.get().getValue(node.getID());  // should be a number -- this doesn't make sense anymore
 				 }
 			 } else {
 				/* state number is encoded in node id after last underscore */
@@ -145,7 +145,7 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 				stateName = splits[splits.length-1];
 				if (useStateName) {
 					// e.g I0 maps to 0, its state number 
-					sampleState = popModel.getStateFromName(stateName);
+					sampleState = popModel.getStateFromName(stateName);  // flag incorrect stateName ie when idx is -1
 				} else {	
 					sampleState = Integer.parseInt(stateName);
 				}

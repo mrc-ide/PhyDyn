@@ -42,8 +42,9 @@ public class PopModelRPrinter extends PopModelBaseVisitor<String> {
 		paramNames = popModel.modelParams.paramNames;
 		// load reserved variables map
 		reserved = new HashMap<String,String>();
+		// this should be linked to 
 		reserved.put("PI", "pi");
-		reserved.put("E", "exp(1)");
+		// reserved.put("E", "exp(1)");
 		reserved.put("T", "t");
 		reserved.put("T0", "t0t1$t0");
 		reserved.put("T1", "t0t1$t1" );

@@ -1,7 +1,5 @@
 package phydyn.model;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,13 +19,9 @@ import org.apache.commons.math3.ode.nonstiff.MidpointIntegrator;
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
-import beast.core.BEASTObject;
-import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
-import phydyn.analysis.PopModelAnalysis;
-import phydyn.analysis.XMLFileWriter;
+
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
 import phydyn.util.General.IntegrationMethod;
@@ -332,21 +326,6 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		//params.print();
 	}
 	
-	
-	/* NEW: used for maximum likelihood parameter inference */
-	/* Re-think this */
-	public void updateRate(String rateName, double v) {
-		int i = this.indexOf(modelParams.paramNames, rateName);
-		if (i==-1) 
-			throw new IllegalArgumentException("Rate name invalid: "+rateName);
-		modelParams.paramValues[i] = v;
-		// update in evaluator
-		eqEvaluator.updateRate(rateName, v);
-	}
-	
-	public boolean updateParam(String paramName, double paramValue) {
-		return trajParams.updateParam(paramName, paramValue);
-	}
 		
 	//public double getEndTime() { return t1; }
 	//public void setEndTime(double newt1) { t1 = newt1; } // integrate again
@@ -373,13 +352,9 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	}
 
 	/*  Rates, etc  */
-	public int getParamIndex(String paramName) {
-		return this.indexOf(modelParams.paramNames, paramName);
-	}
 	
-	public int getYindex(String yName) {
-		return this.indexOf(yNames, yName);
-	}
+	
+
 	
 	public TimeSeriesFGY integrate() {
 		return integrate(trajParams,modelParams);

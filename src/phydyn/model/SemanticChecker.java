@@ -20,15 +20,15 @@ import phydyn.model.parser.PopModelParser.SumExprContext;
 	
 
 public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
-	public static final String PI="PI", E="E", T="t", T0="T0", T1="T1";
+	public static final String PI="PI", T="t", T0="T0", T1="T1"; // removed E="E"
 	public static final Map<String,Double> numericConstants;
 	static {  // build map of literals
 		numericConstants = new HashMap<String,Double>();
 		numericConstants.put(PI,  Math.PI);
-		numericConstants.put(E, Math.E);
+		//numericConstants.put(E, Math.E);
 	}
 	public static String[]  T0T1 = { T0, T1 };
-	public static String[]  reservedIds = { T0, T1, T, PI, E };
+	public static String[]  reservedIds = { T0, T1, T, PI }; // removed E
 	//private static final Set<String> systemVariables = new HashSet<String>(Arrays.asList(
 	//	     new String[] {T, T0,T1}));
 
