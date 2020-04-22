@@ -1,6 +1,8 @@
 package phydyn.model;
 
 import beast.core.CalculationNode;
+import beast.evolution.tree.TraitSet;
+import beast.evolution.tree.Tree;
 
 public abstract class PopModel extends CalculationNode {
 	
@@ -10,7 +12,6 @@ public abstract class PopModel extends CalculationNode {
 
 	@Override
 	public void initAndValidate() {
-		// TODO Auto-generated method stub
 
 	}
 	

@@ -2,6 +2,7 @@ package phydyn.distribution;
 
 import java.util.List;
 import java.lang.Math;
+import java.text.DecimalFormat;
 
 import beast.core.Citation;
 import beast.core.Description;
@@ -9,7 +10,7 @@ import beast.core.Input;
 
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
-
+import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.IntervalType;
 
 import phydyn.model.TimeSeriesFGY;
@@ -62,7 +63,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 			new Integer(0));
 	
 	public Input<Boolean> isConstantLhInput = new Input<>("isConstantLh",
-			"Log-Likelihood = 1, always, if flag set to true",false);
+			"Log-Likelihood = 0, always, if flag set to true",false);
 	
 	/* inherits from STreeGenericLikelihood:
 	 *  public PopModelODE popModel;
@@ -89,6 +90,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 	DVector[] coalProbs;
 	int[] pair = new int[2];
 	private int  gcCounter = 0; 
+	
+	private static DecimalFormat df = new DecimalFormat("#.##");
       
  
     @Override
@@ -112,75 +115,59 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			aceSolver = new Solverfwd(this);
     	}
     	gcCounter = 0;
-    	// If we are interested only on prior parameter sampling then
-    	// we only care about t0 and t1.
-    	if (isConstantLhInput.get()) {
-    		if (!popModel.hasEndTime()) {
-    			if (tree.getDateTrait()==null) {
-        			throw new IllegalArgumentException("Need value for t1, explictly or from tree date trait");
-        		} else {
-        			if (tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
-        				throw new IllegalArgumentException("t1: Can't use backward date trait");
-        			} else {  
-        				popModel.setEndTime( tree.getDateTrait().getDate(0));
-        				System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
-        			}
+    	
+    	// checking existence of t1 - t1 will remain unchanged during sampling
+    	// todo: what if we want to sample dates?
+    	// use tree's date trait if provided
+    	if (!popModel.hasEndTime()) {
+    		if (tree.getDateTrait()==null) {
+        		throw new IllegalArgumentException("Need value for t1, explictly or from tree date trait");
+        	} else {
+        		if (tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
+        			throw new IllegalArgumentException("t1: Can't use backward date trait");
+        		} else {  
+        			popModel.setEndTime( tree.getDateTrait().getDate(0));
+        			System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
         		}
-    			
-    		} else {  // if date trait exists, use date trait
-    			if (tree.getDateTrait()!=null) {
-        			if (!tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
-        				popModel.setEndTime( tree.getDateTrait().getDate(0));
-        				System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
-        			}
+        	}
+    	} else {  // if date trait exists, use date trait
+    		if (tree.getDateTrait()!=null) {
+        		if (!tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
+        			popModel.setEndTime( tree.getDateTrait().getDate(0));
+        			System.out.println("Using date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
         		}
-    		}
+        	}
     	}
+    	
+    	popModel.printModel();
+ 
     }
     
     public boolean initValues()   {
     	intervals.forceRecalculation(); // patch6
     	super.initValues();
-    	// if t1 has t1 Input, do nothing, else t1 to Tree's height
-    	if (!popModel.hasEndTime()) {
-    		if (tree.getDateTrait()==null) {
-    			//System.out.println("NO date trait, setting t1 = "+intervals.getTotalDuration());
-    			popModel.setEndTime( intervals.getTotalDuration() );
-    		} else {
-    			if (tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
-    				//System.out.println("backward date trait, setting t1 = "+intervals.getTotalDuration());
-    				popModel.setEndTime( intervals.getTotalDuration());
-    			} else {  
-    				//System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
-    				popModel.setEndTime( tree.getDateTrait().getDate(0));
-    			}
-    		}
-    	} else {
-    		// If date trait exists, date trait wins - comment back to test fab's xml
-    		if (tree.getDateTrait()!=null) {
-    			if (!tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
-    				popModel.setEndTime( tree.getDateTrait().getDate(0));
-    			}
-    		}
-    	}
     	
        	double trajDuration = popModel.getEndTime() - popModel.getStartTime();
     	//System.out.println("T root = "+(popModel.getEndTime()-intervals.getTotalDuration() ));
     	//System.out.println("t0= "+ popModel.getStartTime()+" t1= "+ popModel.getEndTime() );
        	//System.out.println("traj = "+trajDuration);
-    	//System.out.println("Tree height="+intervals.getTotalDuration());
+    	//System.out.println("intervals length = "+intervals.getTotalDuration());
+    	//System.out.println("tree height = "+ tree.getRoot().getHeight() );
     	   	
     	if (trajDuration < intervals.getTotalDuration()) {
     		// if island model / constant population: extend time frame
+    		final double troot = popModel.getEndTime()- intervals.getTotalDuration();
     		if (popModel.isConstant()) {
-    			System.out.println("Updating t0 to fit tree height (constant population)");
-    			System.out.println("new t0="+(popModel.getEndTime()- intervals.getTotalDuration()));
-    			popModel.setStartTime(popModel.getEndTime()- intervals.getTotalDuration());
+    			//System.out.println("Updating t0 to fit tree height (constant population)");
+    			//System.out.println("new t0="+(popModel.getEndTime()- intervals.getTotalDuration()));
+    			popModel.setStartTime(troot);
     		} else {
+    			System.out.print("t(root) < t0 - ");
     			if (forgiveT0Input.get()) {
-    				System.out.println("t0 too low - using constant population coalescent for missing population info");   		
+    				System.out.println("using constant population coalescent for "
+    						+ "t["+df.format(troot)+","+df.format(popModel.getStartTime())+"]");   		
     			} else {
-    				System.out.println("t0 too low - logP = -Inf");
+    				System.out.println("logP = -Inf");
     				return true;
     			}
     		}
@@ -225,8 +212,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     			logP = 1;
     		return logP;
     	} 
-    	
-    	
+    	   	
     	boolean errorInit = initValues();
         if (errorInit) {
             logP = Double.NEGATIVE_INFINITY;
@@ -234,7 +220,6 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         }
         
         double trajDuration = popModel.getEndTime() - popModel.getStartTime();
-        
  
         logP = 0;  
         
