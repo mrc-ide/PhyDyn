@@ -10,6 +10,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import beast.core.util.Log;
 import phydyn.analysis.PopModelAnalysis;
 import phydyn.analysis.XMLFileWriter;
 import phydyn.util.General.IntegrationMethod;
@@ -162,8 +163,16 @@ public class TrajectoryParameters extends CalculationNode {
 					paramNames[idx] = pValue.names.get(i);
 					paramValues[idx] = pValue.values.getValue(i);
 				} else {
-					System.out.println("Warning: Unknown variable name "+ pValue.names.get(i)+" in population parameters object");
+					Log.warning("Warning: Unknown variable name '"+ pValue.names.get(i)+"' in population parameters object. Ignored.");
 				}
+			}
+		}
+		
+		// Previously, non initialised population variables were set to 0. Now we throw an initialisation error.
+		for(i=0; i < numParams; i++) {
+			if (paramNames[i]==null) {
+				Log.warning("Error: Population variable '"+model.yNames[i]+"' not initialised in TrajectoryParameters");
+				throw new IllegalArgumentException("Population variable '"+model.yNames[i]+"' not initialised in TrajectoryParameters");
 			}
 		}
 				
@@ -205,7 +214,7 @@ public class TrajectoryParameters extends CalculationNode {
 						//System.out.println("update "+pValue.names.get(i)+" = "+pValue.values.getValue(i));
 						paramValues[idx] = pValue.values.getValue(i);
 					} else {
-						throw new IllegalArgumentException("-- Programming error. Please report");
+						// parameter is not used by model
 					}
 				}
 			}
