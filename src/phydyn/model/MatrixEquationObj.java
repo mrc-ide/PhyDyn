@@ -10,10 +10,10 @@ import phydyn.model.parser.PopModelParser.ExprContext;
  * This is NOT a BEAST object
  */
 
-enum EquationType { BIRTH, DEATH, MIGRATION, NONDEME };
+
 
 public class MatrixEquationObj {
-	
+	public enum EquationType { BIRTH, DEATH, MIGRATION, NONDEME };
 	public EquationType type;
 	public int row,column;
 	public ExprContext rhsExprCtx;

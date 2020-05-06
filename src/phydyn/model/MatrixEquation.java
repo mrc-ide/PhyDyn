@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import beast.core.BEASTObject;
 import beast.core.Input;
 import beast.core.Input.Validate;
+import phydyn.model.MatrixEquationObj.EquationType;
 import phydyn.model.parser.PopModelLexer;
 import phydyn.model.parser.PopModelParser;
 import phydyn.model.parser.PopModelParser.ExprContext;

@@ -21,7 +21,7 @@ import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
 import beast.core.Input;
 import beast.core.Input.Validate;
-
+import phydyn.model.MatrixEquationObj.EquationType;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
 import phydyn.util.General.IntegrationMethod;
@@ -447,7 +447,6 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		if (trajParams.timeseriesSteps < trajParams.integrationSteps) {
 			timeseries = timeseries.toFixedStep(trajParams.timeseriesSteps, this); // fix: for memory leak
 			trajParams.integrationSteps = trajParams.timeseriesSteps;
-			
 		}
 		timeseries.reverse();
 		
