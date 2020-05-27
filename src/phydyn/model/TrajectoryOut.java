@@ -40,9 +40,9 @@ public class TrajectoryOut extends Runnable {
 
 	@Override
 	public void run() throws Exception {	
-		popModel.update();
-		popModel.printModel();  // print equations
 		TimeSeriesFGY ts = modelInput.get().getTimeSeries();
+		popModel.printModel();  // print equations
+		
 		ts.reverse();
 		
 		FileWriter writer = new FileWriter(fileName);

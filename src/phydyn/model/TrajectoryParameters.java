@@ -109,6 +109,12 @@ public class TrajectoryParameters extends CalculationNode {
 		paramsMap = new HashMap<>();
 	}
 	
+	//@Override
+	//public boolean requiresRecalculation() {
+	//	System.out.println("Trajectory Parameters -- requiresRecalculation()");
+	//	return true;
+	//}
+	
 	public double getStartTime() {
 		return t0Input.get().getValue();
 	}

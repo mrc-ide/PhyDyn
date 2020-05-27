@@ -19,13 +19,7 @@ public class SEIRLikelihood extends TrajectoryFit {
     public double calculateLogP() {
 		// This will be be called twice (here and by STreeLikelihoodODE)
 		// todo: optimise popmodel udat to prevent unsnecessary recalculation
-		boolean reject = popModel.update();
 		
-		
-		if (reject) {
-			logP = Double.NEGATIVE_INFINITY;
-			return logP;
-		}
 		TimeSeriesFGY ts = popModel.getTimeSeries();
 		
 		// may need to check t in [t0,t1]

@@ -44,6 +44,7 @@ public class PopModelIsland extends PopModel implements Loggable {
 	DVector D;
 	double[] yAll;
 	TimeSeriesFGYConstant ts;
+	boolean trajectoryKnown;
 		
 	TimeSeriesFGYConstant tsConstant;
 	double t0,t1;
@@ -89,6 +90,14 @@ public class PopModelIsland extends PopModel implements Loggable {
 		G = new DMatrix(numDemes, numDemes);
 		D = new DVector(numDemes);
 		yAll = new double[numDemes+numNonDemes]; // numNonDemes is 0
+		
+		trajectoryKnown = false;
+	}
+	
+	@Override
+	public boolean requiresRecalculation() {
+		trajectoryKnown = false;
+		return true;
 	}
 	
 	@Override
@@ -143,12 +152,11 @@ public class PopModelIsland extends PopModel implements Loggable {
 	@Override
 	public boolean isConstant() { return true; }
 	
-	@Override
-	public boolean update() {
+	boolean update() {
 		if (!endTimeDefined) {
 			throw new IllegalArgumentException("Population model: End time undefined");
 		}
-		tsConstant = new TimeSeriesFGYConstant(this,t0Input.get().getValue(), t1,2);
+		tsConstant = new TimeSeriesFGYConstant(this,t0Input.get().getValue(), t1,2); // two points
 		updateMatrices();
 		tsConstant.addFGY(0, F, G, yAll,D);
 		tsConstant.reverse();
@@ -157,6 +165,10 @@ public class PopModelIsland extends PopModel implements Loggable {
 
 	@Override
 	public TimeSeriesFGY getTimeSeries() {
+		if (!trajectoryKnown) {
+			update();
+			trajectoryKnown = true;
+		}
 		return tsConstant;
 	}
 
@@ -177,6 +189,7 @@ public class PopModelIsland extends PopModel implements Loggable {
 	public void setEndTime(double newt1) {
 		t1 = newt1;
 		endTimeDefined = true;
+		trajectoryKnown = false;
 	}
 	
 	@Override
@@ -188,6 +201,7 @@ public class PopModelIsland extends PopModel implements Loggable {
 	public void setStartTime(double newT0) {
 		t0Input.get().setValue(newT0);
 		t0=newT0;
+		trajectoryKnown = false;
 	}
 	
 	@Override

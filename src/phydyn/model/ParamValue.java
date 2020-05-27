@@ -6,11 +6,12 @@ import java.util.List;
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
+import beast.core.StateNode;
 import beast.core.parameter.RealParameter;
 
 /*
  * Changes: We no longer allow multiple names.
- * We allow multiple values in RealParameter. I multiple values are entered then
+ * We allow multiple values in RealParameter. If multiple values are entered then
  * the PhyDyn parameter becomes a vector, and the isVector flag must be set to true.
  * We have introduced (pname,pvalue) - they will be replacing (names,values) 
  */
@@ -85,6 +86,13 @@ public class ParamValue extends CalculationNode {
 			}
 		}
 	}
+	
+	//@Override
+	//public boolean requiresRecalculation() {
+	//	System.out.println("ParamValue -- requiresRecalculation(): "+names.get(0)+" "+values.somethingIsDirty()+" --- "+values.isDirtyCalculation()+
+	//			" "+(values instanceof StateNode));
+	//	return true;
+	//}
 	
 	// use toString() instead of print
 

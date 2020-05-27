@@ -77,6 +77,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 
 	 protected Set<String> allParameters;
 	 
+	 boolean trajectoryKnown;
+	 
 	 	 
 	 // now part of modelParams
 	 //public String[] rateNames;
@@ -230,6 +232,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 				throw new IllegalArgumentException("Error(s) found in model parameters");
 			}
 		}
+		
+		trajectoryKnown = false;
 	}	
 	
 	
@@ -238,7 +242,16 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	public boolean requiresRecalculation() {
 		// called if any of the Inputs was updated - no need to check more
 		//modifiedValues = true;
-		return true;
+		
+		if (this.trajParams.isDirtyCalculation()) {
+			trajectoryKnown = false;
+			return true;
+		}
+		if (this.modelParams.isDirtyCalculation()) {
+			trajectoryKnown = false;
+			return true;
+		}		
+		return false;
 	}
 	
 	@Override
@@ -252,7 +265,11 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		//paramValues = storedParamValues;
 		//storedParamValues = tmp;
 		//modifiedValues = false;
+		trajectoryKnown = false;
+		super.restore();
 	}
+	
+	/* end CalculationNode Interface */
 	
 	@Override
 	public String getName() {
@@ -307,12 +324,21 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	}
 	
 	/* needed by Density class */
-	public boolean update() {
-		integrate(trajParams, modelParams);
-		return false; // reject = false
-	}
+	//boolean update() {
+	//	integrate(trajParams, modelParams);
+	//	trajectoryKnown = true;
+	//	return false; // reject = false
+	//}
 	
-	public TimeSeriesFGY getTimeSeries() { return timeseries; }
+	/* CalculationNode's calculation*/
+	public TimeSeriesFGY getTimeSeries() { 
+		if (!trajectoryKnown) {			
+			integrate(trajParams, modelParams);
+			trajectoryKnown = true;
+		}
+		// check case when integration fails
+		return timeseries; 
+	}
 	
 	
 	protected void init_population(TrajectoryParameters params) {
@@ -361,7 +387,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	}
 	
 	// integrate(double[] y0, double t0, double t1, int nsteps, double[] y1) 
-	public TimeSeriesFGY integrate(TrajectoryParameters trajParams, ModelParameters modelParams) {
+	TimeSeriesFGY integrate(TrajectoryParameters trajParams, ModelParameters modelParams) {
 		//double t0,t1;
 		int nsteps;
 		IntegrationMethod method;

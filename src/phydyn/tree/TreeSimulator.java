@@ -128,14 +128,14 @@ public class TreeSimulator  {
 			sampleHeights[i] = maxSampleTime - sampleTimes[i];
 		}
 		popModel.setEndTime(maxSampleTime+T_EPS);
-		popModel.update();  // needed in order to calculate timeseries
 		
+		ts = popModel.getTimeSeries();
 	
 		ts_t0 = popModel.getStartTime();
 		ts_t1 = popModel.getEndTime();
 		// get timeseries after potential parameter updates
 		
-		ts = popModel.getTimeSeries();
+		
 		numPoints = ts.getNumTimePoints();
 		System.out.println(ts_t0+" - "+ts.getTime(numPoints-1));
 		System.out.println(ts_t1+" - "+ts.getTime(0));

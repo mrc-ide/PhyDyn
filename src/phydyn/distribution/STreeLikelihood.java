@@ -127,14 +127,14 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         			throw new IllegalArgumentException("t1: Can't use backward date trait");
         		} else {  
         			popModel.setEndTime( tree.getDateTrait().getDate(0));
-        			System.out.println(" Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
+        			System.out.println("(PhyDyn) Date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
         		}
         	}
     	} else {  // if date trait exists, use date trait
     		if (tree.getDateTrait()!=null) {
         		if (!tree.getDateTrait().getTraitName().equals( TraitSet.DATE_BACKWARD_TRAIT)) {
         			popModel.setEndTime( tree.getDateTrait().getDate(0));
-        			System.out.println("Using date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
+        			System.out.println("(PhyDyn) Using date trait, setting t1 = "+ tree.getDateTrait().getDate(0) );
         		}
         	}
     	}
@@ -173,12 +173,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		}
     	}
         
-    	boolean reject = popModel.update(); // compute fgy.timeseries
-    	if (reject) {
-        	System.out.println("rejecting population update");
-            return true;
-        }
     	
+    	// removed update and case when popmodel integrate fails (review)
     	ts = popModel.getTimeSeries();
     	
 		FGY fgy = ts.getFGY(0);
@@ -205,11 +201,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
      
     public double calculateLogP() {
     	if ( isConstantLhInput.get() ) {
-    		boolean reject = popModel.update();
-    		if (reject)
-    			logP = Double.NEGATIVE_INFINITY;
-    		else
-    			logP = 1;
+    		// force timeseries calculation
+    		// remove reject case (review)
+    		ts = popModel.getTimeSeries();
+    		logP = 0;  		
     		return logP;
     	} 
     	   	

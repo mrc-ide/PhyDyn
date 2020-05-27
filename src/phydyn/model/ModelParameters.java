@@ -81,6 +81,12 @@ public class ModelParameters extends CalculationNode {
 		
 	}
 	
+	//@Override
+	//public boolean requiresRecalculation() {
+	//	System.out.println("ModelParameters  -- requiresRecalculation()");
+	//	return true;
+	//}
+	
 	// Calculate 
 	public void updateValues() {
 		if (!modifiedValues) return;

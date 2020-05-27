@@ -20,7 +20,6 @@ public abstract class PopModel extends CalculationNode {
 	public int getNumStates() { return numDemes; }
 	
 	
-	public abstract boolean update();
 	public abstract TimeSeriesFGY getTimeSeries();
 	
 	public abstract boolean hasEndTime();
@@ -48,6 +47,14 @@ public abstract class PopModel extends CalculationNode {
 		return this.indexOf(demeNames,name);
 	}
 	
+	public String getDemesString(String sep) {
+		if (numDemes<1) return "";
+		String str = demeNames[0];
+		for(int i = 1; i < numDemes; i++) {
+			str+= sep+" "+demeNames[i];
+		}
+		return str;
+	}
 	
 	public abstract boolean isParameter(String paramName);
 	public abstract String getParameterValue(String paramName);

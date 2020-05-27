@@ -11,6 +11,7 @@ import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
+import beast.core.util.Log;
 import beast.core.Input.Validate;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
@@ -41,14 +42,20 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 	
 	/* Type trait that maps taxa to demes in the population model.
 	 * If type trait is missing, the program assumes
-	 * that taxa names are suffixed with deme names or numbers e.g taxaname_I0 or taxaname_0 */
+	 * that taxa names are suffixed with deme names  e.g taxaname_I0  */
 	/* TODO: It is also possible the tree contains a typeTrait TraitSet */
 	 public Input<TraitSet> typeTraitInput = new Input<>(
 	            "typeTrait", "Type trait set maps taxa to state number.");
 	 
+	 // deprecated: useStateName is always true.
 	 public Input<Boolean> useStateNameInput = new Input<>(
 	    		"useStateName",
 	            "whether to use a state's name or number when extracting type annotation or reading trait value (default true)");
+	 
+	 public Input<String> splitSymbolInput = new Input<>("splitSymbol","Character used to split taxa id "
+	 		+ "in order to extract deme associated with sequence/tip", "_");
+	 public Input<Integer> splitIndexInput = new Input<>("splitIndex", "Index used to extract deme from taxa id "
+			 + "associated with sequence/tip",-1);
 	 
 	 public Input<Boolean> ancestralInput = new Input<>("ancestral",
 				"Compute ancestral states",new Boolean(false));
@@ -63,8 +70,8 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 	 	 
 	 protected int[] nodeNrToState;
 	 
-	 private boolean traitInput = false;
-	 private boolean useStateName = true;
+	 //private boolean traitInput = false;
+	 private TraitSet typeTrait;
 	 protected boolean computeAncestral;
 	 
 	 // the state
@@ -78,15 +85,37 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 		 try {
 			 intervals = (STreeIntervals) treeIntervalsInput.get();	 
 		 } catch (Exception e) {
-			 throw new IllegalArgumentException("Trre Intervals must be of class STreeIntervals");
+			 throw new IllegalArgumentException("Tree Intervals must be of class STreeIntervals");
 		 }
 		 
 		 tree = intervals.treeInput.get();
 		 
-		 if (typeTraitInput.get() != null) traitInput = true;
+		 typeTrait = null;
+		 if (typeTraitInput.get() != null) {
+			 typeTrait = typeTraitInput.get();
+		 } else {
+			 // check inside tree for type trait
+			 for(TraitSet trait : tree.m_traitList.get()) {
+				 final String traitName = trait.getTraitName().toLowerCase();
+				 if (traitName.equals("types") || traitName.equals("type")) {
+					 typeTrait = trait;
+					 break;
+				 }
+			 }
+		 }
+		 
+		 
 		 if (useStateNameInput.get() != null) {
-			 useStateName = useStateNameInput.get();
-		 }	
+			 if (!useStateNameInput.get()) {
+				 Log.warning("(STreeLikelihood): useStateName option deprecated. Always use state name to annotate tips.");
+			 }
+		 }
+		 if (typeTrait==null) {
+			 if (splitIndexInput.get() == 0)
+				 throw new IllegalArgumentException("Invalid splitIndex value: 0 not allowed");
+			 System.out.println("(PhyDyn) No Type trait provided. Extracting structured population information from taxa Ids");
+		 }
+		 
 		 computeAncestral = ancestralInput.get();
 		 numStates = popModel.getNumStates(); 
 		 
@@ -127,32 +156,40 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 			 return;
 		 }
 		 //  num_demes = > 1
+		 String splitBy = splitSymbolInput.get();
+		 int index = splitIndexInput.get();
 		 for(Node node : tree.getExternalNodes()) {
 			 /* assumption: node.nr < numNodes */
 			 final int nr = node.getNr();
-			 if (traitInput) { /* use type trait and extract state number */
-				 if (useStateName) {
-					 sampleState = popModel.getStateFromName(typeTraitInput.get().getStringValue(node.getID()) );
-				 } else {
-					 // important: if trait values are, by mistake, deme names, then
-					 // the sampleState will be zero (parseDouble)
-					 // may want to check for valid state strings
-					 sampleState = (int) typeTraitInput.get().getValue(node.getID());  // should be a number -- this doesn't make sense anymore
-				 }
+			 if (typeTrait!=null) { /* use type trait and extract state number */
+				 stateName = typeTrait.getStringValue(node.getID());
+				 // sampleState = (int) typeTraitInput.get().getValue(node.getID()); -- if trait maps indices (deprecated)			 
 			 } else {
 				/* state number is encoded in node id after last underscore */
 				//System.out.println("Encoded:"+ node.getID());
-				String[] splits = node.getID().split("_");
-				stateName = splits[splits.length-1];
-				if (useStateName) {
-					// e.g I0 maps to 0, its state number 
-					sampleState = popModel.getStateFromName(stateName);  // flag incorrect stateName ie when idx is -1
-				} else {	
-					sampleState = Integer.parseInt(stateName);
+				String[] splits = node.getID().split(splitBy);
+				final int idx = (index>0)?(index-1):(splits.length+index);
+				if ((idx<0)||(idx>=splits.length)) {
+					System.out.println("Error while accessing deme name from tip/taxon: "+node.getID());
+					System.out.print("Array index out of bounds error: ");
+					System.out.println("splitSymbol='"+splitSymbolInput.get()+"' splitIndex="+splitIndexInput.get());
+					throw new IllegalArgumentException("Error while mapping deme name to tip: "+node.getID());
 				}
+				stateName = splits[idx];
+				//if (index>0) {
+				//	stateName = splits[index-1];
+				//} else {
+				//	stateName = splits[splits.length+index];
+				//}
+				
+				// sampleState = Integer.parseInt(stateName); -- if annotated with index (deprecated)
 			 }
+			 sampleState = popModel.getStateFromName(stateName);
 			 if ((sampleState >= numStates)||(sampleState<0)) {
-				 throw new RuntimeException("Incorrect state number for taxon "+node.getID()+": "+sampleState+" must be in [0,"+(numStates-1)+"]");
+				 System.out.print("Unknown deme name '"+stateName+"' extracted from ");
+				 System.out.println("taxa/sequence: "+node.getID());
+				 System.out.println("Valid deme names: "+popModel.getDemesString(","));
+				 throw new RuntimeException("Error while mapping deme name to tip: "+node.getID());
 			 }
 			 nodeNrToState[nr] = sampleState;
 		 }
