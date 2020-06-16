@@ -200,6 +200,14 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     }
      
     public double calculateLogP() {
+    	doCalculateLogP();
+    	//System.out.println("logP="+logP);
+    	return logP;
+    }
+    
+    public double doCalculateLogP() {
+    	//System.out.println("tree = "+tree.getRoot().toNewick(false));
+    	
     	if ( isConstantLhInput.get() ) {
     		// force timeseries calculation
     		// remove reject case (review)

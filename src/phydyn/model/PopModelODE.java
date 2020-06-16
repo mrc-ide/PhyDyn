@@ -316,9 +316,9 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	public double getStartTime() { return trajParams.getStartTime(); }
 	public void setEndTime(double newt1)  {
 		trajParams.setEndTime(newt1); 
-	} // integrate again
-	// (below) removed until we figure out how to keep track changes of t0Input/t0
-	//public void setStartTime(double newt0) { trajParams.t0 = newt0; } // integrate again
+		trajectoryKnown = false; // integrate again
+	}
+	
 	public void unsetEndTime() {
 		trajParams.unsetEndTime();
 	}

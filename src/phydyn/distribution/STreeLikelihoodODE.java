@@ -48,7 +48,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 			 "method","Integration method", IntegrationMethod.CLASSICRK, IntegrationMethod.values() );
 
 	public Input<Double> stepSizeInput = new Input<>("stepSize",
-				"ODE solver stepsize", new Double(0.01));	 
+				"ODE solver stepsize", new Double(0.001));	 
 	 
 	public Input<Double> rTolInput = new Input<>(
 			 "rTol", "relative tolerance", new Double(0.0001));
@@ -148,6 +148,7 @@ public class STreeLikelihoodODE extends STreeLikelihood {
 			 lh = solver.getLogLh();
 		 }
 		 //if (interval==15) solver.setDebug(false);
+		 //solver.setDebug(true);;
 		 /* update tsPoint, h and t */
 
 		 if (ts.getTime(tsPoint) > tEvent) {
