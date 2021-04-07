@@ -198,6 +198,11 @@ public class PopModelIsland extends PopModel implements Loggable {
 	}
 
 	@Override
+	public boolean hasStartTime() {
+		return (t0Input.get()!=null);  // new: check again
+	}
+	
+	@Override
 	public void setStartTime(double newT0) {
 		t0Input.get().setValue(newT0);
 		t0=newT0;

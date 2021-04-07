@@ -12,7 +12,7 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.IntervalType;
-
+import beast.evolution.tree.coalescent.STreeIntervals;
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.util.DMatrix;
@@ -32,7 +32,7 @@ import phydyn.util.DVector;
  * 
  */
 
-@Description("Calculates the probability of a beast.tree  under a structured population model "
+@Description("Calculates the probability of a BEAST tree under a structured population model "
 		+ "using the framework of Volz (2012) and Volz/Siveroni (2018).")
 @Citation("Volz EM, Siveroni I. 2018. Bayesian phylodynamic inference with complex models.\n"
 		+ "  PLos Computational Biology. 14(11), ISSN:1553-7358 ")
@@ -89,7 +89,9 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 	// helper variables
 	DVector[] coalProbs;
 	int[] pair = new int[2];
-	private int  gcCounter = 0; 
+	private int  gcCounter = 0;
+	
+	boolean needsUpdate;
 	
 	private static DecimalFormat df = new DecimalFormat("#.##");
       
@@ -138,14 +140,21 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         		}
         	}
     	}
-    	
+
+    	needsUpdate=true;
     	popModel.printModel();
  
     }
     
     public boolean initValues()   {
-    	intervals.forceRecalculation(); // patch6
+    	// testing
+    	//intervals.forceRecalculation(); // patch6
+    	
     	super.initValues();
+    	
+    	final double troot = popModel.getEndTime()- intervals.getTotalDuration();
+    	
+    	// removed: setting of start-time when t0 not provided
     	
        	double trajDuration = popModel.getEndTime() - popModel.getStartTime();
     	//System.out.println("T root = "+(popModel.getEndTime()-intervals.getTotalDuration() ));
@@ -155,8 +164,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	//System.out.println("tree height = "+ tree.getRoot().getHeight() );
     	   	
     	if (trajDuration < intervals.getTotalDuration()) {
-    		// if island model / constant population: extend time frame
-    		final double troot = popModel.getEndTime()- intervals.getTotalDuration();
+    		// if island model / constant population: extend time frame  		
     		if (popModel.isConstant()) {
     			//System.out.println("Updating t0 to fit tree height (constant population)");
     			//System.out.println("new t0="+(popModel.getEndTime()- intervals.getTotalDuration()));
@@ -198,9 +206,46 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         coalProbs = new DVector[2];
         return false;
     }
-     
+    
+    // Lean CalculationNode optimisation
+    
+    @Override
+    public boolean requiresRecalculation() {
+    	
+    	if (popModel.isDirtyCalculation()) {
+    		needsUpdate = true;
+    		return true;
+    	}
+    	if (intervals.isDirtyCalculation()) {
+    		needsUpdate=true;
+    		return true;
+    	}
+    	return false;
+    }
+    @Override
+    public void store() {
+    	super.store(); 
+    }
+    @Override
+    public void restore() {
+    	needsUpdate = true;
+    	super.restore();
+    }
+    
+    /*
+    @Override
+    public boolean requiresRecalculation() {
+    	return true;
+    }
+    */ 
+    
     public double calculateLogP() {
-    	doCalculateLogP();
+    	if (needsUpdate) {
+    		//System.out.println("--> Likelihood for "+getID());
+    		doCalculateLogP();
+    		needsUpdate=false;
+    	}
+    	
     	//System.out.println("logP="+logP);
     	return logP;
     }
@@ -227,6 +272,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         logP = 0;  
         
         final int numIntervals = intervals.getIntervalCount();
+        
+        if (this.logLikelihood) {
+    		stlhLogs = new STreeLikelihoodLogs(numIntervals);
+    	}
        
         // initialisations        		
         int numExtant, numLeaves; 
@@ -234,14 +283,15 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         h = 0.0;		// used to initialise first (h0,h1) interval 
         t = tsTimes0 = ts.getTime(0); // tsTimes[0];x
         
-        double   lhinterval;
+        double lhinterval=0, lhcoal=0;
+        String errorMsg = "[ "+popModel.getStartTime()+" , "+ t + " ]";
         numLeaves = tree.getLeafNodeCount();
         double duration;
         
- 
         int interval;
         
         for(interval=0; interval < numIntervals; interval++) { 
+        	lhinterval = lhcoal = 0;
         	
         	duration = intervals.getInterval(interval);
         	   	
@@ -249,15 +299,13 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	lhinterval = processInterval(interval, duration, ts);
         	    
         	if (Double.isNaN(lhinterval)) {
-        		System.out.println("logP NaN (interval) - quitting likelihood");
-        		//System.out.println("model parameters: "+popModel.toString());
-        		//throw new IllegalArgumentException("NAN");
+        		errorMsg += "logP NaN (interval)";
         		logP = Double.NEGATIVE_INFINITY;
-				return logP;
+				break;
         	} else if (lhinterval == Double.NEGATIVE_INFINITY) {
-        		System.out.println("logP -Infinity (interval) - quitting likelihood");
+        		errorMsg += "logP -Infinity (interval)";
     			logP = Double.NEGATIVE_INFINITY;
-				return logP;
+				break;
     		} 	
         		
         	// Assess Penalty
@@ -267,63 +315,84 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	if (YmA < 0) {
         		//System.out.println("Y-A < 0");
         		if ((numExtant/numLeaves) > forgiveAgtYInput.get()) {
-        			System.out.println("logP -Infinity : A > Y");
+        			errorMsg += "A > Y";
         			lhinterval = Double.NEGATIVE_INFINITY;
         			logP = Double.NEGATIVE_INFINITY;
-        			return logP;
+        			break;
         		} else {
         			lhinterval += lhinterval*Math.abs(YmA)*penaltyAgtYInput.get();
         		}
-        	}      	
+        	}
+        	
         	logP += lhinterval;
         	
         	if (logP == Double.NEGATIVE_INFINITY) {
-        		System.out.println("logP -Infinity - quitting before processing event"); 
+        		errorMsg += "before processing event"; 
+        		break;
         	}
         	
         	// Make sure times and heights are in sync
         	// assert(h==hEvent) and assert(t = tsTimes[0] - h)
-        	
         	switch (intervals.getIntervalType(interval)) {
         	case SAMPLE:
         		processSampleEvent(interval); break;
         	case COALESCENT:
-        		logP += processCoalEvent(tsPoint, interval); // break;
-        		if (logP == Double.NEGATIVE_INFINITY) {
-            		System.out.println("logP -Infinity - after coal event"); 
-            		return logP;
+        		lhcoal = processCoalEvent(tsPoint, interval);
+        		logP += lhcoal;  break;
+        		//if (logP == Double.NEGATIVE_INFINITY) {
+            	//	errorMsg += "after coal event";
+            	//	break;
             		//throw new IllegalArgumentException("Problem with coal event");
-            	}
-        		break;
+            	//}
+        		//break;
         	default:
         		throw new IllegalArgumentException("Unknown Interval Type");      		
         	}
         	
-        	
-        	// Check value of logLh is sound
         	if (Double.isNaN(logP)) {
-        		System.out.println("logP NaN (after event) - quitting likelihood");
-        		//System.out.println("model parameters: "+popModel.toString());
-        		//throw new IllegalArgumentException("NAN");
+        		errorMsg += "logP NaN (after event)";
         		logP = Double.NEGATIVE_INFINITY;
-				return logP;
+				break;
         	} else if (logP == Double.NEGATIVE_INFINITY) {
-        		System.out.println("logP -Infinity (after event) - quitting likelihood");  // new
-				return logP;
-    		} 
+        		errorMsg += " (after event) t = "+t+"  popmodel "+popModel.getID();  // new
+        		//System.out.println("(STreeLikelihood) logP -Infinity : "+errorMsg);  // remove!!
+        		//return 10;  // remove!!!! after testing
+				break;
+    		}
+        	
+        	if (this.logLikelihood) {
+        		stlhLogs.logInterval(interval, intervals.getEvent(interval), lhinterval, lhcoal, logP);
+        	}
     		    	
-        } 
+        } // for-loop interval
+        
+        // check if there was a loop break due to numerical issues
+        if (logP == Double.NEGATIVE_INFINITY) {
+        	System.out.println("(STreeLikelihood) logP -Infinity : "+errorMsg);
+        	// remove this
+        	// this.stateProbabilities.printExtantProbabilities();
+        	// if (t>0) throw new IllegalArgumentException(" stop here ");  // remove
+        	if (this.logLikelihood) {
+        		stlhLogs.logInterval(interval, intervals.getEvent(interval), lhinterval, lhcoal, logP);
+        	}
+        	return logP;
+        }
+
         
         int lastInterval = interval;               
         if (interval < numIntervals) { // root < t0
         	// process first half of interval
         	duration = trajDuration - h;
         	lhinterval = processInterval(interval, duration, ts);
-        	logP += lhinterval;
+        	
         	// at this point h = trajDuration
         	// process second half of interval, and remaining intervals
-        	duration = intervals.getInterval(interval)-duration;      	
-        	logP += calculateLogP_root2t0(interval, duration);       	       	
+        	duration = intervals.getInterval(interval)-duration;     
+        	
+        	// logP += lhinterval;       	
+        	// logP += calculateLogP_root2t0(interval, duration);       	 
+        	
+        	calculateLogP_root2t0(interval, duration, lhinterval); 
         }
         
         if (ancestralInput.get()) {
@@ -333,15 +402,10 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         if (Double.isInfinite(logP)) logP = Double.NEGATIVE_INFINITY;
         
         if (logP == Double.NEGATIVE_INFINITY) { // new
-        	System.out.println("Double infinity - constant coalescent");
+        	System.out.println("(STreeLikelihood) logP -infinity : constant coalescent");
         	return logP;
         }
                 
-        // System.out.println("LogLh is ="+logP);
-        
-        
-        //System.out.println("Traj duration: "+trajDuration+"  intervals "+intervals.getTotalDuration());
-        //System.out.println("   used: "+usedMemory);
         
         if (gcInput.get() > 0) {
         	if (gcCounter >= gcInput.get()) {
@@ -380,7 +444,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		Ne = comb/lambda;  // should be user input - first trying this
     	}	
     	coef = comb/Ne;
-    	lh += (Math.log(1/Ne) -  coef*duration);   	
+    	lh += (Math.log(1/Ne) -  coef*duration);
     	interval++;
     	// process remaining intervals
     	final int intervalCount = intervals.getIntervalCount();
@@ -393,6 +457,57 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     	}
     	return lh;
     }       
+    
+    /* updates logP for the remaining of three: from t0 to root (upwards)
+       Uses the constant coalescent with Ne given as argument or calculated from last coal rate
+       current position: t,h,tsPoint
+    */
+    public void calculateLogP_root2t0(int interval, double duration, double lhinterval) {
+    	double comb, coef, lambda, Ne;
+    	double lhcoal=0;
+    	// At this point h = trajDuration
+    	// process second half of interval
+    	double numLineages = intervals.getIntervalCount();
+    	comb = numLineages*(numLineages-1)/2.0;
+    	
+    	logP += lhinterval;  
+    	
+    	if (NeInput.get()==null) {
+    		Ne = -1;
+    	} else {
+    		Ne = NeInput.get().getValue();
+    	}
+    	if (Ne <= 0.0) {
+    		lambda = calcTotalCoal(tsPoint);
+    		Ne = comb/lambda;  // should be user input - first trying this
+    	}	
+    	coef = comb/Ne;
+    	lhcoal += (Math.log(1/Ne) -  coef*duration);
+    	
+    	logP += lhcoal;
+    	
+    	if (this.logLikelihood) {
+    		stlhLogs.logInterval(interval, intervals.getEvent(interval), lhinterval, lhcoal, logP);
+    	}
+    	
+    	interval++;
+    	// process remaining intervals
+    	final int intervalCount = intervals.getIntervalCount();
+    	while (interval < intervalCount) {
+    		duration = intervals.getInterval(interval);       		
+    		numLineages = intervals.getIntervalCount();
+    		coef = numLineages*(numLineages-1)/Ne;
+        	lhcoal += (Math.log(1/Ne) - coef*duration);
+        	logP += lhcoal;
+        	if (this.logLikelihood) {
+        		stlhLogs.logInterval(interval, intervals.getEvent(interval), 0, lhcoal, logP);
+        	}
+    		interval++;
+    	}
+    	
+    	return;
+    }       
+    
 
     protected void computeAncestralStates(int interval) {
     		/* traversal state: interval, h, t, tsPoint */
@@ -575,6 +690,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		pa = pi_Y.mul(pj_Y.rmul(F));      // pj_Y * F
     		pa.addi(pj_Y.mul(pi_Y.rmul(F)));   // pi_Y * F
     	}
+    	 
     	pairCoal = pa.sum(); 
 	    pa.divi(pairCoal); // normalise
 					
@@ -686,10 +802,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     }
     
     
-    @Override
-    protected boolean requiresRecalculation() {
-		 return true;
-    }
+ 
     
    
     public void printMemory() {

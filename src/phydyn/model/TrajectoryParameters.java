@@ -11,6 +11,7 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
+import beast.evolution.tree.coalescent.STreeIntervals;
 import phydyn.analysis.PopModelAnalysis;
 import phydyn.analysis.XMLFileWriter;
 import phydyn.util.General.IntegrationMethod;
@@ -30,7 +31,10 @@ public class TrajectoryParameters extends CalculationNode {
 			 "order", "order(k) of adaptive size integration method");
 	 
 	 public Input<RealParameter> t0Input = new Input<>(
-			 "t0","Initial t (timeseries end)",Validate.REQUIRED);
+			 "t0","Initial t (timeseries end)");   // igor - removed requied condition
+	 
+	 public Input<STreeIntervals> intervalsInput = new Input<>(
+			 "treeIntervals","Tree interval used to set t0 = time of root", Validate.XOR, t0Input);  
 	 
 	 public Input<Double> t1Input = new Input<>(
 			 "t1","Final t (timeseries end)");
@@ -52,6 +56,12 @@ public class TrajectoryParameters extends CalculationNode {
 	 public  int integrationSteps, timeseriesSteps, order;
 	 public IntegrationMethod method;
 	 public boolean fixedStepSize;
+	 
+	 // new
+	 // public double t0;  -- testing
+	 //public boolean t0Set;  -- testing
+	 STreeIntervals intervals=null;
+	 
 	 public double t1;
 	 public boolean t1Set;
 	 	 
@@ -88,7 +98,24 @@ public class TrajectoryParameters extends CalculationNode {
 			}
 		}
 		
-		//t0 = t0Input.get().getValue(); // RealParameter - removed 
+	
+		/*  -- testing
+		if (t1Input.get()!=null) {
+			t0 = t0Input.get().getValue();
+			t0Set = true;
+		} else {
+			t0Set = false;
+		}
+		*/
+		
+		if (t0Input.get()==null) {
+			if (intervalsInput.get()==null) {
+				throw new IllegalArgumentException("Programming error: t0 XOR intervals");
+			} else {
+				intervals = intervalsInput.get();
+			}
+		}
+		
 		t1Set=false;
 		if (t1Input.get()!=null) {
 			t1 = t1Input.get();
@@ -115,9 +142,38 @@ public class TrajectoryParameters extends CalculationNode {
 	//	return true;
 	//}
 	
-	public double getStartTime() {
-		return t0Input.get().getValue();
+	/*
+	boolean hasStartTime() {
+		if (t0Input.get() != null ) return true;
+		return t0Set;
 	}
+	*/
+	
+	/*
+	void setStartTime(double newT0) {
+		if (t0Input.get() != null ) {  // this shouldn't happen - bad use
+			t0Input.get().setValue(newT0);
+		}
+		t0 = newT0;
+		t0Set = true;
+	}
+	*/
+	
+	public double getStartTime() {
+		if (t0Input.get()!=null)
+			return t0Input.get().getValue();
+		else {
+			//System.out.println("*-> [t1,duration,troot] = "+t1+","+intervals.getTotalDuration()+","+(t1 - intervals.getTotalDuration() ));
+			return t1 - intervals.getTotalDuration() - 0.0001;
+			/*
+			if (!t0Set)
+				throw new IllegalArgumentException("(phydyn) Value of t0 has not been set");
+			return t0;
+			*/
+		}
+	}
+	
+	
 	
 	/* Not any more: Must call if (and only if) t1 is not supplied in XML input 
 	 *       If called with t1Input present, throw exception  
@@ -241,7 +297,11 @@ public class TrajectoryParameters extends CalculationNode {
 		String space2 = "  ";
 		String space4 = "    ";
 		String s = "trajectory-parameters = {\n";
-		s += "  t0 = "+ Double.toString(this.getStartTime());
+		if (t0Input.get()!=null) { // -- testing
+			s += "  t0 = "+ Double.toString(this.getStartTime());
+		} else {
+			s += "  t0 = "+ "<troot>";
+		}
 		if (t1Set) {
 			s += " t1 = "+ Double.toString(t1);
 		}

@@ -21,6 +21,7 @@ import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
 import beast.core.Input;
 import beast.core.Input.Validate;
+import phydyn.model.translate.PopModelODEPrinter;
 import phydyn.model.MatrixEquationObj.EquationType;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
@@ -37,6 +38,7 @@ import phydyn.util.General.IntegrationMethod;
 	
 	
 public class PopModelODE extends PopModel  implements FirstOrderDifferentialEquations, StepHandler {
+	
 	 
 	 public Input<List<MatrixEquation>> matrixEquationsInput = new Input<>(
 	            "matrixeq",
@@ -72,7 +74,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 public String[] yNames;
 	 public String alldemes;
 	 
-	 protected List<String> defNames;
+	 public List<String> defNames;
 	 public List<DefinitionObj> definitions;
 	 
 	 protected Set<String> allParameters;
@@ -241,7 +243,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	@Override
 	public boolean requiresRecalculation() {
 		// called if any of the Inputs was updated - no need to check more
-		//modifiedValues = true;
+		// trajectoryKnown = false;
+		// return true;
 		
 		if (this.trajParams.isDirtyCalculation()) {
 			trajectoryKnown = false;
@@ -308,17 +311,33 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	
 	@Override
 	public boolean hasEndTime() { return  trajParams.t1Input.get()!= null; }
+	
+	@Override
+	public boolean hasStartTime() { return  trajParams.t0Input.get()!= null; }
+	
+	@Override
 	public double getEndTime() { return trajParams.t1; }
-	public void setStartTime(double newT0) { 
+	
+	@Override
+	public void setStartTime(double newt0) { 
 		// keep this for the time being
 		throw new IllegalArgumentException("Can't change t0 for non-constant populations");
+		//trajParams.setStartTime(newt0); 
+		//trajectoryKnown = false; // integrate again
 	}
-	public double getStartTime() { return trajParams.getStartTime(); }
+	
+	@Override
+	public double getStartTime() { 
+		return trajParams.getStartTime(); 
+	}
+	
+	@Override
 	public void setEndTime(double newt1)  {
 		trajParams.setEndTime(newt1); 
 		trajectoryKnown = false; // integrate again
 	}
 	
+	@Override
 	public void unsetEndTime() {
 		trajParams.unsetEndTime();
 	}
@@ -333,6 +352,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	/* CalculationNode's calculation*/
 	public TimeSeriesFGY getTimeSeries() { 
 		if (!trajectoryKnown) {			
+			//System.out.println("---> computing Trajectory: "+this.getID());
 			integrate(trajParams, modelParams);
 			trajectoryKnown = true;
 		}
@@ -388,7 +408,6 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	
 	// integrate(double[] y0, double t0, double t1, int nsteps, double[] y1) 
 	TimeSeriesFGY integrate(TrajectoryParameters trajParams, ModelParameters modelParams) {
-		//double t0,t1;
 		int nsteps;
 		IntegrationMethod method;
 		
@@ -398,7 +417,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		}
 		t0t1[0] = getStartTime();
 		t0t1[1] = trajParams.t1;
-		// System.out.println("t0="+t0t1[0]+"  t1="+t0t1[1]);
+		// System.out.println("-- integrate -- popModel : "+this.getID() + " t = ["+t0t1[0]+" , "+t0t1[1]+"]");
 	
 		nsteps = trajParams.integrationSteps;
 		method = trajParams.method;

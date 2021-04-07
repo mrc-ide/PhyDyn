@@ -8,6 +8,7 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.Runnable;
 import phydyn.model.TimeSeriesFGY.FGY;
+import phydyn.model.translate.PopModelODETranslator;
 
 public class TrajectoryOut extends Runnable {
 	
@@ -34,7 +35,7 @@ public class TrajectoryOut extends Runnable {
 		popModel = modelInput.get();
 		
 		if (!popModel.hasEndTime()) {
-			throw new IllegalArgumentException("Trajectory End Time (t0) unspecified - quitting");
+			throw new IllegalArgumentException("Trajectory End Time (t1) unspecified - quitting");
 		}
 	}
 
@@ -94,11 +95,12 @@ public class TrajectoryOut extends Runnable {
 			throw new RuntimeException("Expecting PopModelODE");
 		PopModelODETranslator trans = new PopModelODETranslator(modelODE);		
 		FileWriter writer = new FileWriter(RfileInput.get());
-		final String strR = trans.GenerateR();
-		writer.append(strR);
+		StringBuffer buf = new StringBuffer();
+		trans.generateR(buf);
+		writer.append(buf.toString());
 		writer.flush();
 	    writer.close();
-		System.out.println("R code generated:\n"+strR);
+		// System.out.println("R code generated:\n"+buf.toString());
 	}
 	
 

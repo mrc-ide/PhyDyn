@@ -8,8 +8,8 @@ import phydyn.model.DefinitionObj;
 import phydyn.model.MatrixEquationObj;
 import phydyn.model.ModelParameters;
 import phydyn.model.PopModelODE;
-import phydyn.model.PopModelODEPrinter;
 import phydyn.model.TrajectoryParameters;
+import phydyn.model.translate.PopModelODEPrinter;
 
 public class XMLWriter {
 

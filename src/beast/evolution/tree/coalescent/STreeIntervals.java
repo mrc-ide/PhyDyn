@@ -26,8 +26,9 @@ public class STreeIntervals extends TreeIntervals {
     private Node[] events;
     private int[] pOrder; // post-order traversal
     
-    double[] storedTimes;
-    int[] storedIndices;
+    // testing - removing store/restore optimisation
+    //double[] storedTimes;
+    //int[] storedIndices;
 
 	public STreeIntervals() {
 	}
@@ -42,24 +43,43 @@ public class STreeIntervals extends TreeIntervals {
 	 }
 	 
 	 @Override
+	 public boolean requiresRecalculation() {
+		 // Inherited from TreeIntervals - copied to make it explicit during testing
+		 // we only get here if the tree is dirty, which is a StateNode
+		 // since the StateNode can only become dirty through an operation,
+		 // we need to recalculate tree intervals
+		 
+		 intervalsKnown = false;
+		 return true;
+	 }
+	 
+	 @Override
 	 protected void restore() {
-	     
+	     // testing
+		 /*
 		 int[] tmp1 = storedIndices;
 		 storedIndices = indices;
-		 indices = tmp1;
-		 
+		 indices = tmp1;		 
 		 double[] tmp2 = storedTimes;
 		 storedTimes = times;
 		 times = tmp2;
+		 */
 		 
 		 //events = new Node[intervalCount];
 		 //Node[] nodes = treeInput.get().getNodesAsArray();
 		 //for(int i=0; i < intervalCount; i++)
 		 //	events[i] = nodes[indices[i]];
-		 events= null;
 		 
-		 super.restore();
+		 //testing
+		 //events= null;
+		 
+		 // don't want any store/restore business - testing
+		 //super.restore();
+		 
 		 // added to fix problems with MCMC check - state.robustlyCalcPosterior(posterior);
+		 
+		 // CalulationNode::accept: used to set IsDitty=false 
+		 accept(); // this is a hack
 		 intervalsKnown = false;
 	   	        	
 	 } 
@@ -67,15 +87,22 @@ public class STreeIntervals extends TreeIntervals {
 	    
 	 @Override
 	 protected void store() {
+		 // testing
+		 /*
 		 System.arraycopy(indices, 0, storedIndices, 0, intervals.length);
 		 System.arraycopy(times, 0, storedTimes, 0, intervals.length);
 		 super.store();
+		 */
+		 
+		 // added to set isDirty=false and mimic call to super.store
+		 accept();  // this is a hack
 	 }    
 	 
+	 // testing
 	 // patch6
-	 public void forceRecalculation() {
-		 intervalsKnown = false;
-	 }
+	 //public void forceRecalculation() {
+	 //	 intervalsKnown = false;
+	 //}
 	    
 	 @Override
 	 public double getIntervalTime(int i) {
@@ -133,8 +160,9 @@ public class STreeIntervals extends TreeIntervals {
 			 storedIntervals = new double[nodeCount];
 			 storedLineageCounts = new int[nodeCount];
 			 
-			 storedIndices = new int[nodeCount];
-	         storedTimes = new double[nodeCount];
+			 // testing
+			 //storedIndices = new int[nodeCount];
+	         //storedTimes = new double[nodeCount];
 
 		 } 
 		 /* removing functionality related to lineagesAdded/Removed

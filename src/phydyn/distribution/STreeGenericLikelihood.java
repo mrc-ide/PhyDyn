@@ -61,6 +61,9 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 				"Compute ancestral states",new Boolean(false));
 	 
 	 
+	 public boolean logLikelihood = false;
+	 public STreeLikelihoodLogs stlhLogs;
+	 
 	 public PopModel popModel;
 	 public Tree tree;
 	 
@@ -121,12 +124,21 @@ public abstract class STreeGenericLikelihood extends TreeDistribution {
 		 
 		 mapNodesToStates();
 		 
-		
+		 logLikelihood = false;
 	 }
 	 
 	 public boolean initValues() {
 		 // mapNodesToStates();
 		 return false;
+	 }
+	 
+	 public void setLogLikelihood(boolean b) {
+		 logLikelihood = b;
+	 }
+	 
+	 public STreeLikelihoodLogs getSTLhLogs() {
+		 if (logLikelihood) return stlhLogs;
+		 else return null;
 	 }
 	 
 	 public PopModel getModel() { return popModel; }

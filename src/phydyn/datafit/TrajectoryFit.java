@@ -66,7 +66,7 @@ public abstract class TrajectoryFit extends Distribution {
 		numcols = row.length;
 		if (numcols < 2)
 			throw new IllegalArgumentException("Data table must have at least 2 columns");
-		System.out.println("nomcols="+numcols);
+		System.out.println("Data Points: (numcols="+numcols+")");
 		if (headerInput.get()) {
 			headers = row;	
 			row = readRow(reader);

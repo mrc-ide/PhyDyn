@@ -26,6 +26,8 @@ public abstract class PopModel extends CalculationNode {
 	public abstract double getEndTime();
 	public abstract void setEndTime(double newt1);
 	public abstract void unsetEndTime();
+	
+	public abstract boolean hasStartTime();
 	public abstract void setStartTime(double t0);
 	public abstract double getStartTime();
 	
