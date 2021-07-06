@@ -55,6 +55,10 @@ public class PopModelInterpreter extends PopModelBaseVisitor<Double> {
 		env.clear();
 	}
 	
+	public Map<String, Double> get_env() {
+		return env;
+	}
+	
 	public void updateEnv(List<String> varNames, double[] values) {
 		int i=0;
 		for(String name: varNames) {

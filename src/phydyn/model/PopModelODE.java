@@ -104,6 +104,7 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 	 private boolean useT, useT0T1;
 	 
 	 public List<MatrixEquationObj> equations;
+	 public SemanticChecker checker;
 	 
 	@Override
 	public void initAndValidate() {
@@ -198,7 +199,8 @@ public class PopModelODE extends PopModel  implements FirstOrderDifferentialEqua
 		
 		// Check if variables are defined
 		// Keep track of special variables and constants used.
-		SemanticChecker checker = new SemanticChecker();
+		// checker is now a field so it can be re-used by another interpreter
+		checker = new SemanticChecker();
 		if (checker.check(this)) {
 			throw new IllegalArgumentException("Error(s) found in model formulae");
 		}

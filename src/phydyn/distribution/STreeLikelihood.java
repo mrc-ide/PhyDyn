@@ -297,6 +297,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
         	   	
         	if (trajDuration < (h+duration)) break;
         	lhinterval = processInterval(interval, duration, ts);
+        	
+
         	    
         	if (Double.isNaN(lhinterval)) {
         		errorMsg += "logP NaN (interval)";
@@ -668,6 +670,8 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
  		} else { // however, Y_i > 1e-12 by default
  			Y.maxi(1e-12); 
  		}
+   		
+
  
     	double pairCoal=0;
 	    /* Compute Lambda_12 = pair coalescence rate */
@@ -691,7 +695,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
     		pa.addi(pj_Y.mul(pi_Y.rmul(F)));   // pi_Y * F
     	}
     	 
-    	pairCoal = pa.sum(); 
+    	pairCoal = pa.sum();    	
 	    pa.divi(pairCoal); // normalise
 					
 		stateProbabilities.addLineage(coalNode,pa);	
@@ -705,7 +709,7 @@ public abstract class STreeLikelihood extends STreeGenericLikelihood  {
 		if (fsCorrectionsInput.get()) {
 			doFiniteSizeCorrections(coalNode,pa);
 		}
-		
+				
 		return Math.log(pairCoal);
     }
         

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import phydyn.model.parser.PopModelBaseVisitor;
+import phydyn.model.parser.PopModelParser.ExprContext;
 import phydyn.model.parser.PopModelParser.IdentExprContext;
 import phydyn.model.parser.PopModelParser.ProdExprContext;
 import phydyn.model.parser.PopModelParser.StmContext;
@@ -34,14 +35,42 @@ public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
 
 
 	public Map<String, Integer> envTypes;
+	public Map<String, Integer> envTypesUsed;
 	public Map<String,Double> usedConstants;
 	public boolean useT, useT0T1;
-	boolean typeError;
+	boolean typeError, expOnly;
 	
 	public SemanticChecker() {
 		super();
 		envTypes = new HashMap<>();
+		envTypesUsed = new HashMap<>();
 		usedConstants=  new HashMap<String,Double>();
+	}
+	
+	// Added to allow further semantic checks (Copy Constructor)
+	public SemanticChecker(SemanticChecker checker) {
+		//HashMap<String, Employee> shallowCopy = new HashMap<String, Employee>(originalMap);
+		envTypes = new HashMap<String,Integer>(checker.envTypes);
+		envTypesUsed = new HashMap<String,Integer>(checker.envTypes);
+		usedConstants = new HashMap<String,Double>(checker.usedConstants);
+		useT = checker.useT; 
+		useT0T1 = checker.useT0T1;
+	}
+	
+	// added to allow ad-hoc expressions e.g. new likelihood for data fitting
+	public void addExternalVariable(String id) {
+		envTypes.put(id, 5); // new type 5
+	}
+	
+	public SemanticChecker(PopModelODE model) {
+		super();
+		envTypes = new HashMap<>();
+		envTypesUsed = new HashMap<>();
+		usedConstants=  new HashMap<String,Double>();
+		for(DefinitionObj def: model.definitions) envTypes.put(def.name, 0);
+		for(int i=0; i< model.numDemes; i++) envTypes.put(model.demeNames[i], 1);
+		for(int i=0; i< model.numNonDemes; i++) envTypes.put(model.nonDemeNames[i], 2);
+		for(int i=0; i< model.modelParams.numParams; i++) envTypes.put(model.modelParams.paramNames[i], 3);	
 	}
 	
 	public boolean check(PopModelODE model) {
@@ -55,6 +84,7 @@ public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
 		for(i=0; i< model.numNonDemes; i++) envTypes.put(model.nonDemeNames[i], 2);
 		for(i=0; i< model.modelParams.numParams; i++) envTypes.put(model.modelParams.paramNames[i], 3);
 		typeError = false;
+		expOnly = false;
 		// definitions
 		// for(Definition def: model.definitions) envTypes.put(def.name, 0);
 		for(DefinitionObj def: model.definitions) {
@@ -71,6 +101,14 @@ public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
 		}
 		return typeError;
 		
+	}
+	
+	// This may be used several times
+	public boolean check(ExprContext exp) {		
+		typeError = false;
+		expOnly = true;
+		visit(exp);
+		return typeError;
 	}
 	
 	@Override
@@ -100,6 +138,10 @@ public class SemanticChecker extends PopModelBaseVisitor<Boolean> {
 			} else {
 				System.out.println("Unknown identifier: "+id);
 				typeError = true;
+			}
+		} else if (expOnly) {
+			if (!envTypesUsed.containsKey(id)) {
+				envTypesUsed.put(id, envTypes.get(id));  // record if id used (and type)
 			}
 		}
 		// System.out.print(id);
