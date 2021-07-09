@@ -7,11 +7,11 @@ Department of Infectious Disease Epidemiology, Imperial College London.
 [PhyDyn](https://github.com/mrc-ide/PhyDyn/wiki) is a BEAST2 package for performing Bayesian phylogenetic inference under models that deal with structured populations with complex population dynamics.
 This package enables simultaneous estimation of epidemiological parameters and pathogen phylogenies. The package implements a coalescent model for a large class of epidemic processes specified by a deterministic nonlinear dynamical system. Genealogies are specified as timed phylogenetic trees in which lineages are associated with the distinct subpopulation in which they are sampled. Epidemic models are defined by a series of ordinary differential equations (ODEs) specifying the rates that new lineages introduced in the population (birth matrix) and the rates at which migrations, or transition between states occur (migration matrix). The ODE syntax allows the user to define and use complex mathematical expressions such as  polynomials and trigonometric functions. Currently, PhyDyn works with deterministic demographic models. Future versions may incorporate other population models, methods for simulating trees conditional on an epidemic process and include semi-parametric epidemiological models.
 
-**Current version: 1.3.7 **
+**Current version: 1.3.8 **
 
 ## System Requirements
 
-PhyDyn is a BEAST2 package. The latest version of the package (**v1.3.7**) has been compiled against BEAST v2.6.2.
+PhyDyn is a BEAST2 package. The latest version of the package (**v1.3.8**) has been compiled against BEAST v2.6.2.
 
 PhyDyn requires:
 - BEAST2 v2.6.0 or greater or, preferably, BEAST v2.6.2 or greater.
@@ -25,15 +25,15 @@ BEAST2 is available for Windows, OSX and Linux.  Instructions for download and i
 The easiest way to install PhyDyn is with BEAST2's package manager via BEAUti.<br>
 BEAUti, a graphical user-interface (GUI) application for generating BEAST XML files, is distributed together with BEAST2. Instructions on how to install/un-install BEAST2 packages with BEAUti can be found at the [Managing Packages](https://www.beast2.org/managing-packages/) page from the BEAST2 site.
 
-We also provide a zipped distribution of the package (`dist/PhyDyn.v1.3.6.zip`) that can be installed by hand following the instructions in [here](https://www.beast2.org/managing-packages/) .
+We also provide a zipped distribution of the package (`dist/PhyDyn.v1.3.8.zip`) that can be installed by hand following the instructions in [here](https://www.beast2.org/managing-packages/) .
 
 
-<!--  However, the package (v.1.3.7) can also be installed by hand. -->
+<!--  However, the package (v.1.3.8) can also be installed by hand. -->
 <!-- or, alternatively, examples can be run using  PhyDyn's standalone version. -->
 
 <!--
 ### Installation by-hand
-The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.3.6.zip`.
+The zipped distribution of the package is located in the `dist/` directory. The latest distribution is `dist/PhyDyn.v1.3.8.zip`.
 Instructions on how to install Beast packages by hand can be found [here](https://www.beast2.org/managing-packages/). The steps are:
 * Locate the directory where the current Beast version  keeps add-ons and packages. In Linux, it's usually `/users/<username>/.beast/2.6`. Move to that directory, create a directory for PhyDyn, and then move inside the new directory:
 ```
@@ -43,7 +43,7 @@ Instructions on how to install Beast packages by hand can be found [here](https:
 ```
 * Copy the zipped distribution to the package's directory (current directory). Unzip the file.
 ```
-> cp path-to-file/PhyDyn.v1.3.7.zip .
+> cp path-to-file/PhyDyn.v1.3.8.zip .
 > unzip PhyDyn.v1.3.7.zip
 ```
 That's all. Beast should recognize the package next time it runs.
