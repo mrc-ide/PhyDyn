@@ -88,6 +88,13 @@ Examples:
 
 Check the PhyDyn [Wiki](https://github.com/mrc-ide/PhyDyn/wiki) for detailed documentation.
 
+## Last Release: v1.3.8
+
+Additions/Changes included in this release:
+* Added [Covariate Likelihood](https://github.com/mrc-ide/PhyDyn/wiki/Covariate-Likelihood).
+* Option to run trajectory from root.
+
+
 ## Contact
 
 Any questions, bug reports or suggestions please email to Igor Siveroni at i.siveroni@imperial.ac.uk.
