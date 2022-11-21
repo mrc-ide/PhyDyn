@@ -1,22 +1,18 @@
 package phydyn.distribution;
 
-import java.util.List;
-import java.lang.Math;
-import java.text.DecimalFormat;
-
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.IntervalType;
-import beast.evolution.tree.coalescent.STreeIntervals;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.evolution.tree.IntervalType;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TraitSet;
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
+
+import java.text.DecimalFormat;
+import java.util.List;
 
 
 /**

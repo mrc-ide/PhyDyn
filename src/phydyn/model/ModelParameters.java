@@ -1,16 +1,11 @@
 package phydyn.model;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import beast.base.core.Input;
+import beast.base.inference.CalculationNode;
+
 import java.util.ArrayList;
-import java.util.List;
-
-import beast.core.CalculationNode;
-import beast.core.Input;
-import phydyn.analysis.PopModelAnalysis;
-import phydyn.analysis.XMLFileWriter;
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ModelParameters extends CalculationNode {

@@ -2,17 +2,17 @@
 force of infection: max(0, a*t + b )
 -->
 
-<beast beautitemplate='Standard' beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:phydyn.operators:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+<beast beautitemplate='Standard' beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:phydyn.operators:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.base.util:beast.base.math:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
 
-<map name="Uniform">beast.math.distributions.Uniform</map>
-<map name="Exponential">beast.math.distributions.Exponential</map>
-<map name="LogNormal">beast.math.distributions.LogNormalDistributionModel</map>
-<map name="Normal">beast.math.distributions.Normal</map>
-<map name="Beta">beast.math.distributions.Beta</map>
-<map name="Gamma">beast.math.distributions.Gamma</map>
-<map name="LaplaceDistribution">beast.math.distributions.LaplaceDistribution</map>
-<map name="prior">beast.math.distributions.Prior</map>
-<map name="InverseGamma">beast.math.distributions.InverseGamma </map>
+<map name="Uniform">beast.base.inference.distribution.Uniform</map>
+<map name="Exponential">beast.base.inference.distribution.Exponential</map>
+<map name="LogNormal">beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Normal">beast.base.inference.distribution.Normal</map>
+<map name="Beta">beast.base.inference.distribution.Beta</map>
+<map name="Gamma">beast.base.inference.distribution.Gamma</map>
+<map name="LaplaceDistribution">beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="prior">beast.base.inference.distribution.Prior</map>
+<map name="InverseGamma">beast.base.inference.distribution.InverseGamma </map>
 
 
 <data id="sequences" name="alignment">
@@ -484,7 +484,7 @@ t1="1.8000765516"
 	</trajparams>
 	
 	<!-- Define tree outside state -->
-	<init spec="beast.util.TreeParser" id="tree"
+	<init spec="beast.base.evolution.tree.TreeParser" id="tree"
 			taxa="@sequences" 
 			adjustTipHeights="false"
 			IsLabelledNewick="true"
@@ -499,8 +499,8 @@ t1="1.8000765516"
 			<parameter id="tau" lower="-Infinity" upper="Infinity" name="stateNode">6.594857810472015</parameter>
 		</state>
 	 	
- 		<distribution id="posterior" spec="util.CompoundDistribution">
-			<distribution id="prior" spec="util.CompoundDistribution">
+ 		<distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+			<distribution id="prior" spec="beast.base.inference.CompoundDistribution">
 				<prior id="initI0prior" name="distribution" x="@initI0">
 					<LogNormal id="LogNormal:initI0" M="0" S="1" name="distr" />
 				</prior>
@@ -515,7 +515,7 @@ t1="1.8000765516"
 				</prior>
 			</distribution>	
 			
-			<distribution id="likelihood" spec="util.CompoundDistribution">
+			<distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
 				 <distribution spec='STreeLikelihoodODE' id = 'stlikelihood'
              	 useStateName='true' 
              	 approxLambda='false' finiteSizeCorrections='false'

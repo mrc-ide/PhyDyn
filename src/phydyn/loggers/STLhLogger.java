@@ -1,14 +1,13 @@
 package phydyn.loggers;
 
-import java.io.PrintStream;
-
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.Loggable;
-import beast.core.Input.Validate;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Loggable;
+import beast.base.inference.CalculationNode;
 import phydyn.distribution.STreeLikelihood;
 import phydyn.distribution.STreeLikelihoodLogs;
-import phydyn.model.PopModelODE;
+
+import java.io.PrintStream;
 
 public class STLhLogger extends CalculationNode implements Loggable {
 	
@@ -32,7 +31,7 @@ public class STLhLogger extends CalculationNode implements Loggable {
 	}
 
 	@Override
-	public void log(int sample, PrintStream out) {
+	public void log(long sample, PrintStream out) {
 		// get logged values from stlh
 		final STreeLikelihoodLogs logs = stlh.getSTLhLogs();
 		final int n = logs.nodes.length;

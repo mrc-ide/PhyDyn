@@ -1,9 +1,6 @@
 package phydyn.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import beast.core.Description;
+import beast.base.core.Description;
 
 @Description("Interface between PopModelODE (trajectory generator) and the equation/definitions evaluators")
 public interface EquationEvaluatorAPI {

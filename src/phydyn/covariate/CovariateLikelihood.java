@@ -1,18 +1,10 @@
 package phydyn.covariate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.apache.commons.math.distribution.NormalDistribution;
-import org.apache.commons.math.distribution.NormalDistributionImpl;
-
-import beast.core.Input;
-import beast.core.Input.Validate;
 import phydyn.covariate.distribution.ParamDistribution;
 import phydyn.model.PopModelInterpreter;
 import phydyn.model.SemanticChecker;
@@ -22,6 +14,10 @@ import phydyn.model.parser.PopModelParser;
 import phydyn.model.parser.PopModelParser.ExprContext;
 import phydyn.util.DVector;
 import phydyn.util.General;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CovariateLikelihood extends TrajectoryFit {	
 	

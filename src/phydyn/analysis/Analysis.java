@@ -1,17 +1,13 @@
 package phydyn.analysis;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import beast.core.BEASTInterface;
-import beast.core.BEASTObject;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TraitSet;
-import beast.util.TreeParser;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.TreeParser;
 import phydyn.model.PopModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -166,7 +162,7 @@ public abstract class Analysis {
 
 	
 	// create a fully-connected Runnable object
-	public abstract beast.core.Runnable getRunnableObject();
+	public abstract beast.base.inference.Runnable getRunnableObject();
 	
 		
 	

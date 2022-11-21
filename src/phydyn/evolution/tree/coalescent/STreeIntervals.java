@@ -1,12 +1,11 @@
-package beast.evolution.tree.coalescent;
+package phydyn.evolution.tree.coalescent;
+
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeIntervals;
 
 import java.util.Comparator;
 import java.util.List;
-
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.util.HeapSort;
 
 /*
  * @author Igor Siveroni

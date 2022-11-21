@@ -1,13 +1,12 @@
 package phydyn.model;
 
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.CalculationNode;
+import beast.base.inference.parameter.RealParameter;
+
 import java.util.Arrays;
 import java.util.List;
-
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.StateNode;
-import beast.core.parameter.RealParameter;
 
 /*
  * Changes: We no longer allow multiple names.

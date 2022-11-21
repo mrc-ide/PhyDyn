@@ -1,19 +1,13 @@
 package phydyn.model;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Loggable;
-import beast.core.parameter.RealParameter;
-import phydyn.analysis.PopModelAnalysis;
-import phydyn.analysis.XMLFileWriter;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Loggable;
+import beast.base.inference.parameter.RealParameter;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
+
+import java.io.PrintStream;
 
 public class PopModelIsland extends PopModel implements Loggable {
 
@@ -251,7 +245,7 @@ public class PopModelIsland extends PopModel implements Loggable {
 	}
 
 	@Override
-	public void log(int sample, PrintStream out) {
+	public void log(long sample, PrintStream out) {
 		double[] Ne = NeInput.get().getDoubleValues();
 		for(int i=0; i < numDemes; i++) {
 			out.print(Ne[i]+"\t");			

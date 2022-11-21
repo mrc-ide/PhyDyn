@@ -1,25 +1,21 @@
 package phydyn.distribution;
 
 
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeDistribution;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
+import phydyn.evolution.tree.coalescent.STreeIntervals;
+import phydyn.model.PopModel;
+
 import java.util.List;
 import java.util.Random;
-
-
-import beast.core.Description;
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.State;
-import beast.core.parameter.BooleanParameter;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.core.Input.Validate;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeDistribution;
-import beast.evolution.tree.coalescent.STreeIntervals;
-import beast.evolution.tree.coalescent.TreeIntervals;
-import phydyn.model.PopModel;
 
 
 @Description("Distribution on a structured tree")

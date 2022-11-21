@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beast beautitemplate='Standard' beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:phydyn.operators:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+<beast beautitemplate='Standard' beautistatus=''
+	   namespace="beast.base.core:beast.base.inference:beast.base.inference.distributions
+       :beast.base.evolution:beast.base.util:beast.base.evolution.nuc:beast.base.evolution.operators
+       :beast.base.evolution.branchratemodel:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel
+       :beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.evolution.likelihood
+       :phydyn.distribution:phydyn.model:phydyn.evolution.tree.coalescent:phydyn.loggers:phydyn.operators" version="2.7">
 	<data id="sequences" name="alignment">
 		<sequence id="inv3loc_0" taxon="inv3loc_0" totalcount="4" value="??"/>
 		<sequence id="inv4loc_1" taxon="inv4loc_1" totalcount="4" value="??"/>
@@ -37,7 +42,7 @@
 	</params>
 	
 	<!-- Define tree outside state -->
-	<init spec="beast.util.TreeParser" id="tree"
+	<init spec="beast.base.evolution.tree.TreeParser" id="tree"
 			taxa="@sequences" adjustTipHeights="false"
 			IsLabelledNewick="true"
 			newick="(((inv3loc_0:2.5,inv4loc_1:8):4,(inv5loc_1:10,inv6loc_1:6):5.8):27,(inv2loc_0:10,inv1loc_0:20):22):0.0;"/>
@@ -50,16 +55,16 @@
 			<parameter id="migRate" upper="140" name="stateNode">0.001</parameter>
 			<parameter id="initI0" upper="140" name="stateNode">50.00</parameter>
 		</state>
-		<init spec="beast.util.TreeParser" id="NewickTree.t:Species"
+		<init spec="beast.base.evolution.tree.TreeParser" id="NewickTree.t:Species"
 			initial="@tree" taxa="@sequences" adjustTipHeights="false"
 			IsLabelledNewick="true"
 			newick="(((inv3loc_0:2.5,inv4loc_1:8):4,(inv5loc_1:10,inv6loc_1:6):5.8):27,(inv2loc_0:10,inv1loc_0:20):22):0.0;"/>
  		
- 		<distribution id="posterior" spec="util.CompoundDistribution">
-			<distribution id="prior" spec="util.CompoundDistribution">
+ 		<distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+			<distribution id="prior" spec="beast.base.inference.CompoundDistribution">
 				<!-- ARUDSIR Priors-->
 			</distribution>			
-			<distribution id="likelihood" spec="util.CompoundDistribution">
+			<distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
 				 <distribution spec='STreeLikelihoodODE' id = 'stlikelihood' equations='PL1'
              	 useStateName='false' approxLambda='false' finiteSizeCorrections='false'
              	 method="higham-hall"

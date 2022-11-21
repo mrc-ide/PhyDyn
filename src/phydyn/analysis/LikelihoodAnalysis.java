@@ -1,22 +1,15 @@
 package phydyn.analysis;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import beast.core.BEASTInterface;
-import beast.core.BEASTObject;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.coalescent.STreeIntervals;
-import beast.util.TreeParser;
-import beast.util.XMLProducer;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.TreeParser;
 import phydyn.distribution.STreeLikelihoodODE;
+import phydyn.evolution.tree.coalescent.STreeIntervals;
 import phydyn.model.PopModel;
-import phydyn.model.PopModelODE;
 import phydyn.run.LikelihoodOut;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Igor Siveroni
@@ -153,7 +146,7 @@ public class LikelihoodAnalysis extends Analysis {
 		
 	}
 	
-	public beast.core.Runnable getRunnableObject() {
+	public beast.base.inference.Runnable getRunnableObject() {
 		if (this.analysisType!=AType.LH)
 			return null;
 		

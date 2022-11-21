@@ -1,5 +1,43 @@
-<addon name="PhyDyn" version="1.3.8">
-  <depends on="beast2" atleast="2.6.0"/>
+<package name="PhyDyn" version="2.0.0">
+<!-- require  2.7.3  -->
+    <depends on='BEAST.base' atleast='2.7.2'/>
+    <depends on='BEAST.app' atleast='2.7.2'/>
+<!--    <packageapp description="PhyDyn command"-->
+<!--                class="phydyn.command.CommandLine" args="" icon="" />-->
 
-  <!-- Add other dependencies as necessary. -->
-</addon>
+    <service type="beastfx.app.inputeditor.InputEditor">
+        <!--    <provider classname="phydyn.app.beauti.PhyDynPopModelODEInputEditor"/>-->
+        <provider classname="beastfx.app.inputeditor.TypeTraitSetInputEditor"/>
+    </service>
+
+    <service type="beast.base.core.BEASTInterface">
+        <provider classname="phydyn.covariate.CovariateLikelihood"/>
+        <provider classname="phydyn.covariate.SEIRLikelihood"/>
+        <provider classname="phydyn.covariate.SeroprevalenceLikelihood"/>
+        <provider classname="phydyn.covariate.TrajectoryFit"/>
+        <provider classname="phydyn.covariate.distribution.Normal"/>
+        <provider classname="phydyn.covariate.distribution.ParamDistribution"/>
+        <provider classname="phydyn.evolution.speciation.MyTreePrior"/>
+        <provider classname="phydyn.evolution.tree.coalescent.STreeIntervals"/>
+        <provider classname="phydyn.evolution.tree.coalescent.STreeIntervalsStore"/>
+        <provider classname="phydyn.distribution.STreeGenericLikelihood"/>
+        <provider classname="phydyn.distribution.STreeLikelihood"/>
+        <provider classname="phydyn.distribution.STreeLikelihoodODE"/>
+        <provider classname="phydyn.loggers.MemoryLogger"/>
+        <provider classname="phydyn.loggers.STLhLogger"/>
+        <provider classname="phydyn.loggers.STreeRootLogger"/>
+        <provider classname="phydyn.loggers.TrajectoryLogger"/>
+        <provider classname="phydyn.model.Definition"/>
+        <provider classname="phydyn.model.Definitions"/>
+        <provider classname="phydyn.model.MatrixEquation"/>
+        <provider classname="phydyn.model.MatrixEquations"/>
+        <provider classname="phydyn.model.ModelParameters"/>
+        <provider classname="phydyn.model.ParamValue"/>
+        <provider classname="phydyn.model.PopModel"/>
+        <provider classname="phydyn.model.PopModelIsland"/>
+        <provider classname="phydyn.model.PopModelODE"/>
+        <provider classname="phydyn.model.TrajectoryParameters"/>
+        <provider classname="phydyn.operators.LoopOperator"/>
+    </service>
+
+</package>

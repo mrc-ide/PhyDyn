@@ -1,27 +1,17 @@
 package phydyn.command;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.List;
-
-import org.w3c.dom.Node;
-
-import beast.core.BEASTInterface;
-import beast.core.MCMC;
-import beast.core.Runnable;
-import beast.core.parameter.Map;
-import beast.core.parameter.Parameter;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.Sequence;
-import beast.util.BEASTClassLoader;
-import beast.util.PhyDynXMLParser;
-import beast.util.XMLParser;
-import beast.util.XMLParserException;
-import phydyn.distribution.STreeLikelihoodODE;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
+import beast.base.inference.MCMC;
+import beast.base.inference.Runnable;
 import phydyn.model.PopModel;
 import phydyn.model.PopModelODE;
 import phydyn.model.translate.PopModelODETranslator;
+import phydyn.util.PhyDynXMLParser;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.util.List;
 
 
 
@@ -324,7 +314,7 @@ public class CommandLine {
 		 * if (IDMap.containsKey(dRef))
 		 * if (IDNodeMap.containsKey(dRef))
 		 * 
-		 * init : class beast.evolution.alignment.Alignment
+		 * init : class beast.base.evolution.alignment.Alignment
 		 * Alignment(algn)
 		 * 53 taxa
 		 * 29903 sites

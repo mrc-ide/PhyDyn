@@ -1,23 +1,20 @@
 package phydyn.loggers;
 
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jblas.DoubleMatrix;
-
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Loggable;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Loggable;
+import beast.base.inference.CalculationNode;
 import phydyn.model.MatrixEquationObj;
 import phydyn.model.MatrixEquationObj.EquationType;
 import phydyn.model.PopModelODE;
 import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
-import phydyn.model.TimeSeriesFGYStd;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrajectoryLogger extends CalculationNode implements Loggable {
 	
@@ -88,7 +85,7 @@ public class TrajectoryLogger extends CalculationNode implements Loggable {
 	}
 
 	@Override
-	public void log(int sample, PrintStream out) {
+	public void log(long sample, PrintStream out) {
 		TimeSeriesFGY timeseries = popModel.getTimeSeries();
 		
 		FGY fgy; // = ts.getFGY(0);

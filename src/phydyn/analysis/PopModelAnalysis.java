@@ -1,14 +1,8 @@
 package phydyn.analysis;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-
 import phydyn.model.PopModel;
 import phydyn.model.PopModelBailLexer;
 import phydyn.model.PopModelParserErrorStrategy;
@@ -16,6 +10,11 @@ import phydyn.model.parser.PopModelLexer;
 import phydyn.model.parser.PopModelParser;
 import phydyn.model.parser.PopModelParser.AnalysisSpecContext;
 import phydyn.run.XMLGenerator;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 // TODO: Get the new Analysis treatment
 
@@ -95,16 +94,16 @@ public class PopModelAnalysis {
 	
 	private void writeMaps(XMLFileWriter writer) throws IOException {
 		writer.EOL();
-		writer.tabAppend("<map name=\"Uniform\">beast.math.distributions.Uniform</map>\n");
-		writer.tabAppend("<map name=\"LogNormal\">beast.math.distributions.LogNormalDistributionModel</map>\n");
-		writer.tabAppend("<map name=\"Normal\">beast.math.distributions.Normal</map>\n");
-		writer.tabAppend("<map name=\"prior\">beast.math.distributions.Prior</map>\n");
+		writer.tabAppend("<map name=\"Uniform\">beast.base.inference.distribution.Uniform</map>\n");
+		writer.tabAppend("<map name=\"LogNormal\">beast.base.inference.distribution.LogNormalDistributionModel</map>\n");
+		writer.tabAppend("<map name=\"Normal\">beast.base.inference.distribution.Normal</map>\n");
+		writer.tabAppend("<map name=\"prior\">beast.base.inference.distribution.Prior</map>\n");
 		writer.EOL();
-		//<map name="Exponential">beast.math.distributions.Exponential</map>
-		//<map name="Beta">beast.math.distributions.Beta</map>
-		//<map name="Gamma">beast.math.distributions.Gamma</map>
-		//<map name="LaplaceDistribution">beast.math.distributions.LaplaceDistribution</map>
-		//<map name="InverseGamma">beast.math.distributions.InverseGamma </map>
+		//<map name="Exponential">beast.base.inference.distribution.Exponential</map>
+		//<map name="Beta">beast.base.inference.distribution.Beta</map>
+		//<map name="Gamma">beast.base.inference.distribution.Gamma</map>
+		//<map name="LaplaceDistribution">beast.base.inference.distribution.LaplaceDistribution</map>
+		//<map name="InverseGamma">beast.base.inference.distribution.InverseGamma </map>
 	}
 	
 	public String writeXML(XMLFileWriter writer) throws IOException {

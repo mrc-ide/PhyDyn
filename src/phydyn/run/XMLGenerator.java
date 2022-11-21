@@ -1,26 +1,19 @@
 package phydyn.run;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import beast.core.BEASTInterface;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Runnable;
-import beast.evolution.tree.Node;
-import beast.util.TreeParser;
-import beast.util.XMLProducer;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.Runnable;
+import beast.base.parser.XMLProducer;
 import phydyn.analysis.Analysis;
 import phydyn.analysis.Analysis.AType;
-import phydyn.analysis.PopModelAnalysis;
-import phydyn.analysis.XMLFileWriter;
 import phydyn.model.PopModel;
+
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 public class XMLGenerator extends Runnable {
 	public Input<String> xmlTypeInput = new Input<>("xmlType", "XML Phydyn files: likelihood, modelmcmc, treemcmc", Validate.REQUIRED);

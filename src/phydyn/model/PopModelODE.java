@@ -1,31 +1,24 @@
 package phydyn.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
-import org.apache.commons.math3.ode.nonstiff.AdamsBashforthIntegrator;
-import org.apache.commons.math3.ode.nonstiff.AdamsMoultonIntegrator;
-import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-import org.apache.commons.math3.ode.nonstiff.EulerIntegrator;
-import org.apache.commons.math3.ode.nonstiff.GillIntegrator;
-import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
-import org.apache.commons.math3.ode.nonstiff.MidpointIntegrator;
+import org.apache.commons.math3.ode.nonstiff.*;
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
-
-import beast.core.Input;
-import beast.core.Input.Validate;
-import phydyn.model.translate.PopModelODEPrinter;
 import phydyn.model.MatrixEquationObj.EquationType;
+import phydyn.model.translate.PopModelODEPrinter;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
 import phydyn.util.General.IntegrationMethod;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 /**

@@ -1,9 +1,9 @@
 package phydyn.loggers;
 
-import java.io.PrintStream;
+import beast.base.core.Loggable;
+import beast.base.inference.CalculationNode;
 
-import beast.core.CalculationNode;
-import beast.core.Loggable;
+import java.io.PrintStream;
 
 public class MemoryLogger extends CalculationNode implements Loggable {
 	private Runtime runtime; 
@@ -18,7 +18,7 @@ public class MemoryLogger extends CalculationNode implements Loggable {
 	}
 
 	@Override
-	public void log(int nSample, PrintStream out) {
+	public void log(long nSample, PrintStream out) {
 
 	   	//Runtime runtime = Runtime.getRuntime();
     	//long maxMemory = runtime.maxMemory();

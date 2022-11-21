@@ -1,0 +1,443 @@
+<beast version='2.7'
+       namespace='beast.base.core:beast.base.inference:beast.base.inference.distributions
+       :beast.base.evolution:beast.base.util:beast.base.evolution.nuc:beast.base.evolution.operators
+       :beast.base.evolution.branchratemodel:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel
+       :beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.evolution.likelihood
+       :phydyn.distribution:phydyn.model:phydyn.evolution.tree.coalescent:phydyn.loggers:phydyn.operators'>
+       
+  <!-- tree priors -->
+  <mergewith point='treePriorTemplates'>   
+  <!-- SEIR Model -->
+  <subtemplate id='PhydynSEIR' class='phydyn.distribution.STreeLikelihoodODE' mainid='PhydynSEIR.t:$(n)'
+               suppressInputs='phydyn.distribution.STreeLikelihoodODE.treeIntervals,
+               phydyn.distribution.STreeLikelihoodODE.tree, 
+               phydyn.distribution.STreeLikelihoodODE.solvePL,
+               phydyn.distribution.STreeLikelihoodODE.gc,
+               phydyn.distribution.STreeLikelihoodODE.ancestral,
+               phydyn.distribution.STreeLikelihoodODE.useStateName,
+               phydyn.distribution.STreeLikelihoodODE.typeTrait,
+               phydyn.distribution.STreeLikelihoodODE.isConstantLh,
+               phydyn.distribution.STreeLikelihoodODE.approxLambda,
+               phydyn.distribution.STreeLikelihoodODE.order,
+               phydyn.distribution.STreeLikelihoodODE.aTol,
+               phydyn.distribution.STreeLikelihoodODE.rTol,
+               phydyn.model.ParamValue.isVector,
+               phydyn.model.ParamValue.names,
+               phydyn.model.ParamValue.values,
+               phydyn.model.PopModelODE.evaluator,
+               phydyn.model.PopModelODE.definition, 
+               phydyn.model.PopModelODE.definitions,
+               phydyn.model.PopModelODE.matrixeq,
+               phydyn.model.PopModelODE.matrixeqs,
+               phydyn.model.TrajectoryParameters.rTol,
+               phydyn.model.TrajectoryParameters.aTol,
+               phydyn.model.TrajectoryParameters.order,
+               phydyn.model.TrajectoryParameters.timeseriesSteps,
+               phydyn.model.TrajectoryParameters.t1'>
+     <![CDATA[
+        <plugin spec='phydyn.distribution.STreeLikelihoodODE' id='PhydynSEIR.t:$(n)'
+          equations="QL" useStateName='true' forgiveAgtY='1.0' penaltyAgtY='0.0' minP="0.01" stepSize="0.01" 
+          approxLambda='false' finiteSizeCorrections='false'  popmodel="@pdseirmodel.t:$(n)"   >
+          <treeIntervals spec='STreeIntervals' id='STreeIntervals.t:$(n)' tree='@Tree.t:$(n)'/>
+          <Ne spec='parameter.RealParameter' id='seir.Ne.t:$(n)' dimension='1' value='0.1' estimate='false'  />
+        </plugin> 
+        
+       
+  <popmodel spec='phydyn.model.PopModelODE' id='pdseirmodel.t:$(n)' evaluator="compiled"
+	 popParams='@initValues' modelParams='@rates'>
+	<definition spec='phydyn.model.Definition'>	N = S + Il + Ih + E + R  </definition>
+	<definition spec='phydyn.model.Definition'>	beta = if (t > 2020.025) then max(0.0, b) else 0.0 </definition>
+	<definition spec='phydyn.model.Definition'> betaExog =  gammaExog + exogGrowthRate </definition>	 
+	<matrixeq spec='phydyn.model.MatrixEquation' type="migration" origin="E" destination="Il">
+		if ( t > 2020.025 ) then gamma0*E*(1-p_h) else 0.0
+	</matrixeq> 			
+	<matrixeq spec='phydyn.model.MatrixEquation' type="migration" origin="E" destination="Ih">
+		if ( t > 2020.025 ) then gamma0*E*p_h else 0.0 
+	</matrixeq> 			
+	<matrixeq spec='phydyn.model.MatrixEquation' type="birth"  origin="Il" destination="E"> 				
+	    beta*Il*S / N
+	</matrixeq> 			
+	<matrixeq spec='phydyn.model.MatrixEquation' type="birth"  origin="Ih" destination="E"> 
+		beta*Ih*tau * S / N
+	</matrixeq> 			
+	<matrixeq spec='phydyn.model.MatrixEquation' type="death" origin="Il">
+		gamma1*Il
+	</matrixeq> 			
+	<matrixeq spec='phydyn.model.MatrixEquation' type="death" origin="Ih">
+		gamma1*Ih
+	</matrixeq> 				
+	<matrixeq spec='phydyn.model.MatrixEquation' type="nondeme" origin="R"> 
+		gamma1*(Il + Ih)
+	</matrixeq>
+	<matrixeq spec='phydyn.model.MatrixEquation' type="nondeme" origin="S"> 
+		-beta*(Ih*tau+Il) * S / N
+	</matrixeq>
+	<matrixeq spec='phydyn.model.MatrixEquation' type="nondeme" origin="infections"> 
+		beta*(Ih*tau+Il) * S / N
+	</matrixeq>
+	<!-- migration -->				 
+	 <matrixeq spec='phydyn.model.MatrixEquation' type="migration"  origin="exog" destination="Il"> 
+		importRate * Il 
+	</matrixeq> 	
+	<matrixeq spec='phydyn.model.MatrixEquation' type="migration"  origin="Il" destination="exog"> 
+		importRate * Il
+	</matrixeq>
+	<matrixeq spec='phydyn.model.MatrixEquation' type="migration"  origin="exog" destination="Ih"> 
+		importRate * Ih
+	</matrixeq> 	
+	<matrixeq spec='phydyn.model.MatrixEquation' type="migration"  origin="Ih" destination="exog"> 
+		importRate * Ih
+	</matrixeq>
+	<matrixeq spec='phydyn.model.MatrixEquation' type="migration"  origin="exog" destination="E"> 
+		importRate * E
+	</matrixeq> 	
+	<matrixeq spec='phydyn.model.MatrixEquation' type="migration"  origin="E" destination="exog"> 
+		importRate * E
+	</matrixeq>			
+	<!-- exog -->
+	<matrixeq spec='phydyn.model.MatrixEquation' type="birth"  origin="exog" destination="exog"> 
+		betaExog * exog 
+	</matrixeq> 			
+	<matrixeq spec='phydyn.model.MatrixEquation' type="death" origin="exog">
+		gammaExog * exog 
+	</matrixeq> 
+  </popmodel> 
+	 
+
+  <rates spec="phydyn.model.ModelParameters" id='rates'>	
+	<param spec='phydyn.model.ParamValue' id='seir.gamma0.pv.t:$(n)' pname='gamma0' >
+	  <pvalue spec='parameter.RealParameter' id='seir.gamma0.t:$(n)' dimension='1' value='73.0' estimate='false' />
+	</param>
+	<param spec='phydyn.model.ParamValue' id='seir.gamma1.pv.t:$(n)' pname='gamma1' >
+	  <pvalue spec='parameter.RealParameter' id='seir.gamma1.t:$(n)' dimension='1' value='121.667' estimate='false' />
+	</param>
+	<param spec="phydyn.model.ParamValue" id="seir.gammaExog.pv.t:$(n)"  pname="gammaExog">
+      <pvalue spec="parameter.RealParameter" id="seir.gammaExog.t:$(n)" dimension='1' value='44.0' estimate="false" />
+    </param>
+	<param spec='phydyn.model.ParamValue' id='seir.p_h.pv.t:$(n)' pname='p_h' >
+	  <pvalue spec='parameter.RealParameter' id='seir.p_h.t:$(n)' dimension='1' lower="0" upper="1" value='0.20' estimate='true' />
+	</param>
+	<param spec='phydyn.model.ParamValue' id='seir.b.pv.t:$(n)' pname='b' >
+	  <pvalue spec='parameter.RealParameter' id='seir.b.t:$(n)' dimension='1' lower='9' value='15.0' estimate='true' />
+	</param>
+	<param spec='phydyn.model.ParamValue' id='seir.tau.pv.t:$(n)' pname='tau' >
+	  <pvalue spec='parameter.RealParameter' id='seir.tau.t:$(n)' dimension='1' value='73.98393' estimate='true' />
+	</param>
+	<param spec='phydyn.model.ParamValue' id='seir.exogGrowthRate.pv.t:$(n)' pname='exogGrowthRate' >
+	  <pvalue spec='parameter.RealParameter' id='seir.exogGrowthRate.t:$(n)' dimension='1' value='36.5' estimate='true' />
+	</param>
+	<param spec='phydyn.model.ParamValue' id='seir.importRate.pv.t:$(n)' pname='importRate' >
+	  <pvalue spec='parameter.RealParameter' id='seir.importRate.t:$(n)' dimension='1' lower='0' upper='10.0' value='7.0' estimate='true' />
+	</param>
+  </rates>
+
+  <trajparams id='initValues' spec='phydyn.model.TrajectoryParameters' method="classicrk"
+			integrationSteps="200"  >
+	<t0 spec="parameter.RealParameter" id="seir.t0.t:$(n)"  name="t0"  value="2019.7" estimate='false' />
+    <initialValue spec="phydyn.model.ParamValue" id='seir.E.pv.t:$(n)' pname='E'  >
+      <pvalue spec='parameter.RealParameter' id='seir.E.t:$(n)' dimension='1' lower='0' value='1.0' estimate='true' />
+    </initialValue>
+    <initialValue spec="phydyn.model.ParamValue" id='seir.Il.pv.t:$(n)l' pname='Il'  >
+      <pvalue spec='parameter.RealParameter' id='seir.Il.t:$(n)' dimension='1' lower='0' value='1.0E-8' estimate='false' />
+    </initialValue>  
+    <initialValue spec="phydyn.model.ParamValue" id='seir.Ih.pv.t:$(n)' pname='Ih' >
+      <pvalue spec='parameter.RealParameter' id='seir.Ih.t:$(n)' dimension='1' lower='0' value='1.0E-8' estimate='false' />
+    </initialValue>  
+	<initialValue spec="phydyn.model.ParamValue" id='seir.R.pv.t:$(n)' pname='R'  >
+	  <pvalue spec='parameter.RealParameter' id='seir.R.t:$(n)' dimension='1' lower='0' value='0.0' estimate='false' />
+	</initialValue>
+	<initialValue spec="phydyn.model.ParamValue" id='seir.S.pv.t:$(n)' pname='S'  >
+	  <pvalue spec='parameter.RealParameter' id='seir.S.t:$(n)' dimension='1' lower='2.0E7' upper='2.1E7' value='2.05E7' estimate='true' />
+	</initialValue>
+	<initialValue spec="phydyn.model.ParamValue" id='seir.exog.pv.t:$(n)' pname='exog'  >
+	  <pvalue spec='parameter.RealParameter' id='seir.exog.t:$(n)' dimension='1' lower='0' value='0.01' estimate='true' />
+	</initialValue>
+	<initialValue spec="phydyn.model.ParamValue" id='seir.infections.pv.t:$(n)' pname='infections'  >
+	  <pvalue spec='parameter.RealParameter' id='seir.infections.t:$(n)' dimension='1' lower='0' value='0.0' estimate='false' />
+	</initialValue>	
+  </trajparams>
+
+        
+  <operator id='seir.gamma0.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.75'
+            weight="1" parameter='@seir.gamma0.t:$(n)' /> 
+  <operator id='seir.gamma1.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.75'
+            weight="1" parameter='@seir.gamma1.t:$(n)' /> 
+  <operator id='seir.gammaExog.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.75'
+            weight="1" parameter='@seir.gammaExog.t:$(n)' />           
+  <operator id='seir.p_h.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.01"
+            weight="1" parameter='@seir.p_h.t:$(n)' /> 
+  <operator id='seir.b.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="5.0"
+            weight="1" parameter='@seir.b.t:$(n)' /> 
+  <operator id='seir.tau.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.75'
+            weight="1" parameter='@seir.tau.t:$(n)' /> 
+  <operator id='seir.exogGrowthRate.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="5.0"
+            weight="1" parameter='@seir.exogGrowthRate.t:$(n)' />          
+  <operator id='seir.importRate.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="1.0"
+            weight="1" parameter='@seir.importRate.t:$(n)' />         
+ 
+  <operator id='seir.t0.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.1"
+            weight="1" parameter='@seir.t0.t:$(n)' />           
+  <operator id='seir.E.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.15"
+            weight="1" parameter='@seir.E.t:$(n)' /> 
+  <operator id='seir.Il.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.0001"
+            weight="1" parameter='@seir.Il.t:$(n)' /> 
+  <operator id='seir.Ih.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.0001"
+            weight="1" parameter='@seir.Ih.t:$(n)' /> 
+  <operator id='seir.R.operator.t:$(n)' spec='ScaleOperator' scaleFactor='0.5'
+            weight="1" parameter='@seir.R.t:$(n)' /> 
+  <operator id='seir.S.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="5.0"
+            weight="1" parameter='@seir.S.t:$(n)' />          
+  <operator id='seir.exog.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.05"
+            weight="1" parameter='@seir.exog.t:$(n)' />
+  <operator id='seir.infections.operator.t:$(n)' spec='RealRandomWalkOperator' useGaussian='true' windowSize="0.05"
+            weight="1" parameter='@seir.infections.t:$(n)' />                               
+                  
+  <prior id="seir.gamma0.prior.t:$(n)" name="distribution" x="@seir.gamma0.t:$(n)">
+	<LogNormal M="4.48" S="0.5" name="distr" />
+  </prior>    
+  <prior id="seir.gamma1.prior.t:$(n)" name="distribution" x="@seir.gamma1.t:$(n)">
+	<LogNormal  M="4.56" S="0.5" name="distr" />
+  </prior>
+  <prior id="seir.gammaExog.prior.t:$(n)" name="distribution" x="@seir.gammaExog.t:$(n)">
+	<LogNormal  M="3.78" S="0.5" name="distr" />
+  </prior>
+  <prior id="seir.p_h.prior.t:$(n)" name="distribution" x="@seir.p_h.t:$(n)">
+	<Beta alpha="50" beta="200" name="distr" />
+  </prior>
+   <prior id="seir.b.prior.t:$(n)" name="distribution" x="@seir.b.t:$(n)">
+	<LogNormal M="2.7" S="0.5" name="distr" />
+  </prior>
+   <prior id="seir.tau.prior.t:$(n)" name="distribution" x="@seir.tau.t:$(n)">
+	<LogNormal  M="4.3" S="0.1" name="distr" />
+  </prior>
+  <prior id="seir.exogGrowthRate.prior.t:$(n)" name="distribution" x="@seir.exogGrowthRate.t:$(n)">
+	<LogNormal  M="3.6" S="0.25" name="distr" />
+  </prior>
+  <prior id="seir.importRate.prior.t:$(n)" name="distribution" x="@seir.importRate.t:$(n)">
+	<Exponential mean="10.0" name="distr" />
+  </prior>
+
+  <prior id="seir.t0.prior.t:$(n)" name="distribution" x="@seir.t0.t:$(n)">
+	<Normal mean="2019.86" sigma="0.2" name="distr" />
+  </prior>   
+  <prior id="seir.E.prior.t:$(n)" name="distribution" x="@seir.E.t:$(n)">
+    <Exponential mean="1.0" name="distr" />
+  </prior> 
+   <prior id="seir.Il.prior.t:$(n)" name="distribution" x="@seir.Il.t:$(n)">
+	<Exponential mean="0.0001" name="distr" />
+  </prior>
+   <prior id="seir.Ih.prior.t:$(n)" name="distribution" x="@seir.Ih.t:$(n)">
+	<Exponential mean="0.0001" name="distr" />
+  </prior>
+  <prior id="seir.R.prior.t:$(n)" name="distribution" x="@seir.R.t:$(n)">
+	<Exponential mean="1.0" name="distr" />
+  </prior>
+  <prior id="seir.S.prior.t:$(n)" name="distribution" x="@seir.S.t:$(n)">
+	<Uniform  name="distr" upper="Infinity"/>
+  </prior>
+  <prior id="seir.exog.prior.t:$(n)" name="distribution" x="@seir.exog.t:$(n)">
+    <Exponential mean="1.0" name="distr" />
+  </prior> 
+  <prior id="seir.infections.prior.t:$(n)" name="distribution" x="@seir.infections.t:$(n)">
+    <Exponential mean="1.0" name="distr" />
+  </prior> 
+  
+   <logger id="popTrajLog" fileName="seir.$(n).traj" logEvery="10000">
+		<log id="trajectoryLogger" spec="phydyn.loggers.TrajectoryLogger" popModel="@pdseirmodel.t:$(n)" pointFrequency="1"></log>
+   </logger>
+     
+      ]]>
+      <plate fragment="TreeOperators" var="m" range="PhydynSEIR"  />  
+	  
+	  <connect srcID='PhydynSEIR.t:$(n)' targetID='prior' inputName='distribution' id="connect:PHYDYNSEIR"
+               if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                PhyDyn SEIR Model prior on tree t:$(n)
+      </connect>
+      
+      <connect srcID='seir.gamma0.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma0.t:$(n)/estimate=true' />
+      <connect srcID='seir.gamma1.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma1.t:$(n)/estimate=true' />
+       <connect srcID='seir.gammaExog.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gammaExog.t:$(n)/estimate=true' />   
+      <connect srcID='seir.p_h.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.p_h.t:$(n)/estimate=true' />   
+      <connect srcID='seir.b.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.b.t:$(n)/estimate=true' />
+      <connect srcID='seir.tau.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.tau.t:$(n)/estimate=true' />
+      <connect srcID='seir.exogGrowthRate.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exogGrowthRate.t:$(n)/estimate=true' />   
+      <connect srcID='seir.importRate.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.importRate.t:$(n)/estimate=true' />
+   
+      <connect srcID='seir.t0.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.t0.t:$(n)/estimate=true' />           
+      <connect srcID='seir.E.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.E.t:$(n)/estimate=true' />
+      <connect srcID='seir.Il.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Il.t:$(n)/estimate=true' />
+      <connect srcID='seir.Ih.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Ih.t:$(n)/estimate=true' />   
+      <connect srcID='seir.R.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' />     
+      <connect srcID='seir.S.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.S.t:$(n)/estimate=true' />  
+      <connect srcID='seir.exog.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exog.t:$(n)/estimate=true' />     
+      <connect srcID='seir.infections.t:$(n)' targetID='state' inputName='stateNode' 
+         if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' />     
+                 
+
+     <connect srcID='seir.gamma0.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma0.t:$(n)/estimate=true' >
+           operator for gamma0 of t:$(n) </connect>
+     <connect srcID='seir.gamma1.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma1.t:$(n)/estimate=true' >
+           operator for gamma1 of t:$(n) </connect>
+      <connect srcID='seir.gammaExog.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gammaExog.t:$(n)/estimate=true' >
+           operator for gammaExog of t:$(n) </connect>      
+     <connect srcID='seir.p_h.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.p_h.t:$(n)/estimate=true' >
+           operator for p_h of t:$(n) </connect>
+     <connect srcID='seir.b.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.b.t:$(n)/estimate=true' >
+           operator for b of t:$(n) </connect>
+     <connect srcID='seir.tau.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.tau.t:$(n)/estimate=true' >
+           operator for tau of t:$(n) </connect>     
+     <connect srcID='seir.exogGrowthRate.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exogGrowthRate.t:$(n)/estimate=true' >
+           operator for exogGrowthRate of t:$(n) </connect>  
+     <connect srcID='seir.importRate.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.importRate.t:$(n)/estimate=true' >
+           operator for importRate of t:$(n) </connect>                               
+ 
+     <connect srcID='seir.t0.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.t0.t:$(n)/estimate=true' >
+            operator for t0 of t:$(n) </connect>           
+     <connect srcID='seir.E.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.E.t:$(n)/estimate=true' >
+           operator for E of t:$(n) </connect>
+     <connect srcID='seir.Il.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Il.t:$(n)/estimate=true' >
+           operator for Il of t:$(n) </connect>
+     <connect srcID='seir.Ih.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Ih.t:$(n)/estimate=true' >
+           operator for Ih of t:$(n) </connect>
+     <connect srcID='seir.R.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' > 
+            operator for R of t:$(n) </connect> 
+     <connect srcID='seir.S.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.S.t:$(n)/estimate=true' > 
+            operator for S of t:$(n) </connect>   
+     <connect srcID='seir.exog.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exog.t:$(n)/estimate=true' > 
+            operator for exog of t:$(n) </connect>                              
+     <connect srcID='seir.infections.operator.t:$(n)' targetID='mcmc' inputName='operator'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.infections.t:$(n)/estimate=true' > 
+            operator for infections of t:$(n) </connect> 
+ 
+      <connect srcID='seir.gamma0.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma0.t:$(n)/estimate=true'>
+            Prior for gamma0 of partition c:$(n) </connect>
+      <connect srcID='seir.gamma1.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma1.t:$(n)/estimate=true'>
+            Prior for gamma1 of partition c:$(n) </connect>
+      <connect srcID='seir.gammaExog.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gammaExog.t:$(n)/estimate=true'>
+            Prior for gammaExog of partition c:$(n) </connect>      
+      <connect srcID='seir.p_h.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.p_h.t:$(n)/estimate=true'>
+            Prior for p_h of partition c:$(n) </connect>
+      <connect srcID='seir.b.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.b.t:$(n)/estimate=true'>
+            Prior for b of partition c:$(n) </connect>
+      <connect srcID='seir.tau.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.tau.t:$(n)/estimate=true'>
+            Prior for tau of partition c:$(n) </connect>
+      <connect srcID='seir.exogGrowthRate.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exogGrowthRate.t:$(n)/estimate=true'>
+            Prior for exogGrowthRate of partition c:$(n) </connect>  
+      <connect srcID='seir.importRate.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.importRate.t:$(n)/estimate=true'>
+            Prior for improtRate of partition c:$(n) </connect>       
+ 
+      <connect srcID='seir.t0.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.t0.t:$(n)/estimate=true'>
+            Prior for t0 of partition c:$(n) </connect>        
+      <connect srcID='seir.E.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.E.t:$(n)/estimate=true'>
+            Prior for deme E of partition c:$(n) </connect>
+      <connect srcID='seir.Il.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Il.t:$(n)/estimate=true'>
+            Prior for deme Il of partition c:$(n) </connect>
+       <connect srcID='seir.Ih.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Ih.t:$(n)/estimate=true'>
+            Prior for deme Ih of partition c:$(n) </connect>
+      <connect srcID='seir.R.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true'>
+            Prior for non-deme R of partition c:$(n) </connect>
+      <connect srcID='seir.S.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.S.t:$(n)/estimate=true'>
+            Prior for non-deme S of partition c:$(n) </connect>
+      <connect srcID='seir.exog.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exog.t:$(n)/estimate=true'>
+            Prior for Exog of partition c:$(n) </connect>  
+      <connect srcID='seir.infections.prior.t:$(n)' targetID='prior' inputName='distribution'
+            if='inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.infections.t:$(n)/estimate=true'>
+            Prior for non-deme infections of partition c:$(n) </connect>
+            
+      <connect srcID='popTrajLog' targetID='mcmc' inputName='logger' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true' />
+          
+      <!--  structured tree likelihood -->                                  
+      <connect srcID='PhydynSEIR.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true' />
+      <connect srcID='PhydynSEIR.t:$(n)' targetID='screenlog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true' />     
+            
+      <connect srcID='seir.gamma0.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma0.t:$(n)/estimate=true' />
+      <connect srcID='seir.gamma1.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gamma1.t:$(n)/estimate=true' />
+      <connect srcID='seir.gammaExog.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.gammaExog.t:$(n)/estimate=true' />
+      <connect srcID='seir.p_h.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.p_h.t:$(n)/estimate=true' />
+      <connect srcID='seir.b.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.b.t:$(n)/estimate=true' />  
+      <connect srcID='seir.tau.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.tau.t:$(n)/estimate=true' /> 
+      <connect srcID='seir.exogGrowthRate.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exogGrowthRate.t:$(n)/estimate=true' />  
+	  <connect srcID='seir.importRate.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.importRate.t:$(n)/estimate=true' />
+
+    
+     <connect srcID='seir.t0.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.t0.t:$(n)/estimate=true' />    
+     <connect srcID='seir.E.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.E.t:$(n)/estimate=true' />
+     <connect srcID='seir.Il.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Il.t:$(n)/estimate=true' />
+     <connect srcID='seir.Ih.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.Ih.t:$(n)/estimate=true' />
+     <connect srcID='seir.R.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.R.t:$(n)/estimate=true' />
+     <connect srcID='seir.S.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.S.t:$(n)/estimate=true' />
+     <connect srcID='seir.exog.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.exog.t:$(n)/estimate=true' />
+     <connect srcID='seir.infections.t:$(n)' targetID='tracelog' inputName='log' 
+           if= 'inposterior(PhydynSEIR.t:$(n)) and inposterior(Tree.t:$(n)) and seir.infections.t:$(n)/estimate=true' />                
+       
+               
+   </subtemplate>
+   </mergewith>
+   
+ 
+    
+  
+</beast>

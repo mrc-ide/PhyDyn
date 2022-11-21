@@ -1,20 +1,17 @@
 package phydyn.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-// import org.antlr.v4.runtime.ANTLRInputStream;
+import beast.base.core.BEASTObject;
+import beast.base.core.Input;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
-
 import org.antlr.v4.runtime.CommonTokenStream;
-
-import beast.core.BEASTObject;
-import beast.core.Input;
 import phydyn.model.parser.PopModelLexer;
 import phydyn.model.parser.PopModelParser;
 import phydyn.model.parser.PopModelParser.DefinitionsContext;
 import phydyn.model.parser.PopModelParser.StmContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Definitions extends BEASTObject {
 	

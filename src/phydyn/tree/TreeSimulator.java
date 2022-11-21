@@ -7,16 +7,11 @@ package phydyn.tree;
  * Under development
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.util.Randomizer;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
-
-
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
 import phydyn.distribution.StateProbabilities;
 import phydyn.distribution.StateProbabilitiesVectors;
 import phydyn.model.PopModel;
@@ -24,6 +19,9 @@ import phydyn.model.TimeSeriesFGY;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 

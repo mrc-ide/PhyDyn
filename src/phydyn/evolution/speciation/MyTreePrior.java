@@ -1,19 +1,17 @@
-package beast.evolution.speciation;
+package phydyn.evolution.speciation;
+
+import beast.base.core.BEASTInterface;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.evolution.speciation.SpeciesTreeDistribution;
+import beast.base.evolution.tree.*;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Random;
-
-import beast.core.*;
-import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeInterface;
-import beast.evolution.tree.TreeUtils;
-import beast.math.distributions.MRCAPrior;
 
 
 
@@ -27,7 +25,7 @@ import beast.math.distributions.MRCAPrior;
 @Description("Pure birth model (i.e. no deaths)")
 public class MyTreePrior extends SpeciesTreeDistribution {
     final public Input<RealParameter> birthDiffRateParameterInput =
-            new Input<>("birthDiffRate", "birth difference rate parameter, lambda - mu in birth/death model", Validate.REQUIRED);
+            new Input<>("birthDiffRate", "birth difference rate parameter, lambda - mu in birth/death model", Input.Validate.REQUIRED);
     final public Input<RealParameter> originHeightParameterInput =
             new Input<>("originHeight", "the height of the point of origin of the process");
     final public Input<Boolean> conditionalOnRootInput =

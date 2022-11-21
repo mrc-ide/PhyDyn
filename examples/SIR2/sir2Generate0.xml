@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<beast version="2.5" namespace="phydyn.run:phydyn.model:phydyn.distribution:beast.util:beast.evolution.alignment:beast.evolution.tree">
+<beast version="2.5" namespace="phydyn.run:phydyn.model:phydyn.distribution:beast.base.util:beast.base.math:beast.base.evolution.alignment:beast.base.evolution.tree">
   
   
 <model spec="PopModelODE" id="twodeme"

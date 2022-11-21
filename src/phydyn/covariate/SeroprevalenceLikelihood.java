@@ -1,10 +1,9 @@
 package phydyn.covariate;
 
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
 import org.apache.commons.math.distribution.NormalDistribution;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
-
-import beast.core.Input;
-import beast.core.Input.Validate;
 import phydyn.model.TimeSeriesFGY;
 import phydyn.util.DVector;
 import phydyn.util.General;
