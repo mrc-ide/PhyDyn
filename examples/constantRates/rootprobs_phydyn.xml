@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beast beautitemplate='Standard' beautistatus=''
-	   namespace="beast.base.core:beast.base.inference:beast.base.inference.distributions
-       :beast.base.evolution:beast.base.util:beast.base.evolution.nuc:beast.base.evolution.operators
+	   namespace="beast.base.core:beast.base.inference:beast.base.util
+       :beast.base.evolution:beast.base.evolution.alignment:beast.base.evolution.nuc
+       :beast.base.evolution.operator:beast.base.inference.operator:beast.base.inference.distributions
        :beast.base.evolution.branchratemodel:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel
        :beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.evolution.likelihood
        :phydyn.distribution:phydyn.model:phydyn.evolution.tree.coalescent:phydyn.loggers:phydyn.operators" version="2.7">
-	<data id="sequences" name="alignment">
+
+<data id="sequences" name="alignment">
 		<sequence id="inv3loc_0" taxon="inv3loc_0" totalcount="4" value="??"/>
 		<sequence id="inv4loc_1" taxon="inv4loc_1" totalcount="4" value="??"/>
 		<sequence id="inv5loc_1" taxon="inv5loc_1" totalcount="4" value="??"/>

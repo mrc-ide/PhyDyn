@@ -36,8 +36,16 @@
         <provider classname="phydyn.model.PopModel"/>
         <provider classname="phydyn.model.PopModelIsland"/>
         <provider classname="phydyn.model.PopModelODE"/>
+        <provider classname="phydyn.model.TrajectoryOut"/>
         <provider classname="phydyn.model.TrajectoryParameters"/>
         <provider classname="phydyn.operators.LoopOperator"/>
+        <provider classname="phydyn.run.BasicTest"/>
+        <provider classname="phydyn.run.LikelihoodOut"/>
+        <provider classname="phydyn.run.TreeIntervalTest"/>
+        <provider classname="phydyn.run.VersionTest"/>
+        <provider classname="phydyn.run.XMLGenerator"/>
+        <provider classname="phydyn.tree.TreeGenerator"/>
+        <provider classname="phydyn.tree.TreeSimulator"/>
     </service>
 
 </package>
