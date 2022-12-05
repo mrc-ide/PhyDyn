@@ -54,6 +54,7 @@
 
         <copy todir="${build-lib}">
             <fileset dir="${lib}" includes="*.jar"/>
+            <fileset dir="${beastDir}/lib" includes="*.jar"/>
             <fileset dir="${beastDir}/lib/junit" includes="junit-*.jar"/>
             <fileset dir="${BeastFXpath}/locallib" includes="*.jar"/>
         </copy>
@@ -75,6 +76,7 @@
 
         <get src="https://github.com/CompEvol/beast2/archive/${beast-branch}.zip" dest="${build-beast}/beast.zip"/>
         <unzip src="${build-beast}/beast.zip" dest="${build-beast}"/>
+
         <mkdir dir="${build-beast}/beast2-${beast-version}/build"/>
         <javac target="${targetVersion}" source="${sourceVersion}"
             srcdir="${build-beast}/beast2-${beast-version}/src"
@@ -85,8 +87,22 @@
                 <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
             </classpath>
         </javac>
+
+        <mkdir dir="${build-beast}/beast2-${beast-version}/test"/>
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${build-beast}/beast2-${beast-version}/test"
+               destdir="${build-beast}/beast2-${beast-version}/build"
+               includeantruntime="false">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
+                <fileset dir="${beastDir}/lib/junit" includes="junit-*.jar"/>
+            </classpath>
+        </javac>
+
         <copy todir="${build-lib}">
             <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
+            <fileset dir="${beastDir}/lib/junit" includes="junit-*.jar"/>
         </copy>
         <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}/beast2-${beast-version}/build" />
 
@@ -124,9 +140,15 @@
                 <fileset dir="${beastDir}/lib" includes="*.jar"/>
             </classpath>
         </javac>
-        <copy todir="${build-lib}">
-            <fileset dir="${beastDir}/lib" includes="*.jar"/>
-        </copy>
+        <!-- for testing -->
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${beastDir}/test" destdir="${build-beast}"
+               includeantruntime="false">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${build-lib}" includes="*.jar"/>
+            </classpath>
+        </javac>
 
         <!-- Java FX  -->
         <!-- if Zulu is not installed, it can specify javac, e.g. add  -->
@@ -151,7 +173,8 @@
 <!-- executable="../../Downloads/zulu17.36.13-ca-fx-jdk17.0.4-macosx_x64/bin/javac"  -->
     <!-- Compile -->
     <target name="compile" depends="build-beast">
-        <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${src}" destdir="${build}"
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${src}" destdir="${build}"
                fork="true"  includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
@@ -173,11 +196,10 @@
         <mkdir dir="${test-reports}"/>
     </target>
 
-
-    <!--  TODO not tested    -->
     <!-- Compile unit tests -->
     <target name="compile-test" depends="init-test,compile,copy-resources">
-        <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${test}" destdir="${build-test}"
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${test}" destdir="${build-test}"
                includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
