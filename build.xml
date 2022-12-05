@@ -102,7 +102,7 @@
                fork="true"  includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
-                <fileset dir="${build-lib}" includes="*.jar"/>
+                <fileset dir="${build-lib}" includes="commons-math3-3.6.1.jar"/>
             </classpath>
         </javac>
         <jar jarfile="${build-lib}/beastFX.jar" basedir="${build-beast}/beastFX-${beast-version}/build" />
@@ -216,7 +216,7 @@
 
         <mkdir dir="${pack}"/>
         <mkdir dir="${pack}/examples"/>
-        <mkdir dir="${pack}/${templates}"/>
+        <mkdir dir="${pack}/fxtemplates"/>
         <mkdir dir="${pack}/lib"/>
         <mkdir dir="${pack}/doc"/>
 
@@ -241,7 +241,7 @@
         </copy>
 
         <mkdir dir="${templates}" />
-        <copy todir="${pack}/${templates}">
+        <copy todir="${pack}/fxtemplates">
             <fileset dir="${templates}" includes="*.xml" />
         </copy>
 

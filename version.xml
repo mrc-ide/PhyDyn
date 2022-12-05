@@ -6,8 +6,8 @@
 <!--                class="phydyn.command.CommandLine" args="" icon="" />-->
 
     <service type="beastfx.app.inputeditor.InputEditor">
-        <!--    <provider classname="phydyn.app.beauti.PhyDynPopModelODEInputEditor"/>-->
-        <provider classname="beastfx.app.inputeditor.TypeTraitSetInputEditor"/>
+        <!--    <provider classname="phydyn.app.beauti.PhyDynPopModelODEInputEditor"/>
+        <provider classname="beastfx.app.inputeditor.TypeTraitSetInputEditor"/>-->
     </service>
 
     <service type="beast.base.core.BEASTInterface">
