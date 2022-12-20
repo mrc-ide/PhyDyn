@@ -1,7 +1,7 @@
 <package name="PhyDyn" version="2.0.0">
 <!-- require  2.7.3  -->
-    <depends on='BEAST.base' atleast='2.7.2'/>
-    <depends on='BEAST.app' atleast='2.7.2'/>
+    <depends on='BEAST.base' atleast='2.7.3'/>
+    <depends on='BEAST.app' atleast='2.7.3'/>
 <!--    <packageapp description="PhyDyn command"-->
 <!--                class="phydyn.command.CommandLine" args="" icon="" />-->
 
