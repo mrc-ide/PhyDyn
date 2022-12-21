@@ -1,16 +1,16 @@
 package phydyn.loggers;
 
-import java.io.PrintStream;
-
-import beast.core.CalculationNode;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Loggable;
-import beast.evolution.tree.Tree;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Loggable;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.CalculationNode;
 import phydyn.distribution.STreeGenericLikelihood;
 import phydyn.distribution.StateProbabilities;
 import phydyn.util.DVector;
+
+import java.io.PrintStream;
 
 /**
  * @author Igor Siveroni
@@ -56,7 +56,7 @@ public class STreeRootLogger extends CalculationNode implements Loggable {
      * @param out     log stream
      */
     @Override
-    public void log(int nSample, PrintStream out) {
+    public void log(long nSample, PrintStream out) {
     	out.print(nSample+"\t");
     	StateProbabilities sp = densityInput.get().getStateProbabilities();
     	// investigate: use tree.getRoot() instead

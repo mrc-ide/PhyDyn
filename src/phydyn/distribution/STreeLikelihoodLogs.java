@@ -1,6 +1,6 @@
 package phydyn.distribution;
 
-import beast.evolution.tree.Node;
+import beast.base.evolution.tree.Node;
 
 public class STreeLikelihoodLogs {
 	

@@ -1,8 +1,5 @@
 package phydyn.distribution;
 
-import java.util.List;
-
-import beast.evolution.tree.Node;
 import phydyn.util.DMatrix;
 import phydyn.util.DVector;
 

@@ -3,9 +3,10 @@
  */
 package phydyn.operators;
 
-import beast.core.Input;
-import beast.core.Operator;
-import beast.core.parameter.RealParameter;
+import beast.base.core.Input;
+import beast.base.inference.Operator;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.util.InputUtil;
 
 /**
  * @author igor
@@ -35,7 +36,7 @@ public class LoopOperator extends Operator {
 	}
 	
 	public void initAndValidate() {
-		final RealParameter param = parameterInput.get(this);
+		final RealParameter param = (RealParameter) InputUtil.get(parameterInput, this);
 		
 		if (param.getDimension() > 1)
 			throw new IllegalArgumentException("(LoopOperator) Parameter has more than one dimension");
@@ -66,7 +67,7 @@ public class LoopOperator extends Operator {
      * @return log of Hastings Ratio, or Double.NEGATIVE_INFINITY if proposal should not be accepted *
      */
 	public double proposal() {
-		final RealParameter param = parameterInput.get(this);
+		final RealParameter param = (RealParameter) InputUtil.get(parameterInput, this);
 		// sample from samplePoint;
 		double newValue;
 		if (samplePoint==0) {

@@ -1,30 +1,14 @@
 package phydyn.model;
+
+import beast.base.core.Description;
+import org.antlr.v4.runtime.tree.ParseTree;
+import phydyn.model.parser.PopModelBaseVisitor;
+import phydyn.model.parser.PopModelParser;
+import phydyn.model.parser.PopModelParser.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import beast.core.Description;
-import phydyn.model.parser.PopModelBaseVisitor;
-import phydyn.model.parser.PopModelParser;
-import phydyn.model.parser.PopModelParser.BoolExprContext;
-import phydyn.model.parser.PopModelParser.CallBinaryExprContext;
-import phydyn.model.parser.PopModelParser.CallSpecialExprContext;
-import phydyn.model.parser.PopModelParser.CmpExprContext;
-import phydyn.model.parser.PopModelParser.CondExprContext;
-import phydyn.model.parser.PopModelParser.EquationContext;
-import phydyn.model.parser.PopModelParser.FloatExprContext;
-import phydyn.model.parser.PopModelParser.IdentExprContext;
-import phydyn.model.parser.PopModelParser.IntExprContext;
-import phydyn.model.parser.PopModelParser.MinusExprContext;
-import phydyn.model.parser.PopModelParser.NotExprContext;
-import phydyn.model.parser.PopModelParser.ParenthExprContext;
-import phydyn.model.parser.PopModelParser.PowerExprContext;
-import phydyn.model.parser.PopModelParser.ProdExprContext;
-import phydyn.model.parser.PopModelParser.StmContext;
-import phydyn.model.parser.PopModelParser.SumExprContext;
-import phydyn.model.parser.PopModelParser.VectorExprContext;
 
 @Description("Compiles a PopModel expression parse tree into a sequence of equivalent PMStackMachine instructions."
 		+ "Performs basic type checking and calculates the addresses (indexes/offsets) of all declated variables")

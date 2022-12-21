@@ -1,28 +1,27 @@
-package beast.util;
+package phydyn.util;
 
+import beast.base.core.BEASTInterface;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.Distribution;
+import beast.base.inference.Operator;
+import beast.base.inference.Runnable;
+import beast.base.inference.parameter.Parameter;
+import beast.base.parser.XMLParser;
+import beast.base.parser.XMLParserException;
+import org.xml.sax.SAXException;
+import phydyn.distribution.STreeLikelihood;
+import phydyn.distribution.STreeLikelihoodODE;
+import phydyn.model.ParamValue;
+import phydyn.model.PopModel;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
-
-import beast.core.BEASTInterface;
-import beast.core.Distribution;
-import beast.core.Operator;
-import beast.core.Runnable;
-import beast.core.parameter.Parameter;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Tree;
-import phydyn.distribution.STreeLikelihood;
-import phydyn.distribution.STreeLikelihoodODE;
-import phydyn.model.ParamValue;
-import phydyn.model.PopModel;
 
 /*
  * Parses xml BEAST file and collects BEAST objects by class
@@ -47,13 +46,13 @@ public class PhyDynXMLParser {
 		parser = new XMLParser();		
 	}
 	
-	public Runnable parseFile(File f) throws SAXException, IOException, ParserConfigurationException, XMLParserException  {
+	public Runnable parseFile(File f) throws SAXException, IOException, ParserConfigurationException, XMLParserException {
 		return parser.parseFile(f);
 	}
 	
 	
 	public void collectBEASTObjects() {
-		for (HashMap.Entry<String, BEASTInterface> entry : parser.IDMap.entrySet()) {
+		for (HashMap.Entry<String, BEASTInterface> entry : parser.getIDMap().entrySet()) {
 			final BEASTInterface bo = entry.getValue();
 			if (bo instanceof Alignment) {
 				alignments.add((Alignment) bo);
@@ -95,7 +94,7 @@ public class PhyDynXMLParser {
 			answer[i] = new ArrayList<BEASTInterface>();
 		}
 		
-		for (HashMap.Entry<String, BEASTInterface> entry : parser.IDMap.entrySet()) {
+		for (HashMap.Entry<String, BEASTInterface> entry : parser.getIDMap().entrySet()) {
 			final BEASTInterface bo = entry.getValue();
 			for(int i=0; i< classNames.length; i++) {
 				if (classNames[i].isInstance(bo)  ) {
@@ -111,7 +110,7 @@ public class PhyDynXMLParser {
 	public STreeLikelihoodODE getLikelihood() {
 		
 		BEASTInterface bo = null;
-		for (HashMap.Entry<String, BEASTInterface> entry : parser.IDMap.entrySet()) {
+		for (HashMap.Entry<String, BEASTInterface> entry : parser.getIDMap().entrySet()) {
 		    System.out.println(entry.getKey());  
 		    bo = entry.getValue();
 		    if (bo instanceof STreeLikelihoodODE) {
@@ -126,7 +125,7 @@ public class PhyDynXMLParser {
 	public Alignment getAlignment() {
 				
 		BEASTInterface bo = null;
-		for (HashMap.Entry<String, BEASTInterface> entry : parser.IDMap.entrySet()) {
+		for (HashMap.Entry<String, BEASTInterface> entry : parser.getIDMap().entrySet()) {
 		    System.out.println(entry.getKey());  
 		    bo = entry.getValue();
 		    if (bo instanceof Alignment) {

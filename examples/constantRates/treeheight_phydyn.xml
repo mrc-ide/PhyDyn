@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' 
-beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
-    <data id="sequences" name="alignment">
+beautistatus='' namespace="beast.base.core:beast.base.inference:beast.base.util
+       :beast.base.evolution:beast.base.evolution.alignment:beast.base.evolution.nuc
+       :beast.base.evolution.operator:beast.base.inference.operator:beast.base.inference.distributions
+       :beast.base.evolution.branchratemodel:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel
+       :beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.evolution.likelihood
+       :phydyn.distribution:phydyn.model:phydyn.evolution.tree.coalescent:phydyn.loggers:phydyn.operators" version="2.7">
+
+	<data id="sequences" name="alignment">
 		<sequence id="inv0_0" taxon="inv0_0" totalcount="4" value="??"/>
 		<sequence id="inv1_0" taxon="inv1_0" totalcount="4" value="??"/>
 		<sequence id="inv2_0" taxon="inv2_0" totalcount="4" value="??"/>
@@ -9,7 +15,7 @@ beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:beast
 		<sequence id="inv0_2" taxon="inv0_2" totalcount="4" value="??"/>
     </data>
     
-    <trait spec='beast.evolution.tree.TraitSet' id='timeTraitSet' traitname="date-backward"
+    <trait spec='beast.base.evolution.tree.TraitSet' id='timeTraitSet' traitname="date-backward"
         value="inv0_0=0,inv1_0=10,inv2_0=5,inv0_1=1,inv1_1=4,inv0_2=8">
         <taxa spec='TaxonSet' alignment='@sequences'/>
     </trait>
@@ -62,18 +68,18 @@ beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:beast
         </state>
 
 
-        <init id="RandomTree.t:sequences" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@tree" taxa="@sequences">
+        <init id="RandomTree.t:sequences" spec="beast.base.evolution.tree.coalescent.RandomTree" estimate="false" initial="@tree" taxa="@sequences">
             <populationModel id="ConstantPopulation" spec="ConstantPopulation">
                 <parameter id="randomPopSize" name="popSize">100</parameter>
             </populationModel>
         </init>
         
             
-        <distribution id="posterior" spec="util.CompoundDistribution">
-            <distribution id="prior" spec="util.CompoundDistribution">
+        <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+            <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
                 <!-- ARUDSIR Priors-->
             </distribution>         
-            <distribution id="likelihood" spec="util.CompoundDistribution">
+            <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
              	<!--  distribution comes here -->
              	 <distribution spec='STreeLikelihoodODE' id = 'stlikelihood' 
              	 	 popmodel='@simplemodel'
@@ -95,7 +101,7 @@ beautistatus='' namespace="phydyn.model:phydyn.distribution:phydyn.loggers:beast
        
         <logger id="tracelog" fileName="treeheight_phydyn.log" logEvery="10" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
-            <log id="tree_height" spec="beast.evolution.tree.TreeHeightLogger" tree="@tree"/>
+            <log id="tree_height" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@tree"/>
         </logger>
        
         

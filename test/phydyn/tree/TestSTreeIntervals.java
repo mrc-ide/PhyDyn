@@ -1,18 +1,15 @@
 package phydyn.tree;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import phydyn.evolution.tree.coalescent.STreeIntervals;
 
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.STreeIntervals;
-import beast.util.TreeParser;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 // @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 // Valid from JUnit 4.11 onwards

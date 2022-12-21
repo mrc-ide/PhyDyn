@@ -1,9 +1,9 @@
 package phydyn.covariate.distribution;
 
+import beast.base.core.BEASTObject;
+
 import java.util.List;
 import java.util.Map;
-
-import beast.core.BEASTObject;
 
 
 public abstract class ParamDistribution extends BEASTObject {

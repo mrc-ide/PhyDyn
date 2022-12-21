@@ -1,10 +1,9 @@
 package phydyn.app.beauti;
 
-import beast.app.beauti.BeautiDoc;
-import beast.app.draw.*;
-import beast.core.BEASTInterface;
-import beast.core.Input;
-import phydyn.model.*;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Input;
+import beastfx.app.inputeditor.BEASTObjectInputEditor;
+import beastfx.app.inputeditor.BeautiDoc;
 
 public class PhyDynPopModelODEInputEditor extends BEASTObjectInputEditor {
 

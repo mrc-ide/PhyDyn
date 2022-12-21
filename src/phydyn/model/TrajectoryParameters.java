@@ -1,20 +1,17 @@
 package phydyn.model;
 
-import java.io.IOException;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Log;
+import beast.base.inference.CalculationNode;
+import beast.base.inference.parameter.RealParameter;
+import phydyn.evolution.tree.coalescent.STreeIntervals;
+import phydyn.util.General.IntegrationMethod;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.tree.coalescent.STreeIntervals;
-import phydyn.analysis.PopModelAnalysis;
-import phydyn.analysis.XMLFileWriter;
-import phydyn.util.General.IntegrationMethod;
 
 public class TrajectoryParameters extends CalculationNode {
 

@@ -1,23 +1,14 @@
 package phydyn.run;
 
 
-import beast.core.Runnable;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.STreeIntervals;
-import phydyn.distribution.STreeGenericLikelihood;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.Runnable;
 import phydyn.distribution.STreeLikelihood;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-
-import javax.tools.*;
+import phydyn.evolution.tree.coalescent.STreeIntervals;
 
 public class LikelihoodOut extends Runnable {
 	

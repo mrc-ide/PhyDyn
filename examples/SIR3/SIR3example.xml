@@ -1,6 +1,6 @@
 <!-- Basic XML input file -->
 
-<beast version='2.0' namespace='phydyn.model:beast.util:beast.evolution.alignment:beast.evolution.tree'>
+<beast version='2.7' namespace='phydyn.model:beast.base.util:beast.base.math:beast.base.evolution.alignment:beast.base.evolution.tree'>
 
 	<model spec='PopModelODE' id='themodel' evaluator="compiled"
 	     popParams='@initValues' modelParams='@rates'>

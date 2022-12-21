@@ -1,20 +1,19 @@
 package phydyn.tree;
 
-import java.io.FileWriter;
-import java.util.List;
-import java.util.Set;
-
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Runnable;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.Tree;
-import beast.util.HeapSort;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.Runnable;
+import beast.base.util.HeapSort;
 import phydyn.model.PopModel;
 import phydyn.tree.TreeSimulator.SimMethod;
 import phydyn.util.General;
+
+import java.io.FileWriter;
+import java.util.List;
 
 /*
  * @author Igor Siveroni

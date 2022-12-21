@@ -1,9 +1,9 @@
 package phydyn.model;
 
+import beast.base.core.Description;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import beast.core.Description;
 
 @Description("Class used to store a list of PMstack-machine instructions")
 

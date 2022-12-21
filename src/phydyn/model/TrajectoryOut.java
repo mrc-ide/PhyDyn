@@ -1,14 +1,12 @@
 package phydyn.model;
 
-import java.io.FileWriter;
-
-import org.jblas.DoubleMatrix;
-
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Runnable;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.Runnable;
 import phydyn.model.TimeSeriesFGY.FGY;
 import phydyn.model.translate.PopModelODETranslator;
+
+import java.io.FileWriter;
 
 public class TrajectoryOut extends Runnable {
 	

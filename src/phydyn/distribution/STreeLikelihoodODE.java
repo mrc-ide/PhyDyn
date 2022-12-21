@@ -1,13 +1,12 @@
 package phydyn.distribution;
 
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.util.Log;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.coalescent.STreeIntervals;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.evolution.tree.TraitSet;
+import phydyn.evolution.tree.coalescent.STreeIntervals;
 import phydyn.model.PopModel;
-import phydyn.model.PopModelODE;
 import phydyn.model.TimeSeriesFGY;
 import phydyn.util.General.IntegrationMethod;
 

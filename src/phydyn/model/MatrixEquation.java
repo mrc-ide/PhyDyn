@@ -2,15 +2,13 @@ package phydyn.model;
 
 
 // import org.antlr.v4.runtime.ANTLRInputStream;
+
+import beast.base.core.BEASTObject;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
-
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import beast.core.BEASTObject;
-import beast.core.Input;
-import beast.core.Input.Validate;
 import phydyn.model.MatrixEquationObj.EquationType;
 import phydyn.model.parser.PopModelLexer;
 import phydyn.model.parser.PopModelParser;

@@ -1,15 +1,11 @@
 package phydyn.model;
 
 
-import org.antlr.v4.runtime.CommonTokenStream;
-
-//import org.antlr.v4.runtime.ANTLRInputStream;
+import beast.base.core.BEASTObject;
+import beast.base.core.Input;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
-
-
-import beast.core.BEASTObject;
-import beast.core.Input;
+import org.antlr.v4.runtime.CommonTokenStream;
 import phydyn.model.parser.PopModelLexer;
 import phydyn.model.parser.PopModelParser;
 import phydyn.model.parser.PopModelParser.StmContext;

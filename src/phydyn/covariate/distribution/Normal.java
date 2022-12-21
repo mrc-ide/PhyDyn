@@ -1,11 +1,11 @@
 package phydyn.covariate.distribution;
 
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import beast.core.Input;
-import beast.core.Input.Validate;
 
 public class Normal extends ParamDistribution {
 	

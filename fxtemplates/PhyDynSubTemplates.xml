@@ -1,8 +1,9 @@
-<beast version='2.0'
-       namespace='beast.app.beauti:beast.core:beast.evolution.branchratemodel:beast.evolution.speciation
-       :beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators
-       :beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions
-       :phydyn.distribution:phydyn.model'>
+<beast version='2.7'
+       namespace='beast.base.core:beast.base.inference:beast.base.inference.distributions
+       :beast.base.evolution:beast.base.util:beast.base.evolution.nuc:beast.base.evolution.operators
+       :beast.base.evolution.branchratemodel:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel
+       :beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.evolution.likelihood
+       :phydyn.distribution:phydyn.model:phydyn.evolution.tree.coalescent:phydyn.loggers:phydyn.operators'>
        
   <!-- tree priors -->
   <mergewith point='treePriorTemplates'>   

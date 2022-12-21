@@ -1,7 +1,12 @@
 <?xml version="1.0"?>
-<beast version="2.5" namespace="phydyn.run:phydyn.model:phydyn.distribution:beast.util:beast.evolution.alignment:beast.evolution.tree">
-  
-  
+<beast namespace="beast.base.core:beast.base.inference:beast.base.util
+       :beast.base.evolution:beast.base.evolution.alignment:beast.base.evolution.nuc
+       :beast.base.evolution.operator:beast.base.inference.operator:beast.base.inference.distributions
+       :beast.base.evolution.branchratemodel:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel
+       :beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.evolution.likelihood
+       :phydyn.distribution:phydyn.model:phydyn.evolution.tree.coalescent:phydyn.loggers:phydyn.operators" version="2.7">
+
+
 <model spec="PopModelODE" id="twodeme"
        popParams='@initValues' modelParams='@rates'  >
    <definitions> 
@@ -32,7 +37,7 @@
       <initialValue spec="ParamValue" pname="S" pvalue="999"/>
 </trajparams>
   
-<run spec="XMLGenerator" xmlType="likelihood" model='@twodeme'
+<run spec="phydyn.run.XMLGenerator" xmlType="likelihood" model='@twodeme'
      outputFile="sir2Likelihood.xml" treeFile="sir2Master.nwk"
      adjustTipHeights="true" createDateTrait="false" createTypeTrait="false" />
 

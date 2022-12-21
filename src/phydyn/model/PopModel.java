@@ -1,8 +1,6 @@
 package phydyn.model;
 
-import beast.core.CalculationNode;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.Tree;
+import beast.base.inference.CalculationNode;
 
 public abstract class PopModel extends CalculationNode {
 	
