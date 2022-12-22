@@ -1,4 +1,4 @@
-<package name="PhyDyn" version="2.0.0">
+<package name="PhyDyn" version="1.4.0">
 <!-- require  2.7.3  -->
     <depends on='BEAST.base' atleast='2.7.3'/>
     <depends on='BEAST.app' atleast='2.7.3'/>
