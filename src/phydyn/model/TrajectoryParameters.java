@@ -120,7 +120,15 @@ public class TrajectoryParameters extends CalculationNode {
 		}
 		/* Integration Method */
 		method = methodInput.get();
-		fixedStepSize = true;
+
+		/* use the integration method to determine whether we are using fixed 
+		 * or adaptive step size integration.
+		 */
+		switch (method) {
+		case EULER, MIDPOINT, CLASSICRK, GILL -> fixedStepSize = true;
+		case HIGHAMHALL, ADAMSBASHFORTH, ADAMSMOULTON -> fixedStepSize = false;
+		default -> throw new IllegalArgumentException("Unknown integration method: "+method);
+		}
 		
 		if (!fixedStepSize) { // defaults: 0.001, 0.000001;
 			if (rTolInput.get()==null) rTol=0.001; else rTol = rTolInput.get();
