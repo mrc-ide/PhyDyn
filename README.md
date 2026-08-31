@@ -14,7 +14,7 @@ This package enables simultaneous estimation of epidemiological parameters and p
 PhyDyn is a BEAST2 package. The latest version of the package (**v1.4.0**) has been compiled against BEAST v2.7.0.
 
 PhyDyn requires:
-- BEAST2 v2.7.0 or greater or, preferably, BEAST v2.6.2 or greater.
+- BEAST2 v2.7.3 or greater.
 - Java JDK (JDK 8 recommended for OSX) - required by BEAST2. Note that there's the option to download Java and BEAST2 in a single bundle.
 
 BEAST2 is available for Windows, OSX and Linux.  Instructions for download and installation can be found in the [BEAST2 site](https://www.beast2.org).
@@ -25,10 +25,10 @@ BEAST2 is available for Windows, OSX and Linux.  Instructions for download and i
 The easiest way to install PhyDyn is with BEAST2's package manager via BEAUti.<br>
 BEAUti, a graphical user-interface (GUI) application for generating BEAST XML files, is distributed together with BEAST2. Instructions on how to install/un-install BEAST2 packages with BEAUti can be found at the [Managing Packages](https://www.beast2.org/managing-packages/) page from the BEAST2 site.
 
-We also provide a zipped distribution of the package (`dist/PhyDyn.v1.3.8.zip`) that can be installed by hand following the instructions in [here](https://www.beast2.org/managing-packages/) .
+We also provide a zipped distribution of the package (`dist/PhyDyn.v1.4.0.zip`) that can be installed by hand following the instructions in [here](https://www.beast2.org/managing-packages/) .
 
 
-<!--  However, the package (v.1.3.8) can also be installed by hand. -->
+<!--  However, the package (v.1.4.0) can also be installed by hand. -->
 <!-- or, alternatively, examples can be run using  PhyDyn's standalone version. -->
 
 <!--
@@ -88,7 +88,11 @@ Examples:
 
 Check the PhyDyn [Wiki](https://github.com/mrc-ide/PhyDyn/wiki) for detailed documentation.
 
-## Last Release: v1.3.8
+## Current Release: v1.4.0
+
+Updated code to by compiled with BEAST2 v2.7.3.
+
+## Previous Release: v1.3.8
 
 Additions/Changes included in this release:
 * Added [Covariate Likelihood](https://github.com/mrc-ide/PhyDyn/wiki/Covariate-Likelihood).
