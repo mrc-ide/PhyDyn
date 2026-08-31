@@ -7,14 +7,14 @@ Department of Infectious Disease Epidemiology, Imperial College London.
 [PhyDyn](https://github.com/mrc-ide/PhyDyn/wiki) is a BEAST2 package for performing Bayesian phylogenetic inference under models that deal with structured populations with complex population dynamics.
 This package enables simultaneous estimation of epidemiological parameters and pathogen phylogenies. The package implements a coalescent model for a large class of epidemic processes specified by a deterministic nonlinear dynamical system. Genealogies are specified as timed phylogenetic trees in which lineages are associated with the distinct subpopulation in which they are sampled. Epidemic models are defined by a series of ordinary differential equations (ODEs) specifying the rates that new lineages introduced in the population (birth matrix) and the rates at which migrations, or transition between states occur (migration matrix). The ODE syntax allows the user to define and use complex mathematical expressions such as  polynomials and trigonometric functions. Currently, PhyDyn works with deterministic demographic models. Future versions may incorporate other population models, methods for simulating trees conditional on an epidemic process and include semi-parametric epidemiological models.
 
-**Current version: 1.3.8 **
+**Current version: 1.4.0 **
 
 ## System Requirements
 
-PhyDyn is a BEAST2 package. The latest version of the package (**v1.3.8**) has been compiled against BEAST v2.6.2.
+PhyDyn is a BEAST2 package. The latest version of the package (**v1.4.0**) has been compiled against BEAST v2.7.0.
 
 PhyDyn requires:
-- BEAST2 v2.6.0 or greater or, preferably, BEAST v2.6.2 or greater.
+- BEAST2 v2.7.0 or greater or, preferably, BEAST v2.6.2 or greater.
 - Java JDK (JDK 8 recommended for OSX) - required by BEAST2. Note that there's the option to download Java and BEAST2 in a single bundle.
 
 BEAST2 is available for Windows, OSX and Linux.  Instructions for download and installation can be found in the [BEAST2 site](https://www.beast2.org).
